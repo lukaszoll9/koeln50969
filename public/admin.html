@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — Köln 50969</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <a class="brand" href="/">KÖLN <b>50969</b> · Admin</a>
+</header>
+
+<main>
+  <div class="card" id="loginCard">
+    <label for="pw">Admin-Passwort</label>
+    <input type="text" id="pw" autocomplete="off">
+    <button class="primary" id="loginBtn">Anmelden</button>
+    <div id="loginError" class="error" hidden>Falsches Passwort</div>
+  </div>
+
+  <div id="panel" hidden>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="ghost" data-status="pending">Neu</button>
+      <button class="ghost" data-status="approved">Freigeschaltet</button>
+      <button class="ghost" data-status="rejected">Abgelehnt</button>
+    </div>
+    <div id="list"></div>
+  </div>
+</main>
+
+<script>
+let password = sessionStorage.getItem('adminPw') || '';
+let currentStatus = 'pending';
+
+function authHeaders() {
+  return { authorization: `Bearer ${password}` };
+}
+
+async function tryLogin() {
+  const res = await fetch('/api/admin/list?status=pending', { headers: authHeaders() });
+  if (res.ok) {
+    document.getElementById('loginCard').hidden = true;
+    document.getElementById('panel').hidden = false;
+    loadList('pending');
+  } else {
+    document.getElementById('loginError').hidden = false;
+  }
+}
+
+document.getElementById('loginBtn').addEventListener('click', () => {
+  password = document.getElementById('pw').value;
+  sessionStorage.setItem('adminPw', password);
+  tryLogin();
+});
+
+document.querySelectorAll('[data-status]').forEach(btn => {
+  btn.addEventListener('click', () => loadList(btn.dataset.status));
+});
+
+async function loadList(status) {
+  currentStatus = status;
+  const res = await fetch(`/api/admin/list?status=${status}`, { headers: authHeaders() });
+  const data = await res.json();
+  const list = document.getElementById('list');
+  if (!data.posts || data.posts.length === 0) {
+    list.innerHTML = '<p class="hint">Nichts hier.</p>';
+    return;
+  }
+  list.innerHTML = data.posts.map(p => `
+    <div class="admin-item">
+      <img src="${p.images[0].thumb}">
+      <div style="flex:1">
+        <div>${p.displayName ? escapeHtml(p.displayName) : '<em>ohne Namen</em>'}</div>
+        <div class="hint">${p.locationText ? escapeHtml(p.locationText) : 'kein Ort angegeben'}</div>
+        ${p.comment ? `<div class="hint">${escapeHtml(p.comment)}</div>` : ''}
+        <div class="admin-actions">
+          ${status === 'pending' ? `
+            <button class="btn-approve" data-id="${p.id}" data-action="approve">Freischalten</button>
+            <button class="btn-reject" data-id="${p.id}" data-action="reject">Murks</button>
+          ` : ''}
+          <button class="btn-delete" data-id="${p.id}" data-action="delete">Löschen</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('button[data-action]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      await fetch('/api/admin/moderate', {
+        method: 'POST',
+        headers: { ...authHeaders(), 'content-type': 'application/json' },
+        body: JSON.stringify({ id: parseInt(btn.dataset.id, 10), action: btn.dataset.action }),
+      });
+      loadList(currentStatus);
+    });
+  });
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+if (password) tryLogin();
+</script>
+</body>
+</html>

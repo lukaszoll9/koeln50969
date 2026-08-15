@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Köln 50969 — Sticker-Funde</title>
+<meta name="description" content="Hast du den Köln-50969-Sticker gefunden? Foto hochladen, Fundort markieren.">
+<link rel="manifest" href="/manifest.json">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <a class="brand" href="/">KÖLN <b>50969</b></a>
+  <a class="upload-fab" href="/hochladen.html" aria-label="Foto hochladen">+</a>
+</header>
+
+<main>
+  <div id="grid" class="grid"></div>
+  <div id="empty" class="empty-state" hidden>
+    Noch keine Funde. <a href="/hochladen.html">Sei der Erste.</a>
+  </div>
+</main>
+
+<footer>
+  <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a>
+</footer>
+
+<script>
+async function load() {
+  const res = await fetch('/api/posts');
+  const data = await res.json();
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('empty');
+  if (!data.posts || data.posts.length === 0) {
+    empty.hidden = false;
+    return;
+  }
+  grid.innerHTML = data.posts.map(p => `
+    <a href="/fund.html?id=${p.id}">
+      <img src="${p.images[0].thumb}" alt="Sticker-Fund" loading="lazy">
+    </a>
+  `).join('');
+}
+load();
+</script>
+</body>
+</html>

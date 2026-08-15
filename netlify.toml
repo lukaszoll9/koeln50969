@@ -1,0 +1,33 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/posts"
+  to = "/.netlify/functions/posts"
+  status = 200
+
+[[redirects]]
+  from = "/api/upload"
+  to = "/.netlify/functions/upload"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/list"
+  to = "/.netlify/functions/admin-list"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/moderate"
+  to = "/.netlify/functions/admin-moderate"
+  status = 200
+
+[[redirects]]
+  from = "/img/*"
+  to = "/.netlify/functions/image?key=:splat"
+  status = 200
+
+[[headers]]
+  for = "/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

@@ -1,0 +1,13 @@
+{
+  "name": "koeln50969",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^8",
+    "@netlify/database": "^1",
+    "@netlify/functions": "^3"
+  }
+}

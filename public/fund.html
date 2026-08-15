@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fund — Köln 50969</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <a class="brand" href="/">KÖLN <b>50969</b></a>
+  <a class="upload-fab" href="/hochladen.html" aria-label="Foto hochladen">+</a>
+</header>
+
+<main id="content">
+  <p class="hint">Lädt…</p>
+</main>
+
+<script>
+const id = new URLSearchParams(location.search).get('id');
+
+async function load() {
+  const res = await fetch('/api/posts?limit=100');
+  const data = await res.json();
+  const post = (data.posts || []).find(p => String(p.id) === String(id));
+  const content = document.getElementById('content');
+  if (!post) {
+    content.innerHTML = '<p class="hint">Fund nicht gefunden.</p>';
+    return;
+  }
+  const date = new Date(post.createdAt).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
+  content.innerHTML = `
+    <div class="grid" style="margin-bottom:16px">
+      ${post.images.map(im => `<a href="${im.full}" target="_blank"><img src="${im.thumb}" loading="lazy"></a>`).join('')}
+    </div>
+    <div class="card">
+      ${post.displayName ? `<div><strong>${escapeHtml(post.displayName)}</strong></div>` : ''}
+      ${post.locationText ? `<div class="hint">📍 ${escapeHtml(post.locationText)}</div>` : ''}
+      <div class="hint">${date}</div>
+      ${post.comment ? `<p style="margin-top:14px">${escapeHtml(post.comment)}</p>` : ''}
+    </div>
+  `;
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+load();
+</script>
+</body>
+</html>

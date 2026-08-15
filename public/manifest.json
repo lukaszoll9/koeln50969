@@ -1,0 +1,10 @@
+{
+  "name": "Köln 50969",
+  "short_name": "Köln 50969",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#16130f",
+  "theme_color": "#c41c22",
+  "description": "Sticker gefunden? Foto hochladen, Fundort markieren.",
+  "icons": []
+}

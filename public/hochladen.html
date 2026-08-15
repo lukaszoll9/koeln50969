@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foto hochladen — Köln 50969</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <a class="brand" href="/">KÖLN <b>50969</b></a>
+</header>
+
+<main>
+  <div class="card" id="formCard">
+    <h1 style="margin-top:0">Fund melden</h1>
+    <p class="hint">Foto vom Sticker, Fundort dazu — fertig. Wird erst nach kurzer Prüfung sichtbar.</p>
+
+    <label for="files">Foto (bis zu 3)</label>
+    <input type="file" id="files" accept="image/*" capture="environment" multiple>
+    <div class="preview-row" id="previewRow"></div>
+
+    <label for="displayName">Name (optional)</label>
+    <input type="text" id="displayName" maxlength="80" placeholder="Wie du genannt werden willst">
+
+    <label for="locationText">Fundort</label>
+    <input type="text" id="locationText" maxlength="160" placeholder="Adresse oder Ort suchen">
+    <div id="geoStatus" class="hint"></div>
+
+    <label for="comment">Kommentar (optional)</label>
+    <textarea id="comment" maxlength="500" placeholder="Wo genau, wie überrascht warst du..."></textarea>
+
+    <!-- Honeypot: fuer Menschen unsichtbar, Bots fuellen es oft aus -->
+    <input type="text" class="hp-field" id="website" name="website" tabindex="-1" autocomplete="off">
+
+    <div id="errorMsg" class="error" hidden></div>
+    <button class="primary" id="submitBtn" disabled>Erst Foto auswählen</button>
+    <p class="hint">Mit dem Absenden bestätigst du, dass keine fremden Personen erkennbar sind und dir das Bild gehört. GPS-Daten werden nur grob (auf ca. 100 m) gespeichert. <a href="/datenschutz.html">Mehr dazu</a>.</p>
+  </div>
+
+  <div class="success" id="successCard" hidden>
+    <h1>Danke!</h1>
+    <p>Dein Fund wird geprüft und erscheint bald in der Galerie.</p>
+    <a href="/" class="ghost" style="display:inline-block;margin-top:16px;padding:10px 20px;border-radius:10px;border:1px solid var(--border);text-decoration:none;">Zur Galerie</a>
+  </div>
+</main>
+
+<script>
+const filesInput = document.getElementById('files');
+const previewRow = document.getElementById('previewRow');
+const submitBtn = document.getElementById('submitBtn');
+const errorMsg = document.getElementById('errorMsg');
+const locationText = document.getElementById('locationText');
+const geoStatus = document.getElementById('geoStatus');
+
+let selectedFiles = [];
+let detectedLat = null, detectedLng = null;
+
+filesInput.addEventListener('change', async () => {
+  selectedFiles = Array.from(filesInput.files).slice(0, 3);
+  previewRow.innerHTML = '';
+  errorMsg.hidden = true;
+
+  if (selectedFiles.length === 0) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Erst Foto auswählen';
+    return;
+  }
+
+  for (const f of selectedFiles) {
+    const url = URL.createObjectURL(f);
+    const img = document.createElement('img');
+    img.src = url;
+    previewRow.appendChild(img);
+  }
+
+  // GPS aus dem ersten Foto lesen, falls vorhanden
+  geoStatus.textContent = 'Suche Standort im Foto...';
+  const gps = await readExifGPS(selectedFiles[0]).catch(() => null);
+  if (gps) {
+    detectedLat = gps.lat;
+    detectedLng = gps.lng;
+    geoStatus.textContent = 'Standort aus dem Foto erkannt ✓ — du kannst den Ort unten trotzdem anpassen.';
+    if (!locationText.value) {
+      locationText.placeholder = 'Standort erkannt — optional Namen ergänzen';
+    }
+  } else {
+    geoStatus.textContent = 'Kein Standort im Foto — bitte Ort eingeben.';
+  }
+
+  submitBtn.disabled = false;
+  submitBtn.textContent = 'Fund melden';
+});
+
+// Adresssuche mit Nominatim, sobald man tippt (einfacher Abschluss bei Enter/Blur)
+locationText.addEventListener('change', async () => {
+  const q = locationText.value.trim();
+  if (!q) return;
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`, {
+      headers: { 'Accept-Language': 'de' }
+    });
+    const results = await res.json();
+    if (results[0]) {
+      detectedLat = parseFloat(results[0].lat);
+      detectedLng = parseFloat(results[0].lon);
+      geoStatus.textContent = 'Ort gefunden ✓';
+    }
+  } catch { /* Suche optional, kein hartes Erfordernis */ }
+});
+
+async function readExifGPS(file) {
+  const buf = await file.arrayBuffer();
+  const view = new DataView(buf);
+  if (view.getUint16(0) !== 0xFFD8) return null; // kein JPEG
+
+  let offset = 2;
+  while (offset < view.byteLength) {
+    if (view.getUint16(offset) === 0xFFE1) {
+      const exifStart = offset + 4;
+      if (view.getUint32(exifStart) !== 0x45786966) return null; // "Exif"
+      return parseTiff(view, exifStart + 6);
+    }
+    offset += 2 + view.getUint16(offset + 2);
+  }
+  return null;
+}
+
+function parseTiff(view, tiffStart) {
+  const little = view.getUint16(tiffStart) === 0x4949;
+  const ifd0Offset = tiffStart + view.getUint32(tiffStart + 4, little);
+  const gpsOffset = findTag(view, tiffStart, ifd0Offset, little, 0x8825);
+  if (gpsOffset == null) return null;
+  const gpsIfd = tiffStart + gpsOffset;
+
+  const lat = readGpsCoord(view, tiffStart, gpsIfd, little, 2, 1);
+  const lng = readGpsCoord(view, tiffStart, gpsIfd, little, 4, 3);
+  if (lat == null || lng == null) return null;
+  return { lat, lng };
+}
+
+function findTag(view, tiffStart, ifdOffset, little, tagId) {
+  const count = view.getUint16(ifdOffset, little);
+  for (let i = 0; i < count; i++) {
+    const entryOffset = ifdOffset + 2 + i * 12;
+    if (view.getUint16(entryOffset, little) === tagId) {
+      return view.getUint32(entryOffset + 8, little);
+    }
+  }
+  return null;
+}
+
+function readGpsCoord(view, tiffStart, gpsIfd, little, coordTag, refTag) {
+  const count = view.getUint16(gpsIfd, little);
+  let coordOffset = null, refValue = null;
+  for (let i = 0; i < count; i++) {
+    const entryOffset = gpsIfd + 2 + i * 12;
+    const tag = view.getUint16(entryOffset, little);
+    if (tag === coordTag) coordOffset = view.getUint32(entryOffset + 8, little);
+    if (tag === refTag) refValue = String.fromCharCode(view.getUint8(entryOffset + 8));
+  }
+  if (coordOffset == null) return null;
+  const base = tiffStart + coordOffset;
+  const deg = view.getUint32(base, little) / view.getUint32(base + 4, little);
+  const min = view.getUint32(base + 8, little) / view.getUint32(base + 12, little);
+  const sec = view.getUint32(base + 16, little) / view.getUint32(base + 20, little);
+  let val = deg + min / 60 + sec / 3600;
+  if (refValue === 'S' || refValue === 'W') val = -val;
+  return val;
+}
+
+async function compress(file, maxDim, quality) {
+  const bitmap = await createImageBitmap(file);
+  let { width, height } = bitmap;
+  if (width > height && width > maxDim) { height = Math.round(height * maxDim / width); width = maxDim; }
+  else if (height > maxDim) { width = Math.round(width * maxDim / height); height = maxDim; }
+  const canvas = document.createElement('canvas');
+  canvas.width = width; canvas.height = height;
+  canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height);
+  const blob = await new Promise(r => canvas.toBlob(r, 'image/webp', quality));
+  const buf = await blob.arrayBuffer();
+  let binary = '';
+  const bytes = new Uint8Array(buf);
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  if (selectedFiles.length === 0) return;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Wird gesendet...';
+  errorMsg.hidden = true;
+
+  try {
+    const images = [], thumbs = [];
+    for (const f of selectedFiles) {
+      images.push(await compress(f, 1600, 0.82));
+      thumbs.push(await compress(f, 480, 0.75));
+    }
+
+    const payload = {
+      images, thumbs,
+      displayName: document.getElementById('displayName').value.trim() || null,
+      locationText: locationText.value.trim() || null,
+      comment: document.getElementById('comment').value.trim() || null,
+      website: document.getElementById('website').value, // Honeypot
+      lat: detectedLat, lng: detectedLng,
+    };
+
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Upload fehlgeschlagen');
+    }
+
+    document.getElementById('formCard').hidden = true;
+    document.getElementById('successCard').hidden = false;
+  } catch (e) {
+    errorMsg.textContent = e.message || 'Etwas ist schiefgelaufen. Bitte nochmal versuchen.';
+    errorMsg.hidden = false;
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Fund melden';
+  }
+});
+</script>
+</body>
+</html>
