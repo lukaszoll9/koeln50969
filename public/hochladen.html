@@ -210,7 +210,10 @@ async function compressAdaptive(file, startDim, targetBytes) {
     result = await compress(file, dim, quality);
     tries++;
   }
-  return blobToBase64(result.blob);
+  const base64 = await blobToBase64(result.blob);
+  // result.blob.type spiegelt zuverlaessig wider, was toBlob() tatsaechlich erzeugt hat
+  // (webp oder der jpeg-Fallback) -- das geben wir mit an den Server weiter.
+  return { base64, mime: result.blob.type || 'image/webp' };
 }
 
 document.getElementById('submitBtn').addEventListener('click', async () => {
@@ -220,15 +223,17 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
   errorMsg.hidden = true;
 
   try {
-    const images = [], thumbs = [];
+    const images = [], thumbs = [], imageMimes = [], thumbMimes = [];
     for (const f of selectedFiles) {
       // Ziel: deutlich unter dem Server-Limit bleiben, egal wie gross das Originalfoto ist
-      images.push(await compressAdaptive(f, 1600, 1.5 * 1024 * 1024));
-      thumbs.push(await compressAdaptive(f, 480, 300 * 1024));
+      const full = await compressAdaptive(f, 1600, 1.5 * 1024 * 1024);
+      const thumb = await compressAdaptive(f, 480, 300 * 1024);
+      images.push(full.base64); imageMimes.push(full.mime);
+      thumbs.push(thumb.base64); thumbMimes.push(thumb.mime);
     }
 
     const payload = {
-      images, thumbs,
+      images, thumbs, imageMimes, thumbMimes,
       displayName: document.getElementById('displayName').value.trim() || null,
       locationText: locationText.value.trim() || null,
       comment: document.getElementById('comment').value.trim() || null,
