@@ -7,7 +7,7 @@ export default async (req) => {
   if (req.method !== "POST") return json(405, { error: "method not allowed" });
 
   const body = await req.json().catch(() => null);
-  if (!body || !body.id || !["approve", "reject", "delete"].includes(body.action)) {
+  if (!body || !body.id || !["approve", "murks", "delete"].includes(body.action)) {
     return json(400, { error: "invalid request" });
   }
 
@@ -15,8 +15,10 @@ export default async (req) => {
 
   if (body.action === "approve") {
     await db.sql`UPDATE posts SET status = 'approved', moderated_at = now() WHERE id = ${body.id}`;
-  } else if (body.action === "reject") {
-    await db.sql`UPDATE posts SET status = 'rejected', moderated_at = now() WHERE id = ${body.id}`;
+  } else if (body.action === "murks") {
+    // "Murks": Beitrag bleibt gespeichert, wird aber standardmaessig aus der
+    // oeffentlichen Galerie ausgeblendet (posts.mjs zeigt nur status='approved').
+    await db.sql`UPDATE posts SET status = 'murks', moderated_at = now() WHERE id = ${body.id}`;
   } else if (body.action === "delete") {
     const [row] = await db.sql`SELECT image_keys FROM posts WHERE id = ${body.id}`;
     if (row) {

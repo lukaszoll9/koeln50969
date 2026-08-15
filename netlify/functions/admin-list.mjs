@@ -6,7 +6,7 @@ export default async (req) => {
 
   const url = new URL(req.url);
   const status = url.searchParams.get("status") || "pending";
-  if (!["pending", "approved", "rejected"].includes(status)) {
+  if (!["pending", "approved", "murks"].includes(status)) {
     return json(400, { error: "invalid status" });
   }
 
