@@ -14,7 +14,7 @@
 <main>
   <div class="card" id="loginCard">
     <label for="pw">Admin-Passwort</label>
-    <input type="text" id="pw" autocomplete="off">
+    <input type="password" id="pw" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
     <button class="primary" id="loginBtn">Anmelden</button>
     <div id="loginError" class="error" hidden>Falsches Passwort</div>
   </div>
@@ -49,7 +49,7 @@ async function tryLogin() {
 }
 
 document.getElementById('loginBtn').addEventListener('click', () => {
-  password = document.getElementById('pw').value;
+  password = document.getElementById('pw').value.trim();
   sessionStorage.setItem('adminPw', password);
   tryLogin();
 });
