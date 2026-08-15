@@ -22,7 +22,10 @@ export default async (req) => {
   const posts = rows.map((r) => {
     const pairs = r.image_keys.map((pair) => {
       const [full, thumb] = pair.split("|");
-      return { full: `/img/${full}`, thumb: `/img/${thumb}` };
+      return {
+        full: `/.netlify/functions/image?key=${encodeURIComponent(full)}`,
+        thumb: `/.netlify/functions/image?key=${encodeURIComponent(thumb)}`,
+      };
     });
     return {
       id: r.id,

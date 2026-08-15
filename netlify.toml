@@ -22,12 +22,6 @@
   to = "/.netlify/functions/admin-moderate"
   status = 200
 
-[[redirects]]
-  from = "/img/*"
-  to = "/.netlify/functions/image?key=:splat"
-  status = 200
-
-[[headers]]
-  for = "/img/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+# Hinweis: Bilder werden jetzt direkt ueber /.netlify/functions/image?key=...
+# ausgeliefert (siehe posts.mjs / admin-list.mjs). Die fruehere /img/*-Weiterleitung
+# hat den key-Parameter nicht zuverlaessig durchgereicht und wurde entfernt.
