@@ -17,3 +17,5 @@ export function checkAdminAuth(req) {
   if (!expected) return false; // kein Passwort gesetzt -> Zugriff verweigern, nicht erlauben
   return auth === `Bearer ${expected}`;
 }
+
+// redeploy trigger: admin password refresh
