@@ -15,6 +15,9 @@
   <div class="card" id="loginCard">
     <label for="pw">Admin-Passwort</label>
     <input type="password" id="pw" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:0.9rem;color:var(--muted)">
+      <input type="checkbox" id="showPw" style="width:auto"> Passwort anzeigen
+    </label>
     <button class="primary" id="loginBtn">Anmelden</button>
     <div id="loginError" class="error" hidden>Falsches Passwort</div>
   </div>
@@ -47,6 +50,10 @@ async function tryLogin() {
     document.getElementById('loginError').hidden = false;
   }
 }
+
+document.getElementById('showPw').addEventListener('change', (e) => {
+  document.getElementById('pw').type = e.target.checked ? 'text' : 'password';
+});
 
 document.getElementById('loginBtn').addEventListener('click', () => {
   password = document.getElementById('pw').value.trim();
