@@ -3,7 +3,7 @@ import { getDatabase } from "@netlify/database";
 import { json, hashIp } from "./_shared.mjs";
 
 const MAX_IMAGES = 3;
-const MAX_BYTES_PER_IMAGE = 3 * 1024 * 1024; // 3 MB Sicherheitsnetz (Client komprimiert schon)
+const MAX_BYTES_PER_IMAGE = 4 * 1024 * 1024; // 4 MB Sicherheitsnetz (Client komprimiert adaptiv auf ~1,5 MB)
 const RATE_LIMIT_PER_HOUR = 8;
 
 export default async (req) => {
