@@ -24,6 +24,8 @@ export default async (req) => {
 
   const images = Array.isArray(body.images) ? body.images : [];
   const thumbs = Array.isArray(body.thumbs) ? body.thumbs : [];
+  const imageMimes = Array.isArray(body.imageMimes) ? body.imageMimes : [];
+  const thumbMimes = Array.isArray(body.thumbMimes) ? body.thumbMimes : [];
   if (images.length === 0 || images.length > MAX_IMAGES || images.length !== thumbs.length) {
     return json(400, { error: "1-3 Bilder erforderlich" });
   }
@@ -66,10 +68,20 @@ export default async (req) => {
   try {
     for (let i = 0; i < images.length; i++) {
       const id = crypto.randomUUID();
-      const fullKey = `full/${id}.webp`;
-      const thumbKey = `thumb/${id}.webp`;
-      await store.set(fullKey, Buffer.from(images[i], "base64"));
-      await store.set(thumbKey, Buffer.from(thumbs[i], "base64"));
+      // Bild-Typ kommt vom Client (spiegelt, was toBlob() dort tatsaechlich erzeugt hat --
+      // webp normalerweise, jpeg als Fallback bei aelteren Browsern). Nie blind "webp" annehmen.
+      const fullMime = imageMimes[i] === "image/jpeg" ? "image/jpeg" : "image/webp";
+      const thumbMime = thumbMimes[i] === "image/jpeg" ? "image/jpeg" : "image/webp";
+      const fullExt = fullMime === "image/jpeg" ? "jpg" : "webp";
+      const thumbExt = thumbMime === "image/jpeg" ? "jpg" : "webp";
+      const fullKey = `full/${id}.${fullExt}`;
+      const thumbKey = `thumb/${id}.${thumbExt}`;
+      // Als Blob (nicht als roher Node-Buffer) speichern -- das ist der dokumentiert
+      // unterstuetzte Typ fuer Netlify Blobs und traegt den Content-Type gleich mit.
+      const fullBlob = new Blob([Buffer.from(images[i], "base64")], { type: fullMime });
+      const thumbBlob = new Blob([Buffer.from(thumbs[i], "base64")], { type: thumbMime });
+      await store.set(fullKey, fullBlob, { metadata: { contentType: fullMime } });
+      await store.set(thumbKey, thumbBlob, { metadata: { contentType: thumbMime } });
       imageKeys.push(fullKey);
       thumbKeys.push(thumbKey);
     }
