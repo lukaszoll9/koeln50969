@@ -47,8 +47,8 @@ header {
 
 header .brand {
   font-weight: 800;
-  letter-spacing: 0.03em;
-  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+  font-size: 1.5rem;
   text-decoration: none;
   color: var(--ink);
 }
