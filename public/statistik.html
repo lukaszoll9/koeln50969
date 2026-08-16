@@ -11,69 +11,100 @@
   <button class="menu-btn" id="menuOpenBtn">☰</button>
   <a class="brand" href="/">KÖLN <b>50969</b></a>
   <div class="spacer"></div>
-  <a class="upload-fab" href="/hochladen.html" aria-label="Foto hochladen">+</a>
+  <a class="upload-fab" href="/hochladen.html" aria-label="Sticker hochladen">
+    <span class="fab-plus">+</span><span class="fab-label">Sticker hochladen</span>
+  </a>
 </header>
-
 <main>
-  <div class="card">
-    <h1 style="margin-top:0">In Zahlen</h1>
-    <div id="content"><p class="hint">Lädt…</p></div>
-  </div>
+  <div id="content"><p class="hint">Lädt…</p></div>
 </main>
-
 <footer>
   <a href="/faq.html">FAQ</a> · <a href="/karte.html">Karte</a> · <a href="/kontakt.html">Kontakt</a> · <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a>
 </footer>
-
 <script src="/menu.js"></script>
 <script>
-function escapeHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
+function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+async function load(){
+  const res=await fetch('/api/posts?limit=500');
+  const data=await res.json();
+  const posts=data.posts||[];
+  const el=document.getElementById('content');
 
-async function load() {
-  const res = await fetch('/api/posts?limit=100');
-  const data = await res.json();
-  const posts = data.posts || [];
-  const content = document.getElementById('content');
-
-  if (posts.length === 0) {
-    content.innerHTML = '<p class="hint">Noch keine Funde — die Statistik füllt sich, sobald der erste da ist.</p>';
+  if(posts.length===0){
+    el.innerHTML='<div class="card"><p class="hint">Noch keine Funde — die Statistik füllt sich, sobald der erste da ist.</p></div>';
     return;
   }
 
-  const withLocation = posts.filter(p => p.locationText);
-  const counts = {};
-  withLocation.forEach(p => {
-    counts[p.locationText] = (counts[p.locationText] || 0) + 1;
-  });
-  const topOrte = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  // Berechnungen
+  const withLoc=posts.filter(p=>p.locationText);
+  const ortCounts={};
+  withLoc.forEach(p=>{ortCounts[p.locationText]=(ortCounts[p.locationText]||0)+1;});
+  const topOrte=Object.entries(ortCounts).sort((a,b)=>b[1]-a[1]).slice(0,10);
 
-  const finders = {};
-  posts.filter(p => p.displayName).forEach(p => {
-    finders[p.displayName] = (finders[p.displayName] || 0) + 1;
-  });
-  const topFinder = Object.entries(finders).sort((a, b) => b[1] - a[1])[0];
+  const finderCounts={};
+  posts.filter(p=>p.displayName).forEach(p=>{finderCounts[p.displayName]=(finderCounts[p.displayName]||0)+1;});
+  const topFinder=Object.entries(finderCounts).sort((a,b)=>b[1]-a[1]).slice(0,10);
 
-  content.innerHTML = `
-    <div class="stat-big">
-      <span class="num">${posts.length}</span>
-      Fund${posts.length === 1 ? '' : 'e'} insgesamt
-    </div>
-    ${topFinder ? `<div class="stat-row"><span>Meiste Funde</span><span class="stat-count">${escapeHtml(topFinder[0])} (${topFinder[1]})</span></div>` : ''}
-    <div class="stat-row"><span>Verschiedene Orte</span><span class="stat-count">${Object.keys(counts).length}</span></div>
-    ${topOrte.length > 0 ? `
-      <h2 style="margin-top:20px;font-size:1rem">Top-Orte</h2>
-      ${topOrte.map(([ort, n]) => `
-        <div class="stat-row">
-          <a href="/?ort=${encodeURIComponent(ort)}" style="color:inherit;text-decoration:underline">${escapeHtml(ort)}</a>
-          <span class="stat-count">${n}</span>
-        </div>
-      `).join('')}
-    ` : ''}
-  `;
+  // Neueste Stadt
+  const latestCity=posts[0]?.locationText||'—';
+
+  // Funde diese Woche
+  const weekAgo=Date.now()-7*24*60*60*1000;
+  const thisWeek=posts.filter(p=>new Date(p.createdAt)>weekAgo).length;
+
+  // Streak-Berechnung (Tage mit mindestens einem Fund)
+  const daySet=new Set(posts.map(p=>new Date(p.createdAt).toDateString()));
+
+  const rankEmoji=['🥇','🥈','🥉'];
+  const rankClass=['gold','silver','bronze'];
+
+  el.innerHTML=`
+  <div class="card">
+    <h1 style="margin-top:0">In Zahlen</h1>
+    <div class="stat-big"><span class="num">${posts.length}</span> Fund${posts.length===1?'':'e'} insgesamt</div>
+    <div class="stat-row"><span>🗓️ Diese Woche</span><span class="stat-count">${thisWeek}</span></div>
+    <div class="stat-row"><span>📍 Verschiedene Orte</span><span class="stat-count">${Object.keys(ortCounts).length}</span></div>
+    <div class="stat-row"><span>📅 Aktive Tage</span><span class="stat-count">${daySet.size}</span></div>
+    <div class="stat-row"><span>🆕 Zuletzt gefunden in</span><span class="stat-count" style="text-align:right;max-width:55%">${escapeHtml(latestCity)}</span></div>
+  </div>
+
+  ${topFinder.length>0?`
+  <div class="card">
+    <h2 style="margin-top:0;font-size:1rem">🏆 Top-Finder</h2>
+    ${topFinder.map(([name,n],i)=>`
+      <div class="top-finder-card">
+        <span class="top-finder-rank ${rankClass[i]||''}">${rankEmoji[i]||i+1}</span>
+        <span class="top-finder-name">${escapeHtml(name)}</span>
+        <span class="top-finder-count">${n} Fund${n===1?'':'e'}</span>
+      </div>
+    `).join('')}
+  </div>`:''}
+
+  ${topOrte.length>0?`
+  <div class="card">
+    <h2 style="margin-top:0;font-size:1rem">📍 Top-Orte</h2>
+    ${topOrte.map(([ort,n])=>`
+      <div class="stat-row">
+        <a href="/?ort=${encodeURIComponent(ort)}" style="color:inherit;text-decoration:underline">${escapeHtml(ort)}</a>
+        <span class="stat-count">${n}</span>
+      </div>
+    `).join('')}
+  </div>`:''}
+
+  <div class="card" style="text-align:center">
+    <p style="margin:0 0 10px;color:var(--muted);font-size:0.9rem">Sticker gefunden? Teil der Galerie werden!</p>
+    <a href="/hochladen.html" class="share-btn">📸 Fund melden</a>
+    <button class="share-btn" onclick="share()" style="margin-left:8px">🔗 Teilen</button>
+  </div>`;
+}
+
+async function share(){
+  if(navigator.share){
+    try{await navigator.share({title:'Köln 50969 — Sticker-Funde',url:'https://koeln50969.de'});}catch(e){}
+  } else {
+    await navigator.clipboard.writeText('https://koeln50969.de');
+    alert('Link kopiert!');
+  }
 }
 
 load();

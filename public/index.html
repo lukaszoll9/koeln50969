@@ -1,129 +1,157 @@
 <!doctype html>
-<html lang="de">
+<html lang="de" id="html-root">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Köln 50969 — Sticker-Funde</title>
-<meta name="description" content="Hast du den Köln-50969-Sticker gefunden? Foto hochladen, Fundort markieren.">
+<meta name="description" content="Hast du den Köln-50969-Sticker gefunden? Foto hochladen, Fundort markieren — alle Funde in einer Galerie.">
+<meta property="og:title" content="Köln 50969 — Sticker-Funde">
+<meta property="og:description" content="Gefunden? Zeig's der Welt. Alle Sticker-Funde aus Köln-Zollstock auf einen Blick.">
+<meta property="og:image" content="https://koeln50969.de/sticker-hero.jpg">
+<meta property="og:url" content="https://koeln50969.de">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="manifest" href="/manifest.json">
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <header>
-<button class="menu-btn" id="menuOpenBtn">☰</button>
-<a class="brand" href="/">KÖLN <b>50969</b></a>
-<span class="tagline">Gefunden? Zeig's der Welt.</span>
-<div class="spacer"></div>
-<a class="upload-fab" href="/hochladen.html" aria-label="Foto hochladen">+</a>
+  <button class="menu-btn" id="menuOpenBtn">☰</button>
+  <a class="brand" href="/">KÖLN <b>50969</b></a>
+  <span class="tagline" data-de="Gefunden? Zeig's der Welt." data-en="Found it? Show the world.">Gefunden? Zeig's der Welt.</span>
+  <div class="spacer"></div>
+  <button class="lang-btn" id="langBtn" title="Sprache wechseln">EN</button>
+  <a class="upload-fab" href="/hochladen.html" aria-label="Sticker hochladen">
+    <span class="fab-plus">+</span>
+    <span class="fab-label" data-de="Sticker hochladen" data-en="Upload sticker">Sticker hochladen</span>
+  </a>
 </header>
 
 <div class="hero">
-<img src="/sticker-hero.jpg" alt="Der Köln 50969 Sticker">
-<p class="tagline">Gefunden? Zeig's der Welt.</p>
+  <img src="/sticker-hero.jpg" alt="Der Köln 50969 Sticker">
+  <p class="hero-tagline" data-de="Gefunden? Zeig's der Welt." data-en="Found it? Show the world.">Gefunden? Zeig's der Welt.</p>
 </div>
 
 <main>
-<div class="filter-toolbar">
-<div>
-<label for="ortSelect">Ort</label>
-<select id="ortSelect"><option value="">Alle Orte</option></select>
-</div>
-<div>
-<label for="nameSelect">Name</label>
-<select id="nameSelect"><option value="">Alle Namen</option></select>
-</div>
-<div>
-<label for="sortSelect">Sortierung</label>
-<select id="sortSelect">
-<option value="new">Neueste zuerst</option>
-<option value="old">Älteste zuerst</option>
-</select>
-</div>
-</div>
-<div id="filterInfo" class="hint" style="margin-bottom:10px"></div>
-<div id="grid" class="grid"></div>
-<div id="empty" class="empty-state" hidden>
-Noch keine Funde. <a href="/hochladen.html">Sei der Erste.</a>
-</div>
+  <!-- Filter à la danke-max -->
+  <div class="filter-bar">
+    <button class="filter-toggle" id="filterToggle">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+      <span data-de="Filter" data-en="Filter">Filter</span>
+    </button>
+    <div class="filter-dropdowns" id="filterDropdowns">
+      <select id="ortSelect"><option value="" data-de="Alle Orte" data-en="All places">Alle Orte</option></select>
+      <select id="nameSelect"><option value="" data-de="Alle Namen" data-en="All names">Alle Namen</option></select>
+      <select id="sortSelect">
+        <option value="new" data-de="Neueste zuerst" data-en="Newest first">Neueste zuerst</option>
+        <option value="old" data-de="Älteste zuerst" data-en="Oldest first">Älteste zuerst</option>
+      </select>
+    </div>
+    <span class="filter-count" id="filterInfo"></span>
+  </div>
+
+  <!-- Galerie-Liste à la danke-max -->
+  <div id="list" class="fund-list"></div>
+  <div id="empty" class="empty-state" hidden>
+    <span data-de="Noch keine Funde." data-en="No finds yet.">Noch keine Funde.</span>
+    <a href="/hochladen.html" data-de="Sei der Erste." data-en="Be the first.">Sei der Erste.</a>
+  </div>
 </main>
 
 <footer>
-<a href="/faq.html">FAQ</a> · <a href="/karte.html">Karte</a> · <a href="/statistik.html">Statistik</a> · <a href="/kontakt.html">Kontakt</a> · <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a>
+  <a href="/faq.html" data-de="FAQ" data-en="FAQ">FAQ</a> ·
+  <a href="/karte.html" data-de="Karte" data-en="Map">Karte</a> ·
+  <a href="/statistik.html" data-de="Statistik" data-en="Stats">Statistik</a> ·
+  <a href="/kontakt.html" data-de="Kontakt" data-en="Contact">Kontakt</a> ·
+  <a href="/impressum.html">Impressum</a> ·
+  <a href="/datenschutz.html" data-de="Datenschutz" data-en="Privacy">Datenschutz</a>
 </footer>
 
+<!-- Sprach-Popup -->
+<div class="lang-popup" id="langPopup" hidden>
+  <div class="lang-popup-inner">
+    <button class="lang-option active" data-lang="de">🇩🇪 Deutsch</button>
+    <button class="lang-option" data-lang="en">🇬🇧 English</button>
+  </div>
+</div>
+
 <script src="/menu.js"></script>
+<script src="/i18n.js"></script>
 <script>
 let allPosts = [];
 
 function escapeHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString(window._lang === 'en' ? 'en-GB' : 'de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
 function getFilters() {
-  const params = new URLSearchParams(location.search);
-  return { ort: params.get('ort') || '', name: params.get('name') || '' };
+  const p = new URLSearchParams(location.search);
+  return { ort: p.get('ort') || '', name: p.get('name') || '' };
 }
 
 function setUrl(ort, name) {
-  const params = new URLSearchParams();
-  if (ort) params.set('ort', ort);
-  if (name) params.set('name', name);
-  const qs = params.toString();
-  history.replaceState(null, '', qs ? `/?${qs}` : '/');
+  const p = new URLSearchParams();
+  if (ort) p.set('ort', ort);
+  if (name) p.set('name', name);
+  history.replaceState(null, '', p.toString() ? `/?${p}` : '/');
 }
 
 function populateSelects() {
   const { ort, name } = getFilters();
   const orte = [...new Set(allPosts.map(p => p.locationText).filter(Boolean))].sort();
   const namen = [...new Set(allPosts.map(p => p.displayName).filter(Boolean))].sort();
-
-  const ortSelect = document.getElementById('ortSelect');
-  const nameSelect = document.getElementById('nameSelect');
-  ortSelect.innerHTML = '<option value="">Alle Orte</option>' +
-    orte.map(o => `<option value="${escapeHtml(o)}" ${o === ort ? 'selected' : ''}>${escapeHtml(o)}</option>`).join('');
-  nameSelect.innerHTML = '<option value="">Alle Namen</option>' +
-    namen.map(n => `<option value="${escapeHtml(n)}" ${n === name ? 'selected' : ''}>${escapeHtml(n)}</option>`).join('');
+  const lang = window._lang || 'de';
+  document.getElementById('ortSelect').innerHTML =
+    `<option value="">${lang==='en'?'All places':'Alle Orte'}</option>` +
+    orte.map(o => `<option value="${escapeHtml(o)}" ${o===ort?'selected':''}>${escapeHtml(o)}</option>`).join('');
+  document.getElementById('nameSelect').innerHTML =
+    `<option value="">${lang==='en'?'All names':'Alle Namen'}</option>` +
+    namen.map(n => `<option value="${escapeHtml(n)}" ${n===name?'selected':''}>${escapeHtml(n)}</option>`).join('');
 }
 
 function render() {
   const ort = document.getElementById('ortSelect').value;
   const name = document.getElementById('nameSelect').value;
   const sort = document.getElementById('sortSelect').value;
-  const grid = document.getElementById('grid');
-  const empty = document.getElementById('empty');
-  const filterInfo = document.getElementById('filterInfo');
-
   setUrl(ort, name);
 
   let posts = allPosts.slice();
   if (ort) posts = posts.filter(p => p.locationText === ort);
   if (name) posts = posts.filter(p => p.displayName === name);
-
   posts.sort((a, b) => {
-    const diff = new Date(a.createdAt) - new Date(b.createdAt);
-    return sort === 'old' ? diff : -diff;
+    const d = new Date(a.createdAt) - new Date(b.createdAt);
+    return sort === 'old' ? d : -d;
   });
 
-  filterInfo.textContent = (ort || name) ? `${posts.length} Fund${posts.length === 1 ? '' : 'e'} gefiltert` : '';
+  const lang = window._lang || 'de';
+  const info = document.getElementById('filterInfo');
+  info.textContent = (ort || name) ? `${posts.length} ${lang==='en'?'found':'Funde'}` : '';
+
+  const list = document.getElementById('list');
+  const empty = document.getElementById('empty');
 
   if (posts.length === 0) {
-    grid.innerHTML = '';
+    list.innerHTML = '';
     empty.hidden = false;
-    empty.innerHTML = (ort || name)
-      ? 'Keine Funde mit diesem Filter.'
-      : 'Noch keine Funde. <a href="/hochladen.html">Sei der Erste.</a>';
     return;
   }
   empty.hidden = true;
-  grid.innerHTML = posts.map(p => {
-    const loc = p.locationText ? escapeHtml(p.locationText) : '';
-    const date = new Date(p.createdAt).toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
-    return `
-    <a href="/fund.html?id=${p.id}">
-      <img src="${p.images[0].thumb}" alt="Sticker-Fund" loading="lazy">
-      <div class="card-overlay">${loc ? `📍 ${loc}<br>` : ''}${date}</div>
+
+  list.innerHTML = posts.map(p => {
+    const loc = p.locationText ? escapeHtml(p.locationText) : (lang==='en'?'Unknown location':'Unbekannter Ort');
+    const date = fmtDate(p.createdAt);
+    const thumb = p.images[0].thumb;
+    return `<a class="fund-row" href="/fund.html?id=${p.id}">
+      <div class="fund-row-img" style="background-image:url('${thumb}')"></div>
+      <div class="fund-row-info">
+        <div class="fund-row-loc">${loc}</div>
+        <div class="fund-row-date">${date}</div>
+      </div>
+      <svg class="fund-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
     </a>`;
   }).join('');
 }
@@ -142,6 +170,14 @@ async function load() {
 document.getElementById('ortSelect').addEventListener('change', render);
 document.getElementById('nameSelect').addEventListener('change', render);
 document.getElementById('sortSelect').addEventListener('change', render);
+
+// Filter toggle mobile
+document.getElementById('filterToggle').addEventListener('click', () => {
+  document.getElementById('filterDropdowns').classList.toggle('open');
+});
+
+// Nach Sprachwechsel neu rendern
+document.addEventListener('langchange', () => { populateSelects(); render(); });
 
 load();
 </script>

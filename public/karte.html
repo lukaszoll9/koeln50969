@@ -8,134 +8,74 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css">
-<style>
-  #map { height: calc(100vh - 60px); width: 100%; }
-  .cluster-icon {
-    background: var(--red);
-    color: #fff;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
-  }
-  .thumb-marker {
-    width: 44px; height: 44px;
-    border-radius: 999px;
-    border: 3px solid var(--red);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
-    background-size: cover;
-    background-position: center;
-    background-color: #fff;
-  }
-  .popup-thumb { width: 160px; }
-  .popup-thumb img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; display: block; margin-bottom: 6px; }
-  .popup-thumb a.detail-link { font-weight: 700; color: var(--red); text-decoration: none; font-size: 0.9rem; }
-  .leaflet-popup-content-wrapper { border-radius: 10px; }
-  .map-empty {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px;
-    padding: 16px 20px; color: var(--muted); z-index: 500; text-align: center;
-  }
-</style>
 </head>
 <body>
 <header>
   <button class="menu-btn" id="menuOpenBtn">☰</button>
   <a class="brand" href="/">KÖLN <b>50969</b></a>
   <div class="spacer"></div>
-  <a class="upload-fab" href="/hochladen.html" aria-label="Foto hochladen">+</a>
+  <a class="upload-fab" href="/hochladen.html" aria-label="Sticker hochladen">
+    <span class="fab-plus">+</span>
+    <span class="fab-label">Sticker hochladen</span>
+  </a>
 </header>
-
 <div id="map"></div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script>
-function escapeHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
+function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+async function initMap(){
+  const params=new URLSearchParams(location.search);
+  const dLat=parseFloat(params.get('lat')),dLng=parseFloat(params.get('lng'));
+  const dZoom=parseInt(params.get('zoom'),10);
+  const hasDeep=!isNaN(dLat)&&!isNaN(dLng);
+  const map=L.map('map').setView(hasDeep?[dLat,dLng]:[50.9375,6.9603],hasDeep?(isNaN(dZoom)?16:dZoom):12);
 
-async function initMap() {
-  const params = new URLSearchParams(location.search);
-  const deepLat = parseFloat(params.get('lat'));
-  const deepLng = parseFloat(params.get('lng'));
-  const deepZoom = parseInt(params.get('zoom'), 10);
-  const hasDeepLink = !isNaN(deepLat) && !isNaN(deepLng);
-
-  const map = L.map('map').setView(
-    hasDeepLink ? [deepLat, deepLng] : [50.9375, 6.9603],
-    hasDeepLink ? (isNaN(deepZoom) ? 16 : deepZoom) : 12
-  );
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap Mitwirkende',
-    maxZoom: 19,
+  // CartoDB Positron — sauber, hell, wie danke-max
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    subdomains:'abcd', maxZoom:19
   }).addTo(map);
 
-  const cluster = L.markerClusterGroup({
-    maxClusterRadius: 50,
-    iconCreateFunction: function (c) {
-      const count = c.getChildCount();
-      const size = count < 10 ? 34 : count < 50 ? 42 : 50;
-      return L.divIcon({
-        html: `<div class="cluster-icon" style="width:${size}px;height:${size}px;font-size:${size * 0.4}px">${count}</div>`,
-        className: '',
-        iconSize: [size, size],
-      });
+  const cluster=L.markerClusterGroup({
+    maxClusterRadius:50,
+    iconCreateFunction:function(c){
+      const n=c.getChildCount();
+      const sz=n<10?34:n<50?42:50;
+      return L.divIcon({html:`<div class="cluster-icon" style="width:${sz}px;height:${sz}px;font-size:${sz*.4}px">${n}</div>`,className:'',iconSize:[sz,sz]});
     }
   });
 
-  const res = await fetch('/api/posts?limit=100');
-  const data = await res.json();
-  const withLocation = (data.posts || []).filter(p => typeof p.lat === 'number' && typeof p.lng === 'number');
+  const res=await fetch('/api/posts?limit=500');
+  const data=await res.json();
+  const posts=(data.posts||[]).filter(p=>typeof p.lat==='number'&&typeof p.lng==='number');
 
-  if (withLocation.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'map-empty';
-    empty.innerHTML = 'Noch keine Funde mit Standort.<br><a href="/hochladen.html">Sei der Erste.</a>';
-    document.body.appendChild(empty);
+  if(posts.length===0){
+    const el=document.createElement('div');
+    el.className='map-empty';
+    el.innerHTML='Noch keine Funde mit Standort.<br><a href="/hochladen.html">Sei der Erste.</a>';
+    document.body.appendChild(el);
     return;
   }
 
-  const bounds = [];
-  let deepMarker = null;
-  withLocation.forEach(p => {
-    const thumb = p.images && p.images[0] ? p.images[0].thumb : '';
-    const icon = L.divIcon({
-      className: '',
-      html: `<div class="thumb-marker" style="background-image:url('${thumb}')"></div>`,
-      iconSize: [44, 44],
-    });
-    const marker = L.marker([p.lat, p.lng], { icon });
-    const loc = p.locationText ? escapeHtml(p.locationText) : '';
-    marker.bindPopup(`
-      <div class="popup-thumb">
-        <a href="/fund.html?id=${p.id}"><img src="${thumb}" loading="lazy"></a>
-        ${loc ? `<div>${loc}</div>` : ''}
-        <a class="detail-link" href="/fund.html?id=${p.id}">Fund ansehen →</a>
-      </div>
-    `);
+  const bounds=[];
+  let deepMarker=null;
+  posts.forEach(p=>{
+    const thumb=p.images&&p.images[0]?p.images[0].thumb:'';
+    const icon=L.divIcon({className:'',html:`<div class="thumb-marker" style="background-image:url('${thumb}')"></div>`,iconSize:[44,44]});
+    const marker=L.marker([p.lat,p.lng],{icon});
+    const loc=p.locationText?escapeHtml(p.locationText):'';
+    const date=new Date(p.createdAt).toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric'});
+    marker.bindPopup(`<div class="popup-thumb"><a href="/fund.html?id=${p.id}"><img src="${thumb}" loading="lazy"></a>${loc?`<div style="font-size:0.85rem;margin-bottom:3px">📍 ${loc}</div>`:''}<div style="font-size:0.78rem;color:#7d7160;margin-bottom:5px">${date}</div><a class="detail-link" href="/fund.html?id=${p.id}">Fund ansehen →</a></div>`);
     cluster.addLayer(marker);
-    bounds.push([p.lat, p.lng]);
-    if (hasDeepLink && Math.abs(p.lat - deepLat) < 0.0002 && Math.abs(p.lng - deepLng) < 0.0002) {
-      deepMarker = marker;
-    }
+    bounds.push([p.lat,p.lng]);
+    if(hasDeep&&Math.abs(p.lat-dLat)<0.0002&&Math.abs(p.lng-dLng)<0.0002) deepMarker=marker;
   });
   map.addLayer(cluster);
 
-  if (hasDeepLink) {
-    if (deepMarker) {
-      cluster.zoomToShowLayer(deepMarker, () => deepMarker.openPopup());
-    }
-  } else if (bounds.length > 0) {
-    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
-  }
+  if(hasDeep){if(deepMarker)cluster.zoomToShowLayer(deepMarker,()=>deepMarker.openPopup());}
+  else if(bounds.length>0) map.fitBounds(bounds,{padding:[40,40],maxZoom:15});
 }
-
 initMap();
 </script>
 <script src="/menu.js"></script>
