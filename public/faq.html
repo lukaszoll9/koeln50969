@@ -1,53 +1,111 @@
 <!doctype html>
-<html lang="de">
+<html lang="de" id="html-root">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Häufige Fragen — Köln 50969</title>
+<title>FAQ — Köln 50969</title>
 <link rel="stylesheet" href="/style.css">
+<style>
+.faq-tabs { display:flex; gap:8px; margin-bottom:20px; }
+.faq-tab {
+  padding:8px 18px; border-radius:999px; border:1px solid var(--border);
+  background:var(--bg-elevated); font-family:inherit; font-size:0.88rem;
+  font-weight:600; cursor:pointer; color:var(--muted); transition:all 0.12s;
+}
+.faq-tab.active { background:var(--red); color:#fff; border-color:var(--red); }
+.faq-lang { display:none; }
+.faq-lang.active { display:block; }
+h2 { font-size:1rem; margin:20px 0 6px; }
+</style>
 </head>
 <body>
 <header>
   <button class="menu-btn" id="menuOpenBtn">☰</button>
   <a class="brand" href="/">KÖLN <b>50969</b></a>
   <div class="spacer"></div>
-  <a class="upload-fab" href="/hochladen.html" aria-label="Foto hochladen">+</a>
+  <a class="upload-fab" href="/hochladen.html" aria-label="Sticker hochladen">
+    <span class="fab-plus">+</span><span class="fab-label">Sticker hochladen</span>
+  </a>
 </header>
-
 <main>
   <div class="card">
-    <h1 style="margin-top:0">Häufige Fragen</h1>
+    <h1 style="margin-top:0">FAQ</h1>
+    <div class="faq-tabs">
+      <button class="faq-tab active" data-tab="de">🇩🇪 Deutsch</button>
+      <button class="faq-tab" data-tab="en">🇬🇧 English</button>
+    </div>
 
-    <h2>Was ist das hier?</h2>
-    <p>Du hast einen Köln-50969-Sticker gefunden? Hier landet ein Foto davon in einer Galerie mit allen anderen Funden — zusammen mit dem Ort, an dem er geklebt hat.</p>
+    <!-- DEUTSCH -->
+    <div class="faq-lang active" id="faq-de">
+      <h2>Was ist das hier?</h2>
+      <p>Du hast einen Köln-50969-Sticker gefunden? Hier landet ein Foto davon in einer Galerie mit allen anderen Funden — zusammen mit dem Ort, an dem er geklebt hat.</p>
 
-    <h2>Brauche ich einen Account?</h2>
-    <p>Nein. Hochladen geht komplett ohne Registrierung, anonym. Ein Name ist freiwillig.</p>
+      <h2>Brauche ich einen Account?</h2>
+      <p>Nein. Hochladen geht komplett ohne Registrierung, anonym. Ein Name ist freiwillig.</p>
 
-    <h2>Was muss ich angeben?</h2>
-    <p>Nur ein Foto. Name, Fundort und Kommentar sind alle optional — du entscheidest, wie viel du teilen willst.</p>
+      <h2>Was muss ich angeben?</h2>
+      <p>Nur ein Foto. Name, Fundort und Kommentar sind alle optional — du entscheidest, wie viel du teilen willst.</p>
 
-    <h2>Was passiert nach dem Hochladen?</h2>
-    <p>Jeder Fund wird erst kurz geprüft, bevor er öffentlich sichtbar wird. Das ist meistens eine Sache von Stunden, kann bei vielen Uploads auf einmal aber auch etwas länger dauern.</p>
+      <h2>Was passiert nach dem Hochladen?</h2>
+      <p>Jeder Fund wird erst kurz geprüft, bevor er öffentlich sichtbar wird. Das dauert meistens nur wenige Stunden.</p>
 
-    <h2>Was bedeutet „Murks"?</h2>
-    <p>Nicht jeder Fund landet direkt in der Hauptgalerie. Manche werden stattdessen als <strong>Murks</strong> markiert — zum Beispiel wenn der Sticker auf dem Foto kaum zu erkennen ist, das Bild sehr dunkel oder unscharf ist, oder der Fundort keinen Zusammenhang erkennen lässt.</p>
-    <p>Murks heißt nicht „gelöscht". Der Beitrag bleibt erhalten, taucht nur nicht in der normalen Galerie auf. Ein bisschen mehr Sorgfalt beim Foto — ruhig halten, den Ort mit drauf, gutes Licht — reicht meistens schon, damit ein Fund nicht als Murks landet.</p>
+      <h2>Was bedeutet „Murks"?</h2>
+      <p>Nicht jeder Fund landet direkt in der Hauptgalerie. Manche werden als <strong>Murks</strong> markiert — wenn der Sticker kaum zu erkennen ist, das Bild sehr dunkel oder unscharf ist, oder kein Zusammenhang erkennbar ist. Murks heißt nicht gelöscht — der Beitrag bleibt erhalten, taucht nur nicht in der normalen Galerie auf.</p>
 
-    <h2>Wo wurde mein Fundort gespeichert?</h2>
-    <p>GPS-Daten aus deinem Foto werden nur grob (auf ca. 10 Meter) übernommen, nie exakt. Mehr dazu steht in der <a href="/datenschutz.html">Datenschutzerklärung</a>.</p>
+      <h2>Wo wurde mein Fundort gespeichert?</h2>
+      <p>GPS-Daten aus deinem Foto werden nur grob (auf ca. 10 Meter) übernommen, nie exakt. Mehr dazu in der <a href="/datenschutz.html">Datenschutzerklärung</a>.</p>
 
-    <h2>Wann wird ein Fund abgelehnt?</h2>
-    <p>Wenn kein Köln-50969-Sticker erkennbar ist, das Bild technisch nicht nutzbar ist, oder der Inhalt nicht hierher passt.</p>
+      <h2>Wann wird ein Fund abgelehnt?</h2>
+      <p>Wenn kein Köln-50969-Sticker erkennbar ist, das Bild technisch nicht nutzbar ist, oder der Inhalt nicht hierher passt.</p>
 
-    <h2>Ich hab eine Frage, die hier nicht steht</h2>
-    <p>Schreib uns, Kontakt steht im <a href="/impressum.html">Impressum</a>.</p>
+      <h2>Ich hab eine Frage, die hier nicht steht</h2>
+      <p>Schreib uns — Kontakt steht im <a href="/impressum.html">Impressum</a>.</p>
+    </div>
+
+    <!-- ENGLISH -->
+    <div class="faq-lang" id="faq-en">
+      <h2>What is this?</h2>
+      <p>Found a Köln-50969 sticker? Upload a photo and your find joins a gallery of all sightings — together with the location where it was spotted.</p>
+
+      <h2>Do I need an account?</h2>
+      <p>No. Uploading is completely anonymous, no registration required. A name is optional.</p>
+
+      <h2>What do I need to provide?</h2>
+      <p>Just a photo. Name, location and comment are all optional — you decide how much to share.</p>
+
+      <h2>What happens after uploading?</h2>
+      <p>Every find is briefly reviewed before it appears publicly. This usually takes just a few hours.</p>
+
+      <h2>What does "Murks" mean?</h2>
+      <p>Not every find goes straight into the main gallery. Some are marked as <strong>Murks</strong> (roughly: "botched") — for example if the sticker is barely visible, the photo is very dark or blurry, or no connection to the sticker is apparent. Murks doesn't mean deleted — the entry is kept, it just doesn't show in the public gallery.</p>
+
+      <h2>What happens to my location data?</h2>
+      <p>GPS data from your photo is only stored roughly (to about 10 metres), never exactly. See the <a href="/datenschutz.html">privacy policy</a> for details.</p>
+
+      <h2>When is a find rejected?</h2>
+      <p>If no Köln-50969 sticker is recognisable, the image is technically unusable, or the content is not appropriate.</p>
+
+      <h2>I have a question that's not listed here</h2>
+      <p>Get in touch — contact details are in the <a href="/impressum.html">Impressum</a>.</p>
+    </div>
   </div>
 </main>
-
 <footer>
   <a href="/faq.html">FAQ</a> · <a href="/karte.html">Karte</a> · <a href="/kontakt.html">Kontakt</a> · <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a>
 </footer>
 <script src="/menu.js"></script>
+<script>
+document.querySelectorAll('.faq-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.faq-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.faq-lang').forEach(l => l.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('faq-' + btn.dataset.tab).classList.add('active');
+  });
+});
+// Beim Laden Sprache aus localStorage
+const lang = localStorage.getItem('koeln50969_lang') || 'de';
+if (lang === 'en') document.querySelector('[data-tab="en"]').click();
+</script>
 </body>
 </html>

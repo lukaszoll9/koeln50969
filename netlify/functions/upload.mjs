@@ -2,6 +2,32 @@ import { getStore } from "@netlify/blobs";
 import { getDatabase } from "@netlify/database";
 import { json, hashIp } from "./_shared.mjs";
 
+async function notifyNewUpload(locationText, displayName) {
+  const apiKey = process.env.MAILJET_API_KEY;
+  const secret = process.env.MAILJET_SECRET_KEY;
+  const toEmail = process.env.NOTIFY_EMAIL || "lukasfra437@gmail.com";
+  if (!apiKey || !secret) return;
+  const who = displayName || "Anonym";
+  const where = locationText || "unbekannter Ort";
+  try {
+    await fetch("https://api.mailjet.com/v3.1/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Basic " + btoa(`${apiKey}:${secret}`),
+      },
+      body: JSON.stringify({
+        Messages: [{
+          From: { Email: "noreply@koeln50969.de", Name: "Köln 50969" },
+          To: [{ Email: toEmail }],
+          Subject: `🗓️ Neuer Fund: ${where}`,
+          TextPart: `Ein neuer Fund wurde eingereicht!\n\nOrt: ${where}\nName: ${who}\n\nZum Admin-Panel:\nhttps://koeln50969.de/admin.html`,
+        }],
+      }),
+    });
+  } catch (e) { console.error("Mail-Fehler:", e); }
+}
+
 const MAX_IMAGES = 3;
 const MAX_BYTES_PER_IMAGE = 4 * 1024 * 1024; // 4 MB Sicherheitsnetz (Client komprimiert adaptiv auf ~1,5 MB)
 const RATE_LIMIT_PER_HOUR = 8;
@@ -19,7 +45,10 @@ export default async (req) => {
   // Honeypot: Bots fuellen versteckte Felder aus. Wir tun so, als waere alles ok,
   // speichern aber nichts.
   if (body.website) {
-    return json(200, { ok: true });
+      // E-Mail-Benachrichtigung
+  notifyNewUpload(body.locationText, body.displayName).catch(() => {});
+
+  return json(200, { ok: true });
   }
 
   const images = Array.isArray(body.images) ? body.images : [];
@@ -104,3 +133,4 @@ export default async (req) => {
 };
 
 export const config = { path: "/.netlify/functions/upload" };
+
