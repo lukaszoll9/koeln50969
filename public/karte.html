@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Karte — Köln 50969</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css">
+<style>
+  #map { height: calc(100vh - 60px); width: 100%; }
+  .cluster-icon {
+    background: var(--red);
+    color: #fff;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  }
+  .popup-thumb { width: 160px; }
+  .popup-thumb img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; display: block; margin-bottom: 6px; }
+  .popup-thumb a.detail-link { font-weight: 700; color: var(--red); text-decoration: none; font-size: 0.9rem; }
+  .leaflet-popup-content-wrapper { border-radius: 10px; }
+  .map-empty {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 20px; color: var(--muted); z-index: 500; text-align: center;
+  }
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="/">KÖLN <b>50969</b></a>
+  <a class="upload-fab" href="/hochladen.html" aria-label="Foto hochladen">+</a>
+</header>
+
+<div id="map"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+<script>
+async function initMap() {
+  const map = L.map('map').setView([50.9375, 6.9603], 12); // Koeln-Zentrum als Start
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap Mitwirkende',
+    maxZoom: 19,
+  }).addTo(map);
+
+  const cluster = L.markerClusterGroup({
+    iconCreateFunction: function (c) {
+      const count = c.getChildCount();
+      const size = count < 10 ? 34 : count < 50 ? 42 : 50;
+      return L.divIcon({
+        html: `<div class="cluster-icon" style="width:${size}px;height:${size}px;font-size:${size * 0.4}px">${count}</div>`,
+        className: '',
+        iconSize: [size, size],
+      });
+    }
+  });
+
+  const res = await fetch('/api/posts?limit=100');
+  const data = await res.json();
+  const withLocation = (data.posts || []).filter(p => typeof p.lat === 'number' && typeof p.lng === 'number');
+
+  if (withLocation.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'map-empty';
+    empty.innerHTML = 'Noch keine Funde mit Standort.<br><a href="/hochladen.html">Sei der Erste.</a>';
+    document.body.appendChild(empty);
+    return;
+  }
+
+  const bounds = [];
+  withLocation.forEach(p => {
+    const marker = L.marker([p.lat, p.lng]);
+    const thumb = p.images && p.images[0] ? p.images[0].thumb : '';
+    const loc = p.locationText ? escapeHtml(p.locationText) : '';
+    marker.bindPopup(`
+      <div class="popup-thumb">
+        <a href="/fund.html?id=${p.id}"><img src="${thumb}" loading="lazy"></a>
+        ${loc ? `<div>${loc}</div>` : ''}
+        <a class="detail-link" href="/fund.html?id=${p.id}">Fund ansehen →</a>
+      </div>
+    `);
+    cluster.addLayer(marker);
+    bounds.push([p.lat, p.lng]);
+  });
+  map.addLayer(cluster);
+  if (bounds.length > 0) map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+initMap();
+</script>
+</body>
+</html>

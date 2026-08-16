@@ -11,10 +11,23 @@
 <body>
 <header>
   <a class="brand" href="/">KÖLN <b>50969</b></a>
-  <a class="upload-fab" href="/hochladen.html" aria-label="Foto hochladen">+</a>
+  <div style="display:flex;align-items:center;gap:10px">
+    <a href="/karte.html" class="ghost" style="text-decoration:none;padding:8px 14px;font-size:0.9rem">Karte</a>
+    <a class="upload-fab" href="/hochladen.html" aria-label="Foto hochladen">+</a>
+  </div>
 </header>
 
 <main>
+  <div id="toolbar" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+    <div id="filterInfo" class="hint" style="margin:0"></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <label for="sortSelect" class="hint" style="margin:0">Sortierung:</label>
+      <select id="sortSelect" style="padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:#fffdf9;color:var(--ink)">
+        <option value="new">Neueste zuerst</option>
+        <option value="old">Älteste zuerst</option>
+      </select>
+    </div>
+  </div>
   <div id="grid" class="grid"></div>
   <div id="empty" class="empty-state" hidden>
     Noch keine Funde. <a href="/hochladen.html">Sei der Erste.</a>
@@ -22,25 +35,71 @@
 </main>
 
 <footer>
-  <a href="/faq.html">FAQ</a> · <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a>
+  <a href="/faq.html">FAQ</a> · <a href="/karte.html">Karte</a> · <a href="/kontakt.html">Kontakt</a> · <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a>
 </footer>
 
 <script>
-async function load() {
-  const res = await fetch('/api/posts');
-  const data = await res.json();
+let allPosts = [];
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function getFilters() {
+  const params = new URLSearchParams(location.search);
+  return { ort: params.get('ort'), name: params.get('name') };
+}
+
+function render() {
+  const { ort, name } = getFilters();
   const grid = document.getElementById('grid');
   const empty = document.getElementById('empty');
-  if (!data.posts || data.posts.length === 0) {
+  const filterInfo = document.getElementById('filterInfo');
+  const sort = document.getElementById('sortSelect').value;
+
+  let posts = allPosts.slice();
+
+  if (ort) posts = posts.filter(p => (p.locationText || '').toLowerCase() === ort.toLowerCase());
+  if (name) posts = posts.filter(p => (p.displayName || '').toLowerCase() === name.toLowerCase());
+
+  posts.sort((a, b) => {
+    const diff = new Date(a.createdAt) - new Date(b.createdAt);
+    return sort === 'old' ? diff : -diff;
+  });
+
+  if (ort || name) {
+    const label = ort ? `Ort: ${escapeHtml(ort)}` : `Name: ${escapeHtml(name)}`;
+    filterInfo.innerHTML = `Gefiltert nach ${label} · <a href="/">Filter zurücksetzen</a>`;
+  } else {
+    filterInfo.innerHTML = '';
+  }
+
+  if (posts.length === 0) {
+    grid.innerHTML = '';
     empty.hidden = false;
+    empty.innerHTML = (ort || name)
+      ? 'Keine Funde mit diesem Filter. <a href="/">Alle anzeigen</a>.'
+      : 'Noch keine Funde. <a href="/hochladen.html">Sei der Erste.</a>';
     return;
   }
-  grid.innerHTML = data.posts.map(p => `
+  empty.hidden = true;
+  grid.innerHTML = posts.map(p => `
     <a href="/fund.html?id=${p.id}">
       <img src="${p.images[0].thumb}" alt="Sticker-Fund" loading="lazy">
     </a>
   `).join('');
 }
+
+async function load() {
+  const res = await fetch('/api/posts');
+  const data = await res.json();
+  allPosts = data.posts || [];
+  render();
+}
+
+document.getElementById('sortSelect').addEventListener('change', render);
 load();
 </script>
 </body>

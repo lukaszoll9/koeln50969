@@ -34,10 +34,11 @@ async function load() {
       ${post.images.map(im => `<a href="${im.full}" target="_blank"><img src="${im.thumb}" loading="lazy"></a>`).join('')}
     </div>
     <div class="card">
-      ${post.displayName ? `<div><strong>${escapeHtml(post.displayName)}</strong></div>` : ''}
-      ${post.locationText ? `<div class="hint">📍 ${escapeHtml(post.locationText)}</div>` : ''}
+      ${post.displayName ? `<div><strong><a href="/?name=${encodeURIComponent(post.displayName)}" style="color:inherit;text-decoration:underline">${escapeHtml(post.displayName)}</a></strong></div>` : ''}
+      ${post.locationText ? `<div class="hint">📍 <a href="/?ort=${encodeURIComponent(post.locationText)}" style="color:inherit;text-decoration:underline">${escapeHtml(post.locationText)}</a></div>` : ''}
       <div class="hint">${date}</div>
       ${post.comment ? `<p style="margin-top:14px">${escapeHtml(post.comment)}</p>` : ''}
+      ${(typeof post.lat === 'number' && typeof post.lng === 'number') ? `<p style="margin-top:10px"><a href="/karte.html">Auf der Karte ansehen →</a></p>` : ''}
     </div>
   `;
 }
@@ -50,5 +51,8 @@ function escapeHtml(s) {
 
 load();
 </script>
+<footer>
+  <a href="/faq.html">FAQ</a> · <a href="/karte.html">Karte</a> · <a href="/kontakt.html">Kontakt</a> · <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a>
+</footer>
 </body>
 </html>
