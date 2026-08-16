@@ -56,8 +56,10 @@ export default async (req) => {
   let lat = null, lng = null;
   if (typeof body.lat === "number" && typeof body.lng === "number") {
     if (body.lat >= -90 && body.lat <= 90 && body.lng >= -180 && body.lng <= 180) {
-      lat = Math.round(body.lat * 1000) / 1000;
-      lng = Math.round(body.lng * 1000) / 1000;
+      // 4 Nachkommastellen ≈ 11 m Genauigkeit -- praezise genug fuer eine
+      // brauchbare Karte, aber kein exaktes Hausnummern-GPS.
+      lat = Math.round(body.lat * 10000) / 10000;
+      lng = Math.round(body.lng * 10000) / 10000;
     }
   }
 

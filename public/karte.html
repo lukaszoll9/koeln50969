@@ -21,6 +21,15 @@
     border: 2px solid #fff;
     box-shadow: 0 2px 8px rgba(0,0,0,0.35);
   }
+  .thumb-marker {
+    width: 44px; height: 44px;
+    border-radius: 999px;
+    border: 3px solid var(--red);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    background-size: cover;
+    background-position: center;
+    background-color: #fff;
+  }
   .popup-thumb { width: 160px; }
   .popup-thumb img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; display: block; margin-bottom: 6px; }
   .popup-thumb a.detail-link { font-weight: 700; color: var(--red); text-decoration: none; font-size: 0.9rem; }
@@ -43,14 +52,30 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script>
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
 async function initMap() {
-  const map = L.map('map').setView([50.9375, 6.9603], 12); // Koeln-Zentrum als Start
+  const params = new URLSearchParams(location.search);
+  const deepLat = parseFloat(params.get('lat'));
+  const deepLng = parseFloat(params.get('lng'));
+  const deepZoom = parseInt(params.get('zoom'), 10);
+  const hasDeepLink = !isNaN(deepLat) && !isNaN(deepLng);
+
+  const map = L.map('map').setView(
+    hasDeepLink ? [deepLat, deepLng] : [50.9375, 6.9603],
+    hasDeepLink ? (isNaN(deepZoom) ? 16 : deepZoom) : 12
+  );
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap Mitwirkende',
     maxZoom: 19,
   }).addTo(map);
 
   const cluster = L.markerClusterGroup({
+    maxClusterRadius: 50,
     iconCreateFunction: function (c) {
       const count = c.getChildCount();
       const size = count < 10 ? 34 : count < 50 ? 42 : 50;
@@ -75,9 +100,15 @@ async function initMap() {
   }
 
   const bounds = [];
+  let deepMarker = null;
   withLocation.forEach(p => {
-    const marker = L.marker([p.lat, p.lng]);
     const thumb = p.images && p.images[0] ? p.images[0].thumb : '';
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="thumb-marker" style="background-image:url('${thumb}')"></div>`,
+      iconSize: [44, 44],
+    });
+    const marker = L.marker([p.lat, p.lng], { icon });
     const loc = p.locationText ? escapeHtml(p.locationText) : '';
     marker.bindPopup(`
       <div class="popup-thumb">
@@ -88,15 +119,19 @@ async function initMap() {
     `);
     cluster.addLayer(marker);
     bounds.push([p.lat, p.lng]);
+    if (hasDeepLink && Math.abs(p.lat - deepLat) < 0.0002 && Math.abs(p.lng - deepLng) < 0.0002) {
+      deepMarker = marker;
+    }
   });
   map.addLayer(cluster);
-  if (bounds.length > 0) map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
-}
 
-function escapeHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
+  if (hasDeepLink) {
+    if (deepMarker) {
+      cluster.zoomToShowLayer(deepMarker, () => deepMarker.openPopup());
+    }
+  } else if (bounds.length > 0) {
+    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+  }
 }
 
 initMap();

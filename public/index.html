@@ -7,27 +7,62 @@
 <meta name="description" content="Hast du den Köln-50969-Sticker gefunden? Foto hochladen, Fundort markieren.">
 <link rel="manifest" href="/manifest.json">
 <link rel="stylesheet" href="/style.css">
+<style>
+  .menu-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: 999px; padding: 8px 16px; font-weight: 700; font-size: 0.9rem;
+    color: var(--ink); cursor: pointer;
+  }
+  .menu-panel {
+    position: fixed; inset: 0; background: rgba(36,30,24,0.4); z-index: 100;
+    display: none;
+  }
+  .menu-panel.open { display: block; }
+  .menu-sheet {
+    position: absolute; top: 0; right: 0; height: 100%; width: min(320px, 86vw);
+    background: var(--bg); box-shadow: -8px 0 24px rgba(0,0,0,0.2);
+    padding: 20px; overflow-y: auto;
+  }
+  .menu-sheet h2 { margin: 0 0 14px; font-size: 1.1rem; }
+  .menu-sheet nav { display: flex; flex-direction: column; gap: 2px; margin-bottom: 22px; }
+  .menu-sheet nav a {
+    padding: 12px 10px; border-radius: 8px; text-decoration: none; color: var(--ink);
+    font-weight: 600; border-bottom: 1px solid var(--border);
+  }
+  .menu-close { float: right; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--muted); }
+</style>
 </head>
 <body>
 <header>
   <a class="brand" href="/">KÖLN <b>50969</b></a>
   <div style="display:flex;align-items:center;gap:10px">
-    <a href="/karte.html" class="ghost" style="text-decoration:none;padding:8px 14px;font-size:0.9rem">Karte</a>
+    <button class="menu-btn" id="menuOpenBtn">☰ Kategorien</button>
     <a class="upload-fab" href="/hochladen.html" aria-label="Foto hochladen">+</a>
   </div>
 </header>
 
-<main>
-  <div id="toolbar" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-    <div id="filterInfo" class="hint" style="margin:0"></div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <label for="sortSelect" class="hint" style="margin:0">Sortierung:</label>
-      <select id="sortSelect" style="padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:#fffdf9;color:var(--ink)">
-        <option value="new">Neueste zuerst</option>
-        <option value="old">Älteste zuerst</option>
-      </select>
-    </div>
+<div class="menu-panel" id="menuPanel">
+  <div class="menu-sheet">
+    <button class="menu-close" id="menuCloseBtn">×</button>
+    <h2>Kategorien</h2>
+    <nav>
+      <a href="/karte.html">🗺️ Karte</a>
+      <a href="/faq.html">❓ FAQ</a>
+      <a href="/kontakt.html">✉️ Kontakt</a>
+      <a href="/impressum.html">Impressum</a>
+      <a href="/datenschutz.html">Datenschutz</a>
+    </nav>
+    <h2>Sortierung</h2>
+    <select id="sortSelect" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:#fffdf9;color:var(--ink)">
+      <option value="new">Neueste zuerst</option>
+      <option value="old">Älteste zuerst</option>
+    </select>
   </div>
+</div>
+
+<main>
+  <div id="filterInfo" class="hint" style="margin-bottom:10px"></div>
   <div id="grid" class="grid"></div>
   <div id="empty" class="empty-state" hidden>
     Noch keine Funde. <a href="/hochladen.html">Sei der Erste.</a>
@@ -60,7 +95,6 @@ function render() {
   const sort = document.getElementById('sortSelect').value;
 
   let posts = allPosts.slice();
-
   if (ort) posts = posts.filter(p => (p.locationText || '').toLowerCase() === ort.toLowerCase());
   if (name) posts = posts.filter(p => (p.displayName || '').toLowerCase() === name.toLowerCase());
 
@@ -100,6 +134,16 @@ async function load() {
 }
 
 document.getElementById('sortSelect').addEventListener('change', render);
+document.getElementById('menuOpenBtn').addEventListener('click', () => {
+  document.getElementById('menuPanel').classList.add('open');
+});
+document.getElementById('menuCloseBtn').addEventListener('click', () => {
+  document.getElementById('menuPanel').classList.remove('open');
+});
+document.getElementById('menuPanel').addEventListener('click', (e) => {
+  if (e.target.id === 'menuPanel') e.target.classList.remove('open');
+});
+
 load();
 </script>
 </body>
