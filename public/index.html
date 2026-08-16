@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Köln 50969 — Sticker-Funde</title>
-<meta name="description" content="Hast du den Köln-50969-Sticker gefunden? Foto hochladen, Fundort markieren — alle Funde in einer Galerie.">
+<meta name="description" content="Ein Sticker aus Köln-Zollstock auf Reisen. Finde ihn. Fotografiere ihn. Werde Teil der Geschichte.">
 <meta property="og:title" content="Köln 50969 — Sticker-Funde">
-<meta property="og:description" content="Gefunden? Zeig's der Welt. Alle Sticker-Funde aus Köln-Zollstock auf einen Blick.">
+<meta property="og:description" content="Ein Sticker aus Köln-Zollstock — gefunden irgendwo auf der Welt. Zeig wo du ihn entdeckt hast.">
 <meta property="og:image" content="https://koeln50969.de/sticker-hero.jpg">
 <meta property="og:url" content="https://koeln50969.de">
 <meta name="twitter:card" content="summary_large_image">
@@ -14,10 +14,21 @@
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+
+<!-- ── ONBOARDING OVERLAY (nur beim ersten Besuch) ── -->
+<div class="onboarding" id="onboarding" hidden>
+  <div class="onboarding-box">
+    <div class="onboarding-sticker">📍</div>
+    <h2 class="onboarding-title" data-de="Hallo, Entdecker." data-en="Hello, Explorer.">Hallo, Entdecker.</h2>
+    <p class="onboarding-text" data-de="Du hast einen Sticker aus Köln-Zollstock gefunden — dem Zollywood Tower, der überall hingereist ist. Hier sammeln sich alle Funde weltweit." data-en="You found a sticker from Cologne's Zollstock neighbourhood — the Zollywood Tower, travelling everywhere. All finds from around the world land here.">Du hast einen Sticker aus Köln-Zollstock gefunden — dem Zollywood Tower, der überall hingereist ist. Hier sammeln sich alle Funde weltweit.</p>
+    <button class="onboarding-btn" id="onboardingClose" data-de="Verstanden — zeig mir die Funde!" data-en="Got it — show me the finds!">Verstanden — zeig mir die Funde!</button>
+  </div>
+</div>
+
 <header>
   <button class="menu-btn" id="menuOpenBtn">☰</button>
   <a class="brand" href="/">KÖLN <b>50969</b></a>
-  <span class="tagline" data-de="Gefunden? Zeig's der Welt." data-en="Found it? Show the world.">Gefunden? Zeig's der Welt.</span>
+  <span class="header-tagline" data-de="Zollywood überall." data-en="Zollywood everywhere.">Zollywood überall.</span>
   <div class="spacer"></div>
   <button class="lang-btn" id="langBtn" title="Sprache wechseln">EN</button>
   <a class="upload-fab" href="/hochladen.html" aria-label="Sticker hochladen">
@@ -26,39 +37,45 @@
   </a>
 </header>
 
+<!-- ── HERO ── -->
 <div class="hero">
-  <img src="/sticker-hero.jpg" alt="Der Köln 50969 Sticker">
-  <p class="hero-tagline" data-de="Gefunden? Zeig's der Welt." data-en="Found it? Show the world.">Gefunden? Zeig's der Welt.</p>
+  <div class="hero-sticker-wrap">
+    <img src="/sticker-hero.jpg" alt="Der Köln 50969 Sticker" class="hero-sticker-img">
+  </div>
+  <div class="hero-text">
+    <h1 class="hero-headline" data-de="Ein Sticker.<br>Eine Stadt.<br>Überall zuhause." data-en="One sticker.<br>One city.<br>At home everywhere.">Ein Sticker.<br>Eine Stadt.<br>Überall zuhause.</h1>
+    <p class="hero-sub" data-de="Der Zollywood Tower aus Köln-Zollstock reist mit. Finde ihn. Fotografiere ihn. Zeig der Welt, wo er aufgetaucht ist." data-en="The Zollywood Tower from Cologne's Zollstock travels with you. Find it. Photograph it. Show the world where it appeared.">Der Zollywood Tower aus Köln-Zollstock reist mit. Finde ihn. Fotografiere ihn. Zeig der Welt, wo er aufgetaucht ist.</p>
+    <div class="hero-counter" id="heroCounter"></div>
+  </div>
 </div>
 
 <main>
-  <!-- Filter à la danke-max -->
+  <!-- Filter -->
   <div class="filter-bar">
     <button class="filter-toggle" id="filterToggle">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
       <span data-de="Filter" data-en="Filter">Filter</span>
     </button>
     <div class="filter-dropdowns" id="filterDropdowns">
-      <select id="ortSelect"><option value="" data-de="Alle Orte" data-en="All places">Alle Orte</option></select>
-      <select id="nameSelect"><option value="" data-de="Alle Namen" data-en="All names">Alle Namen</option></select>
+      <select id="ortSelect"><option value="">Alle Orte</option></select>
+      <select id="nameSelect"><option value="">Alle Namen</option></select>
       <select id="sortSelect">
-        <option value="new" data-de="Neueste zuerst" data-en="Newest first">Neueste zuerst</option>
-        <option value="old" data-de="Älteste zuerst" data-en="Oldest first">Älteste zuerst</option>
+        <option value="new">Neueste zuerst</option>
+        <option value="old">Älteste zuerst</option>
       </select>
     </div>
     <span class="filter-count" id="filterInfo"></span>
   </div>
 
-  <!-- Galerie-Liste à la danke-max -->
   <div id="list" class="fund-list"></div>
   <div id="empty" class="empty-state" hidden>
-    <span data-de="Noch keine Funde." data-en="No finds yet.">Noch keine Funde.</span>
-    <a href="/hochladen.html" data-de="Sei der Erste." data-en="Be the first.">Sei der Erste.</a>
+    <p data-de="Noch keine Funde — sei der Erste!" data-en="No finds yet — be the first!">Noch keine Funde — sei der Erste!</p>
+    <a href="/hochladen.html" class="upload-fab" style="display:inline-flex;margin-top:14px" data-de="Sticker hochladen" data-en="Upload sticker">Sticker hochladen</a>
   </div>
 </main>
 
 <footer>
-  <a href="/faq.html" data-de="FAQ" data-en="FAQ">FAQ</a> ·
+  <a href="/faq.html">FAQ</a> ·
   <a href="/karte.html" data-de="Karte" data-en="Map">Karte</a> ·
   <a href="/statistik.html" data-de="Statistik" data-en="Stats">Statistik</a> ·
   <a href="/kontakt.html" data-de="Kontakt" data-en="Contact">Kontakt</a> ·
@@ -66,7 +83,6 @@
   <a href="/datenschutz.html" data-de="Datenschutz" data-en="Privacy">Datenschutz</a>
 </footer>
 
-<!-- Sprach-Popup -->
 <div class="lang-popup" id="langPopup" hidden>
   <div class="lang-popup-inner">
     <button class="lang-option active" data-lang="de">🇩🇪 Deutsch</button>
@@ -77,78 +93,107 @@
 <script src="/menu.js"></script>
 <script src="/i18n.js"></script>
 <script>
+// Onboarding: nur beim ersten Besuch
+(function(){
+  if(!localStorage.getItem('koeln50969_visited')){
+    document.getElementById('onboarding').hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  document.getElementById('onboardingClose').addEventListener('click', function(){
+    localStorage.setItem('koeln50969_visited','1');
+    document.getElementById('onboarding').hidden = true;
+    document.body.style.overflow = '';
+  });
+  // i18n auf Onboarding-Inhalt anwenden
+  document.addEventListener('langchange', function(e){
+    var lang = e.detail;
+    document.querySelectorAll('#onboarding [data-de]').forEach(function(el){
+      el.innerHTML = lang==='en'?(el.dataset.en||el.dataset.de):el.dataset.de;
+    });
+  });
+})();
+
 let allPosts = [];
 
-function escapeHtml(s) {
-  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+function escapeHtml(s){ const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
+
+function fmtDate(iso){
+  return new Date(iso).toLocaleDateString(window._lang==='en'?'en-GB':'de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
 }
 
-function fmtDate(iso) {
-  const d = new Date(iso);
-  return d.toLocaleDateString(window._lang === 'en' ? 'en-GB' : 'de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+function isNew(iso){
+  return Date.now() - new Date(iso).getTime() < 72*60*60*1000; // 72h
 }
 
-function getFilters() {
-  const p = new URLSearchParams(location.search);
-  return { ort: p.get('ort') || '', name: p.get('name') || '' };
+function getFilters(){
+  const p=new URLSearchParams(location.search);
+  return {ort:p.get('ort')||'',name:p.get('name')||''};
 }
 
-function setUrl(ort, name) {
-  const p = new URLSearchParams();
-  if (ort) p.set('ort', ort);
-  if (name) p.set('name', name);
-  history.replaceState(null, '', p.toString() ? `/?${p}` : '/');
+function setUrl(ort,name){
+  const p=new URLSearchParams();
+  if(ort)p.set('ort',ort);
+  if(name)p.set('name',name);
+  history.replaceState(null,'',(p.toString()?'/?'+p:'/'));
 }
 
-function populateSelects() {
-  const { ort, name } = getFilters();
-  const orte = [...new Set(allPosts.map(p => p.locationText).filter(Boolean))].sort();
-  const namen = [...new Set(allPosts.map(p => p.displayName).filter(Boolean))].sort();
-  const lang = window._lang || 'de';
-  document.getElementById('ortSelect').innerHTML =
-    `<option value="">${lang==='en'?'All places':'Alle Orte'}</option>` +
-    orte.map(o => `<option value="${escapeHtml(o)}" ${o===ort?'selected':''}>${escapeHtml(o)}</option>`).join('');
-  document.getElementById('nameSelect').innerHTML =
-    `<option value="">${lang==='en'?'All names':'Alle Namen'}</option>` +
-    namen.map(n => `<option value="${escapeHtml(n)}" ${n===name?'selected':''}>${escapeHtml(n)}</option>`).join('');
+function populateSelects(){
+  const {ort,name}=getFilters();
+  const lang=window._lang||'de';
+  const orte=[...new Set(allPosts.map(p=>p.locationText).filter(Boolean))].sort();
+  const namen=[...new Set(allPosts.map(p=>p.displayName).filter(Boolean))].sort();
+  document.getElementById('ortSelect').innerHTML=
+    `<option value="">${lang==='en'?'All places':'Alle Orte'}</option>`+
+    orte.map(o=>`<option value="${escapeHtml(o)}"${o===ort?' selected':''}>${escapeHtml(o)}</option>`).join('');
+  document.getElementById('nameSelect').innerHTML=
+    `<option value="">${lang==='en'?'All names':'Alle Namen'}</option>`+
+    namen.map(n=>`<option value="${escapeHtml(n)}"${n===name?' selected':''}>${escapeHtml(n)}</option>`).join('');
+  document.getElementById('sortSelect').innerHTML=
+    `<option value="new">${lang==='en'?'Newest first':'Neueste zuerst'}</option>`+
+    `<option value="old">${lang==='en'?'Oldest first':'Älteste zuerst'}</option>`;
 }
 
-function render() {
-  const ort = document.getElementById('ortSelect').value;
-  const name = document.getElementById('nameSelect').value;
-  const sort = document.getElementById('sortSelect').value;
-  setUrl(ort, name);
+function updateCounter(){
+  const n=allPosts.length;
+  const lang=window._lang||'de';
+  const el=document.getElementById('heroCounter');
+  if(n>0) el.innerHTML=`<span class="counter-num">${n}</span> <span class="counter-label">${lang==='en'?`Find${n===1?'':'s'} worldwide`:`Fund${n===1?'':'e'} weltweit`}</span>`;
+  else el.innerHTML='';
+}
 
-  let posts = allPosts.slice();
-  if (ort) posts = posts.filter(p => p.locationText === ort);
-  if (name) posts = posts.filter(p => p.displayName === name);
-  posts.sort((a, b) => {
-    const d = new Date(a.createdAt) - new Date(b.createdAt);
-    return sort === 'old' ? d : -d;
+function render(){
+  const ort=document.getElementById('ortSelect').value;
+  const name=document.getElementById('nameSelect').value;
+  const sort=document.getElementById('sortSelect').value;
+  setUrl(ort,name);
+
+  let posts=allPosts.slice();
+  if(ort) posts=posts.filter(p=>p.locationText===ort);
+  if(name) posts=posts.filter(p=>p.displayName===name);
+  posts.sort((a,b)=>{
+    const d=new Date(a.createdAt)-new Date(b.createdAt);
+    return sort==='old'?d:-d;
   });
 
-  const lang = window._lang || 'de';
-  const info = document.getElementById('filterInfo');
-  info.textContent = (ort || name) ? `${posts.length} ${lang==='en'?'found':'Funde'}` : '';
+  const lang=window._lang||'de';
+  const info=document.getElementById('filterInfo');
+  info.textContent=(ort||name)?`${posts.length} ${lang==='en'?'found':'Funde'}`:'';
 
-  const list = document.getElementById('list');
-  const empty = document.getElementById('empty');
+  const list=document.getElementById('list');
+  const empty=document.getElementById('empty');
 
-  if (posts.length === 0) {
-    list.innerHTML = '';
-    empty.hidden = false;
-    return;
-  }
-  empty.hidden = true;
+  if(posts.length===0){ list.innerHTML=''; empty.hidden=false; return; }
+  empty.hidden=true;
 
-  list.innerHTML = posts.map(p => {
-    const loc = p.locationText ? escapeHtml(p.locationText) : (lang==='en'?'Unknown location':'Unbekannter Ort');
-    const date = fmtDate(p.createdAt);
-    const thumb = p.images[0].thumb;
+  list.innerHTML=posts.map(p=>{
+    const loc=p.locationText?escapeHtml(p.locationText):(lang==='en'?'Unknown location':'Unbekannter Ort');
+    const date=fmtDate(p.createdAt);
+    const thumb=p.images[0].thumb;
+    const newBadge=isNew(p.createdAt)?`<span class="new-badge">NEU</span>`:'';
     return `<a class="fund-row" href="/fund.html?id=${p.id}">
       <div class="fund-row-img" style="background-image:url('${thumb}')"></div>
       <div class="fund-row-info">
-        <div class="fund-row-loc">${loc}</div>
+        <div class="fund-row-loc">${newBadge}${loc}</div>
         <div class="fund-row-date">${date}</div>
       </div>
       <svg class="fund-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
@@ -156,28 +201,27 @@ function render() {
   }).join('');
 }
 
-async function load() {
-  const res = await fetch('/api/posts');
-  const data = await res.json();
-  allPosts = data.posts || [];
+async function load(){
+  try{
+    const res=await fetch('/api/posts');
+    const data=await res.json();
+    allPosts=data.posts||[];
+  }catch(e){ allPosts=[]; }
+  updateCounter();
   populateSelects();
-  const { ort, name } = getFilters();
-  document.getElementById('ortSelect').value = ort;
-  document.getElementById('nameSelect').value = name;
+  const {ort,name}=getFilters();
+  document.getElementById('ortSelect').value=ort;
+  document.getElementById('nameSelect').value=name;
   render();
 }
 
-document.getElementById('ortSelect').addEventListener('change', render);
-document.getElementById('nameSelect').addEventListener('change', render);
-document.getElementById('sortSelect').addEventListener('change', render);
-
-// Filter toggle mobile
-document.getElementById('filterToggle').addEventListener('click', () => {
+document.getElementById('ortSelect').addEventListener('change',render);
+document.getElementById('nameSelect').addEventListener('change',render);
+document.getElementById('sortSelect').addEventListener('change',render);
+document.getElementById('filterToggle').addEventListener('click',()=>{
   document.getElementById('filterDropdowns').classList.toggle('open');
 });
-
-// Nach Sprachwechsel neu rendern
-document.addEventListener('langchange', () => { populateSelects(); render(); });
+document.addEventListener('langchange',()=>{ populateSelects(); updateCounter(); render(); });
 
 load();
 </script>
