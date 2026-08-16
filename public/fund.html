@@ -6,25 +6,45 @@
 <title>Fund — Köln 50969</title>
 <link rel="stylesheet" href="/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<style>
-  #minimap { height: 220px; border-radius: 10px; margin-top: 10px; border: 1px solid var(--border); }
-</style>
 </head>
 <body>
 <header>
-  <button class="menu-btn" id="menuOpenBtn">☰</button>
-  <a class="brand" href="/">KÖLN <b>50969</b></a>
-  <div class="spacer"></div>
-  <a class="upload-fab" href="/hochladen.html" aria-label="Foto hochladen">+</a>
+<button class="menu-btn" id="menuOpenBtn">☰</button>
+<a class="brand" href="/">KÖLN <b>50969</b></a>
+<div class="spacer"></div>
+<a class="upload-fab" href="/hochladen.html" aria-label="Foto hochladen">+</a>
 </header>
 
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
+<button class="lightbox-close" id="lightboxClose" aria-label="Schließen">✕</button>
+<img id="lightboxImg" src="" alt="Sticker-Foto groß">
+</div>
+
 <main id="content">
-  <p class="hint">Lädt…</p>
+<p class="hint">Lädt…</p>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 const id = new URLSearchParams(location.search).get('id');
+
+// Lightbox
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+function openLightbox(src) {
+  lightboxImg.src = src;
+  lightbox.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  lightbox.classList.remove('open');
+  document.body.style.overflow = '';
+}
 
 async function load() {
   const res = await fetch('/api/posts?limit=100');
@@ -39,20 +59,32 @@ async function load() {
   const hasLocation = typeof post.lat === 'number' && typeof post.lng === 'number';
 
   content.innerHTML = `
-    <div class="grid" style="margin-bottom:16px">
-      ${post.images.map(im => `<a href="${im.full}" target="_blank"><img src="${im.thumb}" loading="lazy"></a>`).join('')}
+    <div class="fund-grid">
+      ${post.images.map((im, i) => `
+        <a href="#" data-full="${im.full}" class="fund-photo">
+          <img src="${im.thumb}" loading="${i === 0 ? 'eager' : 'lazy'}" alt="Sticker-Foto ${i+1}">
+        </a>
+      `).join('')}
     </div>
     <div class="card">
-      ${post.displayName ? `<div><strong><a href="/?name=${encodeURIComponent(post.displayName)}" style="color:inherit;text-decoration:underline">${escapeHtml(post.displayName)}</a></strong></div>` : ''}
-      ${post.locationText ? `<div class="hint">📍 <a href="/?ort=${encodeURIComponent(post.locationText)}" style="color:inherit;text-decoration:underline">${escapeHtml(post.locationText)}</a></div>` : ''}
+      ${post.displayName ? `<div style="margin-bottom:6px"><strong><a href="/?name=${encodeURIComponent(post.displayName)}" style="color:inherit;text-decoration:underline">${escapeHtml(post.displayName)}</a></strong></div>` : ''}
+      ${post.locationText ? `<div class="hint" style="margin-bottom:4px">📍 <a href="/?ort=${encodeURIComponent(post.locationText)}" style="color:inherit;text-decoration:underline">${escapeHtml(post.locationText)}</a></div>` : ''}
       <div class="hint">${date}</div>
-      ${post.comment ? `<p style="margin-top:14px">${escapeHtml(post.comment)}</p>` : ''}
+      ${post.comment ? `<p style="margin-top:14px;margin-bottom:0">${escapeHtml(post.comment)}</p>` : ''}
       ${hasLocation ? `
         <div id="minimap"></div>
         <p style="margin-top:10px"><a href="/karte.html?lat=${post.lat}&lng=${post.lng}&zoom=16">Auf der großen Karte ansehen →</a></p>
       ` : ''}
     </div>
   `;
+
+  // Lightbox-Handler für alle Fotos
+  document.querySelectorAll('.fund-photo').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      openLightbox(a.dataset.full);
+    });
+  });
 
   if (hasLocation) {
     const m = L.map('minimap', { zoomControl: true, scrollWheelZoom: false }).setView([post.lat, post.lng], 15);
@@ -73,7 +105,7 @@ function escapeHtml(s) {
 load();
 </script>
 <footer>
-  <a href="/faq.html">FAQ</a> · <a href="/karte.html">Karte</a> · <a href="/kontakt.html">Kontakt</a> · <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a>
+<a href="/faq.html">FAQ</a> · <a href="/karte.html">Karte</a> · <a href="/kontakt.html">Kontakt</a> · <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a>
 </footer>
 <script src="/menu.js"></script>
 </body>

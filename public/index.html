@@ -10,44 +10,45 @@
 </head>
 <body>
 <header>
-  <button class="menu-btn" id="menuOpenBtn">☰</button>
-  <a class="brand" href="/">KÖLN <b>50969</b></a>
-  <div class="spacer"></div>
-  <a class="upload-fab" href="/hochladen.html" aria-label="Foto hochladen">+</a>
+<button class="menu-btn" id="menuOpenBtn">☰</button>
+<a class="brand" href="/">KÖLN <b>50969</b></a>
+<span class="tagline">Gefunden? Zeig's der Welt.</span>
+<div class="spacer"></div>
+<a class="upload-fab" href="/hochladen.html" aria-label="Foto hochladen">+</a>
 </header>
 
 <div class="hero">
-  <img src="/sticker-hero.jpg" alt="Der Köln 50969 Sticker">
-  <p class="tagline">Gemacht für den Zollywood Tower.</p>
+<img src="/sticker-hero.jpg" alt="Der Köln 50969 Sticker">
+<p class="tagline">Gefunden? Zeig's der Welt.</p>
 </div>
 
 <main>
-  <div class="filter-toolbar">
-    <div>
-      <label for="ortSelect">Ort</label>
-      <select id="ortSelect"><option value="">Alle Orte</option></select>
-    </div>
-    <div>
-      <label for="nameSelect">Name</label>
-      <select id="nameSelect"><option value="">Alle Namen</option></select>
-    </div>
-    <div>
-      <label for="sortSelect">Sortierung</label>
-      <select id="sortSelect">
-        <option value="new">Neueste zuerst</option>
-        <option value="old">Älteste zuerst</option>
-      </select>
-    </div>
-  </div>
-  <div id="filterInfo" class="hint" style="margin-bottom:10px"></div>
-  <div id="grid" class="grid"></div>
-  <div id="empty" class="empty-state" hidden>
-    Noch keine Funde. <a href="/hochladen.html">Sei der Erste.</a>
-  </div>
+<div class="filter-toolbar">
+<div>
+<label for="ortSelect">Ort</label>
+<select id="ortSelect"><option value="">Alle Orte</option></select>
+</div>
+<div>
+<label for="nameSelect">Name</label>
+<select id="nameSelect"><option value="">Alle Namen</option></select>
+</div>
+<div>
+<label for="sortSelect">Sortierung</label>
+<select id="sortSelect">
+<option value="new">Neueste zuerst</option>
+<option value="old">Älteste zuerst</option>
+</select>
+</div>
+</div>
+<div id="filterInfo" class="hint" style="margin-bottom:10px"></div>
+<div id="grid" class="grid"></div>
+<div id="empty" class="empty-state" hidden>
+Noch keine Funde. <a href="/hochladen.html">Sei der Erste.</a>
+</div>
 </main>
 
 <footer>
-  <a href="/faq.html">FAQ</a> · <a href="/karte.html">Karte</a> · <a href="/statistik.html">Statistik</a> · <a href="/kontakt.html">Kontakt</a> · <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a>
+<a href="/faq.html">FAQ</a> · <a href="/karte.html">Karte</a> · <a href="/statistik.html">Statistik</a> · <a href="/kontakt.html">Kontakt</a> · <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a>
 </footer>
 
 <script src="/menu.js"></script>
@@ -116,11 +117,15 @@ function render() {
     return;
   }
   empty.hidden = true;
-  grid.innerHTML = posts.map(p => `
+  grid.innerHTML = posts.map(p => {
+    const loc = p.locationText ? escapeHtml(p.locationText) : '';
+    const date = new Date(p.createdAt).toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
+    return `
     <a href="/fund.html?id=${p.id}">
       <img src="${p.images[0].thumb}" alt="Sticker-Fund" loading="lazy">
-    </a>
-  `).join('');
+      <div class="card-overlay">${loc ? `📍 ${loc}<br>` : ''}${date}</div>
+    </a>`;
+  }).join('');
 }
 
 async function load() {
