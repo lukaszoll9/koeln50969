@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Statistik — Köln 50969</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <button class="menu-btn" id="menuOpenBtn">☰</button>
+  <a class="brand" href="/">KÖLN <b>50969</b></a>
+  <div class="spacer"></div>
+  <a class="upload-fab" href="/hochladen.html" aria-label="Foto hochladen">+</a>
+</header>
+
+<main>
+  <div class="card">
+    <h1 style="margin-top:0">In Zahlen</h1>
+    <div id="content"><p class="hint">Lädt…</p></div>
+  </div>
+</main>
+
+<footer>
+  <a href="/faq.html">FAQ</a> · <a href="/karte.html">Karte</a> · <a href="/kontakt.html">Kontakt</a> · <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a>
+</footer>
+
+<script src="/menu.js"></script>
+<script>
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+async function load() {
+  const res = await fetch('/api/posts?limit=100');
+  const data = await res.json();
+  const posts = data.posts || [];
+  const content = document.getElementById('content');
+
+  if (posts.length === 0) {
+    content.innerHTML = '<p class="hint">Noch keine Funde — die Statistik füllt sich, sobald der erste da ist.</p>';
+    return;
+  }
+
+  const withLocation = posts.filter(p => p.locationText);
+  const counts = {};
+  withLocation.forEach(p => {
+    counts[p.locationText] = (counts[p.locationText] || 0) + 1;
+  });
+  const topOrte = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+  const finders = {};
+  posts.filter(p => p.displayName).forEach(p => {
+    finders[p.displayName] = (finders[p.displayName] || 0) + 1;
+  });
+  const topFinder = Object.entries(finders).sort((a, b) => b[1] - a[1])[0];
+
+  content.innerHTML = `
+    <div class="stat-big">
+      <span class="num">${posts.length}</span>
+      Fund${posts.length === 1 ? '' : 'e'} insgesamt
+    </div>
+    ${topFinder ? `<div class="stat-row"><span>Meiste Funde</span><span class="stat-count">${escapeHtml(topFinder[0])} (${topFinder[1]})</span></div>` : ''}
+    <div class="stat-row"><span>Verschiedene Orte</span><span class="stat-count">${Object.keys(counts).length}</span></div>
+    ${topOrte.length > 0 ? `
+      <h2 style="margin-top:20px;font-size:1rem">Top-Orte</h2>
+      ${topOrte.map(([ort, n]) => `
+        <div class="stat-row">
+          <a href="/?ort=${encodeURIComponent(ort)}" style="color:inherit;text-decoration:underline">${escapeHtml(ort)}</a>
+          <span class="stat-count">${n}</span>
+        </div>
+      `).join('')}
+    ` : ''}
+  `;
+}
+
+load();
+</script>
+</body>
+</html>

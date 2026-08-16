@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&display=swap');
+
 :root {
   --bg: #f7f0e4;
   --bg-elevated: #ffffff;
@@ -16,7 +18,7 @@ html, body {
   padding: 0;
   background: var(--bg);
   color: var(--ink);
-  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-family: 'Work Sans', "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -28,11 +30,11 @@ header {
   z-index: 10;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
   padding: 14px 18px;
-  background: rgba(247, 240, 228, 0.92);
+  background: rgba(247, 240, 228, 0.94);
   backdrop-filter: blur(6px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 3px solid var(--red);
 }
 
 header .brand {
@@ -44,6 +46,8 @@ header .brand {
 }
 
 header .brand b { color: var(--red); }
+
+header .spacer { flex: 1; }
 
 .upload-fab {
   background: var(--red);
@@ -59,7 +63,66 @@ header .brand b { color: var(--red); }
   justify-content: center;
   text-decoration: none;
   box-shadow: 0 4px 14px rgba(196, 28, 34, 0.25);
+  flex-shrink: 0;
 }
+
+/* Aufklappbares Menue, auf allen Seiten gleich (menu.js) */
+.menu-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 999px; padding: 8px 14px; font-weight: 700; font-size: 0.9rem;
+  color: var(--ink); cursor: pointer; flex-shrink: 0;
+  font-family: inherit;
+}
+.menu-panel {
+  position: fixed; inset: 0; background: rgba(36,30,24,0.4); z-index: 200;
+  display: none;
+}
+.menu-panel.open { display: block; }
+.menu-sheet {
+  position: absolute; top: 0; left: 0; height: 100%; width: min(300px, 86vw);
+  background: var(--bg); box-shadow: 8px 0 24px rgba(0,0,0,0.2);
+  padding: 20px; overflow-y: auto;
+}
+.menu-sheet h2 { margin: 22px 0 10px; font-size: 0.95rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.menu-sheet h2:first-of-type { margin-top: 0; }
+.menu-sheet nav { display: flex; flex-direction: column; gap: 2px; }
+.menu-sheet nav a {
+  padding: 12px 10px; border-radius: 8px; text-decoration: none; color: var(--ink);
+  font-weight: 600; border-bottom: 1px solid var(--border);
+}
+.menu-close { float: right; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--muted); }
+
+/* Hero-Bereich Startseite */
+.hero {
+  text-align: center;
+  padding: 24px 10px 10px;
+}
+.hero img {
+  width: 160px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(36,30,24,0.18);
+  border: 1px solid var(--border);
+}
+.hero .tagline {
+  margin: 14px 0 0;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--red);
+  font-size: 1.05rem;
+}
+
+/* Filter-Toolbar Galerie */
+.filter-toolbar {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  margin-bottom: 16px; padding: 12px 14px;
+  background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px;
+}
+.filter-toolbar select {
+  padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border);
+  background: #fffdf9; color: var(--ink); font-family: inherit; font-size: 0.88rem;
+}
+.filter-toolbar label { margin: 0; font-size: 0.8rem; color: var(--muted); }
 
 main {
   max-width: 1080px;
@@ -111,7 +174,7 @@ label {
   margin: 16px 0 6px;
 }
 
-input[type="text"], textarea, input[type="file"], input[type="password"] {
+input[type="text"], textarea, input[type="file"], input[type="password"], select {
   width: 100%;
   padding: 11px 12px;
   border-radius: 10px;
@@ -137,6 +200,7 @@ button.primary {
   font-size: 1.05rem;
   font-weight: 700;
   cursor: pointer;
+  font-family: inherit;
 }
 
 button.primary:disabled { opacity: 0.5; }
@@ -148,6 +212,7 @@ button.ghost {
   border-radius: 10px;
   padding: 10px 14px;
   cursor: pointer;
+  font-family: inherit;
 }
 
 .hint { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
@@ -166,6 +231,16 @@ footer {
 }
 footer a { text-decoration: underline; }
 
+/* Statistik */
+.stat-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.stat-row:last-child { border-bottom: none; }
+.stat-count { font-weight: 800; color: var(--red); }
+.stat-big { text-align: center; padding: 10px 0 20px; }
+.stat-big .num { font-size: 2.6rem; font-weight: 800; color: var(--red); display: block; }
+
 /* Admin */
 .admin-item {
   display: flex;
@@ -181,4 +256,4 @@ footer a { text-decoration: underline; }
 .btn-approve { background: #2e7d32; }
 .btn-murks { background: #b8862e; }
 .btn-delete { background: var(--red); }
-.admin-actions button { flex: 1; border: none; color: white; padding: 10px; border-radius: 8px; font-weight: 600; }
+.admin-actions button { flex: 1; border: none; color: white; padding: 10px; border-radius: 8px; font-weight: 600; font-family: inherit; }
