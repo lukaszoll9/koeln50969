@@ -2,13 +2,14 @@ import { getStore } from "@netlify/blobs";
 import { getDatabase } from "@netlify/database";
 import { json, hashIp } from "./_shared.mjs";
 
-async function notifyNewUpload(locationText, displayName) {
+async function notifyNewUpload(locationText, displayName, possibleDuplicate = false) {
   const apiKey = process.env.MAILJET_API_KEY;
   const secret = process.env.MAILJET_SECRET_KEY;
   const toEmail = process.env.NOTIFY_EMAIL || "lukasfra437@gmail.com";
   if (!apiKey || !secret) return;
   const who = displayName || "Anonym";
   const where = locationText || "unbekannter Ort";
+  const dupHint = possibleDuplicate ? "\n⚠️ MÖGLICHES DUPLIKAT — gleicher Standort bereits vorhanden!" : "";
   try {
     await fetch("https://api.mailjet.com/v3.1/send", {
       method: "POST",
@@ -20,8 +21,8 @@ async function notifyNewUpload(locationText, displayName) {
         Messages: [{
           From: { Email: "noreply@koeln50969.de", Name: "Köln 50969" },
           To: [{ Email: toEmail }],
-          Subject: `🗓️ Neuer Fund: ${where}`,
-          TextPart: `Ein neuer Fund wurde eingereicht!\n\nOrt: ${where}\nName: ${who}\n\nZum Admin-Panel:\nhttps://koeln50969.de/admin.html`,
+          Subject: possibleDuplicate ? `⚠️ Mögl. Duplikat: ${where}` : `🗓️ Neuer Fund: ${where}`,
+          TextPart: `Ein neuer Fund wurde eingereicht!${dupHint}\n\nOrt: ${where}\nName: ${who}\n\nZum Admin-Panel:\nhttps://koeln50969.de/admin.html`,
         }],
       }),
     });
@@ -130,15 +131,35 @@ export default async (req) => {
   const db = getDatabase();
   const allKeys = imageKeys.map((k, i) => `${k}|${thumbKeys[i]}`);
 
-  const [row] = await db.sql`
+  // Duplikat-Erkennung: Prüfe ob innerhalb ~50m schon ein Fund existiert
+  // 0.0005 Grad ≈ 55m — gut genug um doppelte Einreichungen am gleichen Spot zu erkennen
+  let possibleDuplicate = false;
+  if (lat !== null && lng !== null) {
+    const radius = 0.0005;
+    const nearby = await db.sql`
+      SELECT id FROM posts
+      WHERE status IN ('approved', 'pending')
+        AND lat IS NOT NULL AND lng IS NOT NULL
+        AND lat BETWEEN ${lat - radius} AND ${lat + radius}
+        AND lng BETWEEN ${lng - radius} AND ${lng + radius}
+      LIMIT 1
+    `;
+    if (nearby.length > 0) possibleDuplicate = true;
+  }
+
+  const [row] = await db.sql\`
     INSERT INTO posts (image_keys, display_name, location_text, lat, lng, comment, status, client_ip_hash)
     VALUES (${allKeys}, ${displayName}, ${locationText}, ${lat}, ${lng}, ${comment}, 'pending', ${ipHash})
     RETURNING id
-  `;
+  \`;
 
-  return json(200, { ok: true, id: row.id });
+  // E-Mail-Benachrichtigung (auch bei Duplikat, aber mit Hinweis)
+  notifyNewUpload(locationText, displayName, possibleDuplicate).catch(() => {});
+
+  return json(200, { ok: true, id: row.id, possibleDuplicate });
 };
 
 export const config = { path: "/.netlify/functions/upload" };
+
 
 
