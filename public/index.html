@@ -71,7 +71,7 @@
     <span class="filter-count" id="filterInfo"></span>
   </div>
 
-  <div id="list" class="fund-list"></div>
+  <div id="list" class="fund-grid-gallery"></div>
   <div id="empty" class="empty-state" hidden>
     <p data-de="Noch keine Funde — sei der Erste!" data-en="No finds yet — be the first!">Noch keine Funde — sei der Erste!</p>
     <a href="/hochladen.html" class="upload-fab" style="display:inline-flex;margin-top:14px" data-de="Sticker hochladen" data-en="Upload sticker">Sticker hochladen</a>
@@ -126,7 +126,7 @@ function fmtDate(iso){
 }
 
 function isNew(iso){
-  return Date.now() - new Date(iso).getTime() < 72*60*60*1000; // 72h
+  return Date.now() - new Date(iso).getTime() < 48*60*60*1000; // 48h
 }
 
 function getFilters(){
@@ -203,18 +203,23 @@ function render(){
   empty.hidden=true;
 
   list.innerHTML=posts.map(p=>{
-    const loc=p.locationText?escapeHtml(p.locationText):(lang==='en'?'Unknown location':'Unbekannter Ort');
+    const rawLoc = p.locationText ? p.locationText.charAt(0).toUpperCase() + p.locationText.slice(1) : '';
+    const loc=rawLoc?escapeHtml(rawLoc):(lang==='en'?'Unknown location':'Unbekannter Ort');
     const date=fmtDate(p.createdAt);
     const thumb=p.images[0].thumb;
     const newBadge=isNew(p.createdAt)?`<span class="new-badge">NEU</span>`:'';
-    return `<a class="fund-row" href="/fund.html?id=${p.id}">
-      <div class="fund-row-img" style="background-image:url('${thumb}')"></div>
-      <div class="fund-row-preview" style="background-image:url('${thumb}')"></div>
-      <div class="fund-row-info">
-        <div class="fund-row-loc">${newBadge}${loc}</div>
-        <div class="fund-row-date">${date}</div>
+    return `<a class="fund-card" href="/fund.html?id=${p.id}">
+      <div class="fund-card-img">
+        <img src="${thumb}" alt="${loc}" loading="lazy">
+        ${newBadge}
       </div>
-      <svg class="fund-row-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      <div class="fund-card-info">
+        <div class="fund-card-loc">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          ${loc}
+        </div>
+        <div class="fund-card-date">${date}</div>
+      </div>
     </a>`;
   }).join('');
 }
