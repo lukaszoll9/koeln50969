@@ -176,6 +176,8 @@ header {
   letter-spacing: 0.05em; line-height: 1.1;
   color: var(--ink); margin: 0 0 10px;
 }
+
+.hero-line { display: block; }
 .hero-sub {
   font-size: 0.88rem; color: var(--muted);
   line-height: 1.6; margin: 0 0 14px;
@@ -402,3 +404,4 @@ footer {
   color: var(--muted); font-size: 0.82rem;
 }
 footer a { text-decoration: underline; }
+
