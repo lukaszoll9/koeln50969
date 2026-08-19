@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Foto hochladen — Köln 50969</title>
+<title>Fund melden — Köln 50969</title>
 <link rel="stylesheet" href="/style.css">
+<!-- exifr: robuste EXIF-Library, liest GPS zuverlässig aus iOS/Android/Windows-Fotos -->
+<script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
 </head>
 <body>
 <header>
@@ -21,18 +23,27 @@
     <input type="file" id="files" accept="image/*" multiple>
     <div class="preview-row" id="previewRow"></div>
 
+    <div id="geoBox" class="geo-box" hidden>
+      <div class="geo-status" id="geoStatus"></div>
+      <button class="geo-btn" id="geoBtn" hidden>📍 Aktuellen Standort nutzen</button>
+    </div>
+
     <label for="displayName">Name (optional)</label>
     <input type="text" id="displayName" maxlength="80" placeholder="Wie du genannt werden willst">
 
     <label for="locationText">Fundort</label>
-    <input type="text" id="locationText" maxlength="160" placeholder="Adresse oder Ort suchen">
-    <div id="geoStatus" class="hint"></div>
+    <input type="text" id="locationText" maxlength="160" placeholder="z.B. Zollstock, Köln oder Paris, Eiffelturm">
+    <p class="hint" style="margin-top:4px">Wo hast du den Sticker gefunden?</p>
 
     <label for="comment">Kommentar (optional)</label>
     <textarea id="comment" maxlength="500" placeholder="Wo genau, wie überrascht warst du..."></textarea>
 
-    <!-- Honeypot: fuer Menschen unsichtbar, Bots fuellen es oft aus -->
+    <!-- Honeypot -->
     <input type="text" class="hp-field" id="website" name="website" tabindex="-1" autocomplete="off">
+
+    <div class="upload-progress" id="uploadProgress">
+      <div class="upload-progress-bar" id="uploadProgressBar"></div>
+    </div>
 
     <div id="errorMsg" class="error" hidden></div>
     <button class="primary" id="submitBtn" disabled>Erst Foto auswählen</button>
@@ -40,136 +51,179 @@
   </div>
 
   <div class="success" id="successCard" hidden>
+    <div style="font-size:3rem;margin-bottom:16px">🎉</div>
     <h1>Danke!</h1>
     <p>Dein Fund wird geprüft und erscheint bald in der Galerie.</p>
-    <a href="/" class="ghost" style="display:inline-block;margin-top:16px;padding:10px 20px;border-radius:10px;border:1px solid var(--border);text-decoration:none;">Zur Galerie</a>
+    <a href="/" style="display:inline-block;margin-top:16px;padding:12px 24px;background:var(--red);color:#fff;border-radius:999px;text-decoration:none;font-weight:700">Zur Galerie →</a>
   </div>
 </main>
 
+<style>
+.geo-box { margin: 10px 0; }
+.geo-status {
+  font-size: 0.84rem; padding: 8px 12px;
+  border-radius: 8px; border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  display: flex; align-items: center; gap: 8px;
+}
+.geo-status.ok { border-color: #2e7d32; color: #2e7d32; background: #f0faf0; }
+.geo-status.warn { border-color: #b8862e; color: #7a5a1e; background: #fdf8f0; }
+.geo-status.err { border-color: var(--border); color: var(--muted); }
+.geo-btn {
+  margin-top: 8px; padding: 8px 14px;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 8px; font-size: 0.84rem; font-weight: 600;
+  cursor: pointer; font-family: inherit; color: var(--ink);
+  transition: background 0.12s;
+}
+.geo-btn:hover { background: var(--border); }
+</style>
+
 <script>
-const filesInput = document.getElementById('files');
-const previewRow = document.getElementById('previewRow');
-const submitBtn = document.getElementById('submitBtn');
-const errorMsg = document.getElementById('errorMsg');
-const locationText = document.getElementById('locationText');
-const geoStatus = document.getElementById('geoStatus');
+const filesInput  = document.getElementById('files');
+const previewRow  = document.getElementById('previewRow');
+const submitBtn   = document.getElementById('submitBtn');
+const errorMsg    = document.getElementById('errorMsg');
+const locationInp = document.getElementById('locationText');
+const geoBox      = document.getElementById('geoBox');
+const geoStatus   = document.getElementById('geoStatus');
+const geoBtn      = document.getElementById('geoBtn');
+const progEl      = document.getElementById('uploadProgress');
+const progBar     = document.getElementById('uploadProgressBar');
 
 let selectedFiles = [];
 let detectedLat = null, detectedLng = null;
 
+function setGeoStatus(msg, type) {
+  geoBox.hidden = false;
+  geoStatus.textContent = msg;
+  geoStatus.className = 'geo-status ' + (type||'');
+}
+
+// ── GPS aus Foto lesen via exifr ──────────────────────────────────────
+async function tryReadExif(file) {
+  try {
+    // exifr.gps() liest nur GPS-Tags — schnell und zuverlässig
+    const gps = await exifr.gps(file);
+    if (gps && typeof gps.latitude === 'number' && typeof gps.longitude === 'number') {
+      // Plausibilitätsprüfung: Koordinaten müssen auf der Erde liegen
+      // und nicht 0,0 (häufiger Fallback-Wert bei kaputten EXIF)
+      if (Math.abs(gps.latitude) < 0.01 && Math.abs(gps.longitude) < 0.01) return null;
+      return { lat: gps.latitude, lng: gps.longitude };
+    }
+  } catch(e) {
+    // exifr nicht geladen oder kein EXIF — kein Problem
+  }
+  return null;
+}
+
+// ── Browser Geolocation ───────────────────────────────────────────────
+function askBrowserLocation() {
+  if (!navigator.geolocation) {
+    setGeoStatus('Standort nicht verfügbar', 'err');
+    return;
+  }
+  setGeoStatus('Standort wird ermittelt…', '');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      detectedLat = Math.round(pos.coords.latitude  * 10000) / 10000;
+      detectedLng = Math.round(pos.coords.longitude * 10000) / 10000;
+      setGeoStatus('📍 Standort erkannt ✓', 'ok');
+      // Reverse Geocode für lesbaren Ortsnamen
+      reverseGeocode(detectedLat, detectedLng);
+    },
+    err => {
+      setGeoStatus('Standort verweigert — bitte Ort manuell eingeben', 'warn');
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+// ── Reverse Geocoding: Koordinaten → Ortsname ─────────────────────────
+async function reverseGeocode(lat, lng) {
+  try {
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14`,
+      { headers: { 'Accept-Language': 'de' } }
+    );
+    const d = await r.json();
+    const parts = [];
+    if (d.address) {
+      const a = d.address;
+      if (a.suburb || a.neighbourhood || a.quarter) parts.push(a.suburb || a.neighbourhood || a.quarter);
+      if (a.city || a.town || a.village) parts.push(a.city || a.town || a.village);
+      if (a.country && a.country !== 'Deutschland') parts.push(a.country);
+    }
+    if (parts.length > 0 && !locationInp.value.trim()) {
+      locationInp.value = parts.join(', ');
+    }
+  } catch(e) {}
+}
+
+// ── Foto-Auswahl ──────────────────────────────────────────────────────
 filesInput.addEventListener('change', async () => {
   selectedFiles = Array.from(filesInput.files).slice(0, 3);
   previewRow.innerHTML = '';
   errorMsg.hidden = true;
+  detectedLat = null;
+  detectedLng = null;
 
   if (selectedFiles.length === 0) {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Erst Foto auswählen';
+    geoBox.hidden = true;
     return;
   }
 
+  // Vorschau
   for (const f of selectedFiles) {
-    const url = URL.createObjectURL(f);
     const img = document.createElement('img');
-    img.src = url;
+    img.src = URL.createObjectURL(f);
     previewRow.appendChild(img);
-  }
-
-  // GPS aus dem ersten Foto lesen, falls vorhanden
-  geoStatus.textContent = 'Suche Standort im Foto...';
-  const gps = await readExifGPS(selectedFiles[0]).catch(() => null);
-  if (gps) {
-    detectedLat = gps.lat;
-    detectedLng = gps.lng;
-    geoStatus.textContent = 'Standort aus dem Foto erkannt ✓ — du kannst den Ort unten trotzdem anpassen.';
-    if (!locationText.value) {
-      locationText.placeholder = 'Standort erkannt — optional Namen ergänzen';
-    }
-  } else {
-    geoStatus.textContent = 'Kein Standort im Foto — bitte Ort eingeben.';
   }
 
   submitBtn.disabled = false;
   submitBtn.textContent = 'Fund melden';
+
+  // GPS aus erstem Foto via exifr
+  setGeoStatus('Suche GPS im Foto…', '');
+  geoBtn.hidden = true;
+
+  const gps = await tryReadExif(selectedFiles[0]);
+  if (gps) {
+    detectedLat = Math.round(gps.lat * 10000) / 10000;
+    detectedLng = Math.round(gps.lng * 10000) / 10000;
+    setGeoStatus('📍 GPS aus Foto erkannt ✓', 'ok');
+    // Ortsnamen automatisch befüllen
+    reverseGeocode(detectedLat, detectedLng);
+  } else {
+    // Kein EXIF-GPS → Browser-Location anbieten
+    setGeoStatus('Kein GPS im Foto — Standort manuell eingeben oder:', 'warn');
+    geoBtn.hidden = false;
+  }
 });
 
-// Adresssuche mit Nominatim, sobald man tippt (einfacher Abschluss bei Enter/Blur)
-locationText.addEventListener('change', async () => {
-  const q = locationText.value.trim();
-  if (!q) return;
+geoBtn.addEventListener('click', askBrowserLocation);
+
+// ── Forward Geocoding beim Tippen (optional) ──────────────────────────
+locationInp.addEventListener('change', async () => {
+  const q = locationInp.value.trim();
+  if (!q || detectedLat) return; // GPS schon bekannt
   try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`, {
-      headers: { 'Accept-Language': 'de' }
-    });
-    const results = await res.json();
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`,
+      { headers: { 'Accept-Language': 'de' } }
+    );
+    const results = await r.json();
     if (results[0]) {
       detectedLat = parseFloat(results[0].lat);
       detectedLng = parseFloat(results[0].lon);
-      geoStatus.textContent = 'Ort gefunden ✓';
+      setGeoStatus('📍 Ort gefunden ✓', 'ok');
     }
-  } catch { /* Suche optional, kein hartes Erfordernis */ }
+  } catch(e) {}
 });
 
-async function readExifGPS(file) {
-  const buf = await file.arrayBuffer();
-  const view = new DataView(buf);
-  if (view.getUint16(0) !== 0xFFD8) return null; // kein JPEG
-
-  let offset = 2;
-  while (offset < view.byteLength) {
-    if (view.getUint16(offset) === 0xFFE1) {
-      const exifStart = offset + 4;
-      if (view.getUint32(exifStart) !== 0x45786966) return null; // "Exif"
-      return parseTiff(view, exifStart + 6);
-    }
-    offset += 2 + view.getUint16(offset + 2);
-  }
-  return null;
-}
-
-function parseTiff(view, tiffStart) {
-  const little = view.getUint16(tiffStart) === 0x4949;
-  const ifd0Offset = tiffStart + view.getUint32(tiffStart + 4, little);
-  const gpsOffset = findTag(view, tiffStart, ifd0Offset, little, 0x8825);
-  if (gpsOffset == null) return null;
-  const gpsIfd = tiffStart + gpsOffset;
-
-  const lat = readGpsCoord(view, tiffStart, gpsIfd, little, 2, 1);
-  const lng = readGpsCoord(view, tiffStart, gpsIfd, little, 4, 3);
-  if (lat == null || lng == null) return null;
-  return { lat, lng };
-}
-
-function findTag(view, tiffStart, ifdOffset, little, tagId) {
-  const count = view.getUint16(ifdOffset, little);
-  for (let i = 0; i < count; i++) {
-    const entryOffset = ifdOffset + 2 + i * 12;
-    if (view.getUint16(entryOffset, little) === tagId) {
-      return view.getUint32(entryOffset + 8, little);
-    }
-  }
-  return null;
-}
-
-function readGpsCoord(view, tiffStart, gpsIfd, little, coordTag, refTag) {
-  const count = view.getUint16(gpsIfd, little);
-  let coordOffset = null, refValue = null;
-  for (let i = 0; i < count; i++) {
-    const entryOffset = gpsIfd + 2 + i * 12;
-    const tag = view.getUint16(entryOffset, little);
-    if (tag === coordTag) coordOffset = view.getUint32(entryOffset + 8, little);
-    if (tag === refTag) refValue = String.fromCharCode(view.getUint8(entryOffset + 8));
-  }
-  if (coordOffset == null) return null;
-  const base = tiffStart + coordOffset;
-  const deg = view.getUint32(base, little) / view.getUint32(base + 4, little);
-  const min = view.getUint32(base + 8, little) / view.getUint32(base + 12, little);
-  const sec = view.getUint32(base + 16, little) / view.getUint32(base + 20, little);
-  let val = deg + min / 60 + sec / 3600;
-  if (refValue === 'S' || refValue === 'W') val = -val;
-  return val;
-}
-
+// ── Komprimierung ─────────────────────────────────────────────────────
 async function compress(file, maxDim, quality) {
   const bitmap = await createImageBitmap(file);
   let { width, height } = bitmap;
@@ -178,13 +232,8 @@ async function compress(file, maxDim, quality) {
   const canvas = document.createElement('canvas');
   canvas.width = width; canvas.height = height;
   canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height);
-
-  // manche Browser (v.a. aeltere Safari-Versionen) liefern bei image/webp
-  // einen leeren Blob zurueck -- dann auf JPEG ausweichen, statt fehlzuschlagen
   let blob = await new Promise(r => canvas.toBlob(r, 'image/webp', quality));
-  if (!blob || blob.size === 0) {
-    blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', quality));
-  }
+  if (!blob || blob.size === 0) blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', quality));
   return { blob, width, height };
 }
 
@@ -197,69 +246,70 @@ function blobToBase64(blob) {
   });
 }
 
-// Komprimiert so lange nach (kleinere Aufloesung, niedrigere Qualitaet),
-// bis das Ergebnis unter targetBytes liegt oder das Minimum erreicht ist.
-// So scheitert der Upload nicht mehr an "zu grossen" Fotos -- er passt sie automatisch an.
 async function compressAdaptive(file, startDim, targetBytes) {
-  let dim = startDim;
-  let quality = 0.82;
-  let result = await compress(file, dim, quality);
-  let tries = 0;
+  let dim = startDim, quality = 0.82, result = await compress(file, dim, quality), tries = 0;
   while (result.blob.size > targetBytes && tries < 5) {
     quality = Math.max(0.4, quality - 0.15);
     dim = Math.max(640, Math.round(dim * 0.82));
     result = await compress(file, dim, quality);
     tries++;
   }
-  const base64 = await blobToBase64(result.blob);
-  // result.blob.type spiegelt zuverlaessig wider, was toBlob() tatsaechlich erzeugt hat
-  // (webp oder der jpeg-Fallback) -- das geben wir mit an den Server weiter.
-  return { base64, mime: result.blob.type || 'image/webp' };
+  return { base64: await blobToBase64(result.blob), mime: result.blob.type || 'image/webp' };
 }
 
-document.getElementById('submitBtn').addEventListener('click', async () => {
+// ── Upload ────────────────────────────────────────────────────────────
+submitBtn.addEventListener('click', async () => {
   if (selectedFiles.length === 0) return;
   submitBtn.disabled = true;
-  submitBtn.textContent = 'Wird gesendet...';
+  submitBtn.textContent = 'Wird gesendet…';
   errorMsg.hidden = true;
+  progEl.style.display = 'block';
+  progBar.style.width = '15%';
 
   try {
     const images = [], thumbs = [], imageMimes = [], thumbMimes = [];
     for (const f of selectedFiles) {
-      // Ziel: deutlich unter dem Server-Limit bleiben, egal wie gross das Originalfoto ist
-      const full = await compressAdaptive(f, 1600, 1.5 * 1024 * 1024);
-      const thumb = await compressAdaptive(f, 480, 300 * 1024);
-      images.push(full.base64); imageMimes.push(full.mime);
+      const full  = await compressAdaptive(f, 1600, 1.5 * 1024 * 1024);
+      const thumb = await compressAdaptive(f,  480,       300 * 1024);
+      images.push(full.base64);  imageMimes.push(full.mime);
       thumbs.push(thumb.base64); thumbMimes.push(thumb.mime);
     }
+    progBar.style.width = '60%';
 
     const payload = {
       images, thumbs, imageMimes, thumbMimes,
-      displayName: document.getElementById('displayName').value.trim() || null,
-      locationText: locationText.value.trim() || null,
-      comment: document.getElementById('comment').value.trim() || null,
-      website: document.getElementById('website').value, // Honeypot
-      lat: detectedLat, lng: detectedLng,
+      displayName:  document.getElementById('displayName').value.trim() || null,
+      locationText: locationInp.value.trim() || null,
+      comment:      document.getElementById('comment').value.trim() || null,
+      website:      document.getElementById('website').value,
+      lat: detectedLat,
+      lng: detectedLng,
     };
 
+    progBar.style.width = '80%';
     const res = await fetch('/api/upload', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(payload),
     });
+    progBar.style.width = '100%';
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.error || 'Upload fehlgeschlagen');
     }
 
-    document.getElementById('formCard').hidden = true;
-    document.getElementById('successCard').hidden = false;
-  } catch (e) {
+    setTimeout(() => {
+      document.getElementById('formCard').hidden = true;
+      document.getElementById('successCard').hidden = false;
+    }, 300);
+
+  } catch(e) {
     errorMsg.textContent = e.message || 'Etwas ist schiefgelaufen. Bitte nochmal versuchen.';
     errorMsg.hidden = false;
     submitBtn.disabled = false;
     submitBtn.textContent = 'Fund melden';
+    progEl.style.display = 'none';
   }
 });
 </script>

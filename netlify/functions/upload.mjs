@@ -81,14 +81,21 @@ export default async (req) => {
   const locationText = typeof body.locationText === "string" ? body.locationText.slice(0, 160) : null;
   const comment = typeof body.comment === "string" ? body.comment.slice(0, 500) : null;
 
-  // GPS ist bereits clientseitig auf ~3 Nachkommastellen (~100m) gerundet.
+  // GPS-Validierung: nur plausible, nicht-null Koordinaten speichern
   let lat = null, lng = null;
   if (typeof body.lat === "number" && typeof body.lng === "number") {
-    if (body.lat >= -90 && body.lat <= 90 && body.lng >= -180 && body.lng <= 180) {
-      // 4 Nachkommastellen ≈ 11 m Genauigkeit -- praezise genug fuer eine
-      // brauchbare Karte, aber kein exaktes Hausnummern-GPS.
-      lat = Math.round(body.lat * 10000) / 10000;
-      lng = Math.round(body.lng * 10000) / 10000;
+    const rawLat = body.lat;
+    const rawLng = body.lng;
+    // Grundlegende Gültigkeitsprüfung
+    const validRange = rawLat >= -90 && rawLat <= 90 && rawLng >= -180 && rawLng <= 180;
+    // 0,0 ist ein häufiger Fallback bei kaputten EXIF-Daten (Golf von Guinea, West-Afrika)
+    const notNullIsland = Math.abs(rawLat) > 0.1 || Math.abs(rawLng) > 0.1;
+    // Koordinaten müssen auf Land liegen (grobe Prüfung: nicht mitten im Ozean)
+    // Wir akzeptieren alle Koordinaten die gültig und nicht 0,0 sind
+    if (validRange && notNullIsland) {
+      // 4 Nachkommastellen ≈ 11 m Genauigkeit
+      lat = Math.round(rawLat * 10000) / 10000;
+      lng = Math.round(rawLng * 10000) / 10000;
     }
   }
 
@@ -133,4 +140,5 @@ export default async (req) => {
 };
 
 export const config = { path: "/.netlify/functions/upload" };
+
 

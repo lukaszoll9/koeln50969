@@ -405,3 +405,215 @@ footer {
 }
 footer a { text-decoration: underline; }
 
+
+
+/* ── FUND-DETAILSEITE EXTRAS ── */
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--muted); font-size: 0.84rem; font-weight: 600;
+  text-decoration: none; margin-bottom: 14px; transition: color 0.12s;
+}
+.back-link:hover { color: var(--red); }
+
+.fund-meta {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 6px;
+}
+.fund-meta-loc { font-weight: 600; font-size: 0.94rem; }
+.fund-meta-date { font-size: 0.8rem; color: var(--muted); }
+.fund-meta-name { font-size: 0.88rem; color: var(--muted); margin-bottom: 10px; }
+.fund-comment {
+  margin: 12px 0 0; font-size: 0.95rem; line-height: 1.6;
+  border-left: 3px solid var(--border); padding-left: 12px; color: var(--ink);
+}
+.map-link {
+  display: inline-block; margin-top: 10px;
+  font-size: 0.84rem; font-weight: 600; color: var(--red);
+  text-decoration: none;
+}
+.map-link:hover { text-decoration: underline; }
+
+/* Skeleton Loader */
+.fund-skeleton { padding: 10px 0; }
+.skel {
+  background: linear-gradient(90deg, var(--border) 25%, var(--bg-elevated) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: skel-shine 1.4s infinite;
+  border-radius: 10px; margin-bottom: 12px;
+}
+@keyframes skel-shine { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.skel-img { height: 200px; }
+.skel-line { height: 18px; }
+
+/* Hochladen-Seite: Fortschrittsanzeige */
+.upload-progress {
+  margin-top: 10px; height: 4px; border-radius: 999px;
+  background: var(--border); overflow: hidden; display: none;
+}
+.upload-progress-bar {
+  height: 100%; background: var(--red);
+  border-radius: 999px; width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* ── KONTAKT ── */
+.contact-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+  text-decoration: none; color: var(--ink);
+  transition: background 0.12s;
+}
+.contact-row:last-of-type { border-bottom: none; }
+.contact-icon { font-size: 1.4rem; flex-shrink: 0; }
+.contact-label { display: block; font-size: 0.75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.contact-val { display: block; font-weight: 600; font-size: 0.95rem; margin-top: 2px; }
+
+
+/* ── ANIMATIONEN ── */
+
+/* Galerie-Einträge: staggered fade-in beim Laden */
+@keyframes row-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fund-row {
+  animation: row-in 0.35s ease both;
+}
+.fund-row:nth-child(1)  { animation-delay: 0.04s; }
+.fund-row:nth-child(2)  { animation-delay: 0.08s; }
+.fund-row:nth-child(3)  { animation-delay: 0.12s; }
+.fund-row:nth-child(4)  { animation-delay: 0.16s; }
+.fund-row:nth-child(5)  { animation-delay: 0.20s; }
+.fund-row:nth-child(6)  { animation-delay: 0.24s; }
+.fund-row:nth-child(7)  { animation-delay: 0.28s; }
+.fund-row:nth-child(8)  { animation-delay: 0.32s; }
+.fund-row:nth-child(n+9){ animation-delay: 0.36s; }
+
+/* Hero fade-in beim Seitenlade */
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero { animation: hero-in 0.5s ease both; }
+.hero-headline { animation: hero-in 0.5s ease 0.1s both; }
+.hero-sub      { animation: hero-in 0.5s ease 0.2s both; }
+.hero-counter  { animation: hero-in 0.5s ease 0.3s both; }
+
+/* Counter-Puls wenn Zahl sich einzählt */
+@keyframes counter-pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+.counter-num.pop { animation: counter-pop 0.25s ease; }
+
+/* Foto-Hover-Preview Tooltip */
+.fund-row { position: relative; }
+.fund-row-preview {
+  position: absolute;
+  left: 70px; top: 50%; transform: translateY(-50%);
+  width: 120px; height: 120px;
+  border-radius: 12px;
+  background-size: cover; background-position: center;
+  box-shadow: 0 8px 24px rgba(36,30,24,0.25);
+  border: 2px solid #fff;
+  pointer-events: none;
+  opacity: 0; transform: translateY(-50%) scale(0.85);
+  transition: opacity 0.18s, transform 0.18s;
+  z-index: 100;
+}
+.fund-row:hover .fund-row-preview {
+  opacity: 1; transform: translateY(-50%) scale(1);
+}
+
+/* Onboarding Sticker dreht sich beim Laden */
+@keyframes sticker-bounce {
+  0%   { transform: rotate(-8deg) scale(0.7); opacity: 0; }
+  60%  { transform: rotate(3deg)  scale(1.05); opacity: 1; }
+  100% { transform: rotate(0deg)  scale(1);    opacity: 1; }
+}
+.onboarding-sticker { animation: sticker-bounce 0.5s cubic-bezier(.22,.68,0,1.1) both; }
+
+/* Header Brand: 50969 etwas größer */
+.brand b {
+  color: var(--red);
+  font-size: 2.1rem;
+}
+
+/* Lang-Button: aktueller Stand deutlicher */
+.lang-btn {
+  font-weight: 800;
+  color: var(--red);
+  border-color: var(--red);
+}
+
+
+/* ══════════════════════════════════════════════
+   MOBILE-OPTIMIERUNGEN (max-width: 480px)
+   ══════════════════════════════════════════════ */
+
+/* 1. Tagline ab 360px sichtbar (war 480px) */
+@media (min-width: 360px) {
+  .header-tagline { display: block; font-size: 0.72rem; }
+}
+
+/* 2. Hover-Preview: nur auf Geräten mit echtem Hover (Desktop) */
+@media (hover: none) {
+  .fund-row-preview { display: none !important; }
+}
+
+/* 3. Parallax deaktivieren wenn Nutzer reduced-motion bevorzugt 
+      oder auf Touch-Gerät */
+@media (prefers-reduced-motion: reduce), (hover: none) {
+  .hero-sticker-wrap { transition: none !important; }
+  .fund-row { animation-duration: 0.15s !important; }
+  .hero, .hero-headline, .hero-sub, .hero-counter {
+    animation-duration: 0.2s !important;
+  }
+}
+
+/* 4. Hero auf kleinen Schirmen kompakter */
+@media (max-width: 440px) {
+  .hero { gap: 16px; padding: 18px 14px 12px; }
+  .hero-sticker-img { width: 85px; }
+  .hero-headline { font-size: 1.55rem; }
+  .hero-sub { font-size: 0.82rem; }
+}
+
+/* 5. Filter auf Mobile untereinander */
+@media (max-width: 500px) {
+  .filter-bar { flex-wrap: wrap; gap: 8px; }
+  .filter-dropdowns { flex-direction: column; width: 100%; }
+  .filter-dropdowns select { width: 100%; font-size: 0.9rem; padding: 9px 10px; }
+}
+
+/* 6. FAB-Label ab 375px (iPhone SE) */
+@media (min-width: 375px) {
+  .fab-label { display: block; }
+}
+
+/* 7. Onboarding kompakter auf kleinen Schirmen */
+@media (max-width: 440px) {
+  .onboarding-box { padding: 22px 18px; }
+  .onboarding-title { font-size: 1.6rem; }
+  .onboarding-text { font-size: 0.88rem; }
+}
+
+/* 8. Upload-Button tappbarer (min. 48px Höhe für Touch-Targets) */
+@media (hover: none) {
+  button.primary { padding: 16px; font-size: 1.05rem; min-height: 52px; }
+  .fund-row { padding: 13px 8px 13px 0; }
+  .fund-row-img { width: 60px; height: 60px; }
+}
+
+/* 9. Header auf sehr kleinen Schirmen (< 360px) */
+@media (max-width: 359px) {
+  .brand { font-size: 1.5rem; }
+  .header-tagline { display: none; }
+  .lang-btn { padding: 4px 8px; font-size: 0.7rem; }
+}
+
+/* 10. Karte: Vollbild auf Mobile, kein Padding */
+@media (max-width: 600px) {
+  #map { height: calc(100vh - 54px); }
+}

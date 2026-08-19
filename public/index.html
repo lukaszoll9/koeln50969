@@ -161,8 +161,21 @@ function updateCounter(){
   const n=allPosts.length;
   const lang=window._lang||'de';
   const el=document.getElementById('heroCounter');
-  if(n>0) el.innerHTML=`<span class="counter-num">${n}</span> <span class="counter-label">${lang==='en'?`Find${n===1?'':'s'} worldwide`:`Fund${n===1?'':'e'} weltweit`}</span>`;
-  else el.innerHTML='';
+  if(n===0){ el.innerHTML=''; return; }
+  const label=lang==='en'?`Find${n===1?'':'s'} worldwide`:`Fund${n===1?'':'e'} weltweit`;
+  el.innerHTML=`<span class="counter-num" id="counterNum">0</span> <span class="counter-label">${label}</span>`;
+  // Zählt von 0 auf n hoch
+  let current=0;
+  const step=Math.max(1,Math.floor(n/20));
+  const numEl=document.getElementById('counterNum');
+  const timer=setInterval(()=>{
+    current=Math.min(current+step,n);
+    numEl.textContent=current;
+    numEl.classList.remove('pop');
+    void numEl.offsetWidth; // reflow
+    numEl.classList.add('pop');
+    if(current>=n) clearInterval(timer);
+  },40);
 }
 
 function render(){
@@ -196,6 +209,7 @@ function render(){
     const newBadge=isNew(p.createdAt)?`<span class="new-badge">NEU</span>`:'';
     return `<a class="fund-row" href="/fund.html?id=${p.id}">
       <div class="fund-row-img" style="background-image:url('${thumb}')"></div>
+      <div class="fund-row-preview" style="background-image:url('${thumb}')"></div>
       <div class="fund-row-info">
         <div class="fund-row-loc">${newBadge}${loc}</div>
         <div class="fund-row-date">${date}</div>
@@ -228,6 +242,17 @@ document.getElementById('filterToggle').addEventListener('click',()=>{
 document.addEventListener('langchange',()=>{ populateSelects(); updateCounter(); render(); });
 
 load();
+
+// Parallax: nur auf Desktop mit echter Maus (kein Touch, kein reduced-motion)
+const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const hasHover = window.matchMedia('(hover: hover)').matches;
+if (hasHover && !prefersReduced) {
+  window.addEventListener('scroll', () => {
+    const wrap = document.querySelector('.hero-sticker-wrap');
+    if (!wrap) return;
+    wrap.style.transform = `rotate(-3deg) translateY(${window.scrollY * 0.12}px)`;
+  }, { passive: true });
+}
 </script>
 </body>
 </html>

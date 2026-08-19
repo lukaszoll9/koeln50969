@@ -32,9 +32,10 @@ async function initMap(){
   const map=L.map('map').setView(hasDeep?[dLat,dLng]:[50.9375,6.9603],hasDeep?(isNaN(dZoom)?16:dZoom):12);
 
   // CartoDB Positron — sauber, hell, wie danke-max
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
-    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
-    subdomains:'abcd', maxZoom:19
+  // Stadia Maps Alidade Smooth — modern, hell, sauber, kostenlos
+  L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png',{
+    attribution:'&copy; <a href="https://stadiamaps.com/">Stadia Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom:20
   }).addTo(map);
 
   const cluster=L.markerClusterGroup({
@@ -81,3 +82,4 @@ initMap();
 <script src="/menu.js"></script>
 </body>
 </html>
+
