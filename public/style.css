@@ -617,3 +617,141 @@ footer a { text-decoration: underline; }
 @media (max-width: 600px) {
   #map { height: calc(100vh - 54px); }
 }
+
+
+/* ══════════════════════════════════════════════
+   MOBILE FIXES — komplett neu
+   ══════════════════════════════════════════════ */
+
+/* Header: kein Overflow, alles passt auf 390px */
+header {
+  padding: 10px 12px;
+  gap: 7px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+/* Brand kleiner auf Mobile */
+@media (max-width: 480px) {
+  .brand { font-size: 1.45rem; }
+}
+
+/* Tagline nur ab 500px */
+.header-tagline { display: none; }
+@media (min-width: 500px) {
+  .header-tagline { display: block; }
+}
+
+/* FAB: auf kleinen Schirmen nur Icon, kein Label */
+.fab-label { display: none; }
+.upload-fab {
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.fab-plus { font-size: 1.5rem; }
+
+/* Ab 500px: Label + normales Padding */
+@media (min-width: 500px) {
+  .fab-label { display: block; }
+  .upload-fab {
+    width: auto;
+    padding: 0 16px 0 12px;
+  }
+}
+
+/* Lang-Button kompakter */
+.lang-btn {
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  flex-shrink: 0;
+}
+
+/* Hero auf Mobile */
+@media (max-width: 600px) {
+  .hero {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 14px 10px;
+    overflow: hidden;
+  }
+  .hero-sticker-wrap { flex-shrink: 0; }
+  .hero-sticker-img { width: 90px; }
+  .hero-headline {
+    font-size: 1.35rem;
+    margin-bottom: 6px;
+  }
+  .hero-sub { font-size: 0.78rem; line-height: 1.5; }
+  .counter-num { font-size: 1.5rem; }
+  .counter-label { font-size: 0.72rem; }
+}
+
+/* Auf sehr kleinen Schirmen Hero vertikal */
+@media (max-width: 380px) {
+  .hero { flex-direction: column; align-items: center; text-align: center; }
+  .hero-counter { justify-content: center; }
+  .hero-sticker-img { width: 80px; }
+}
+
+/* Main: kein overflow */
+main { 
+  max-width: 100%;
+  padding: 12px 14px;
+  overflow-x: hidden;
+}
+
+/* Galerie-Bilder nicht abschneiden */
+.fund-row { 
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+}
+.fund-row-img { flex-shrink: 0; }
+.fund-row-info { min-width: 0; overflow: hidden; }
+.fund-row-loc { 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Filter auf Mobile */
+@media (max-width: 500px) {
+  .filter-bar { gap: 8px; }
+  .filter-dropdowns { flex-direction: column; width: 100%; }
+  .filter-dropdowns select { width: 100%; font-size: 0.9rem; padding: 9px 10px; }
+}
+
+/* Onboarding auf Mobile */
+@media (max-width: 480px) {
+  .onboarding { padding: 16px; }
+  .onboarding-box { padding: 22px 18px; }
+  .onboarding-title { font-size: 1.6rem; }
+  .onboarding-text { font-size: 0.88rem; }
+}
+
+/* Karte */
+@media (max-width: 600px) {
+  #map { height: calc(100vh - 62px); }
+}
+
+/* Touch: Hover-Preview deaktivieren */
+@media (hover: none) {
+  .fund-row-preview { display: none !important; }
+}
+
+/* Kein Parallax auf Mobile */
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .hero, .hero-headline, .hero-sub, .hero-counter {
+    animation-duration: 0.2s !important;
+  }
+  .fund-row { animation-duration: 0.15s !important; }
+}
+
+/* Upload-Button tappbar */
+@media (hover: none) {
+  button.primary { padding: 16px; min-height: 52px; }
+}
