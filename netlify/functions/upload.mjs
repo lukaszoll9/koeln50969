@@ -147,11 +147,11 @@ export default async (req) => {
     if (nearby.length > 0) possibleDuplicate = true;
   }
 
-  const [row] = await db.sql\`
+  const [row] = await db.sql`
     INSERT INTO posts (image_keys, display_name, location_text, lat, lng, comment, status, client_ip_hash)
     VALUES (${allKeys}, ${displayName}, ${locationText}, ${lat}, ${lng}, ${comment}, 'pending', ${ipHash})
     RETURNING id
-  \`;
+  `;
 
   // E-Mail-Benachrichtigung (auch bei Duplikat, aber mit Hinweis)
   notifyNewUpload(locationText, displayName, possibleDuplicate).catch(() => {});
@@ -160,6 +160,7 @@ export default async (req) => {
 };
 
 export const config = { path: "/.netlify/functions/upload" };
+
 
 
 
