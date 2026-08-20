@@ -28,7 +28,7 @@
 <header>
   <button class="menu-btn" id="menuOpenBtn">☰</button>
   <a class="brand" href="/">KÖLN <b>50969</b></a>
-  <span class="header-tagline" data-de="Zollywood überall." data-en="Zollywood everywhere.">Zollywood überall.</span>
+  <span class="header-tagline-always" data-de="Zollywood überall." data-en="Zollywood everywhere.">Zollywood überall.</span>
   <div class="spacer"></div>
   <button class="lang-btn" id="langBtn" title="Sprache wechseln">EN</button>
   <a class="upload-fab" href="/hochladen.html" aria-label="Sticker hochladen">
@@ -39,6 +39,7 @@
 
 <!-- ── HERO ── -->
 <div class="hero">
+  <!-- Tower SVG Hintergrund -->
   <div class="hero-sticker-wrap">
     <img src="/sticker-hero.jpg" alt="Der Köln 50969 Sticker" class="hero-sticker-img">
   </div>
@@ -54,21 +55,11 @@
 </div>
 
 <main>
-  <!-- Upload-CTA + Filter ausblendbar -->
-  <div class="gallery-header">
-    <span class="gallery-count" id="filterInfo"></span>
-    <button class="filter-toggle-btn" id="filterToggle" aria-label="Filter">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
-    </button>
-  </div>
-  <div class="filter-drawer" id="filterDrawer" hidden>
-    <select id="ortSelect"><option value="">Alle Orte</option></select>
-    <select id="nameSelect"><option value="">Alle Namen</option></select>
-    <select id="sortSelect">
-      <option value="new" data-de="Neueste zuerst" data-en="Newest first">Neueste zuerst</option>
-      <option value="old" data-de="Älteste zuerst" data-en="Oldest first">Älteste zuerst</option>
-    </select>
-  </div>
+  <!-- Versteckte Selects für JS (kein UI) -->
+  <select id="ortSelect" hidden><option value="">Alle Orte</option></select>
+  <select id="nameSelect" hidden><option value="">Alle Namen</option></select>
+  <select id="sortSelect" hidden><option value="new">Neueste zuerst</option></select>
+  <span id="filterInfo" hidden></span>
 
   <div id="list" class="fund-grid-gallery"></div>
   <div id="empty" class="empty-state" hidden>
@@ -240,9 +231,7 @@ async function load(){
 document.getElementById('ortSelect').addEventListener('change',render);
 document.getElementById('nameSelect').addEventListener('change',render);
 document.getElementById('sortSelect').addEventListener('change',render);
-document.getElementById('filterToggle').addEventListener('click',()=>{
-  const d=document.getElementById('filterDrawer'); d.hidden=!d.hidden;
-});
+
 document.addEventListener('langchange',()=>{ populateSelects(); updateCounter(); render(); });
 
 load();
@@ -260,11 +249,12 @@ if (hasHover && !prefersReduced) {
 </script>
 
 <!-- Floating Upload Button (Mobile, immer sichtbar) -->
-<a class="fab-float" href="/hochladen.html">
+<a class="fab-float" href="/hochladen.html" data-de="📍 Fund melden" data-en="📍 Report find">
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
   <span data-de="Fund melden" data-en="Report find">Fund melden</span>
 </a>
 </body>
 </html>
+
 
 
