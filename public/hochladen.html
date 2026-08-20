@@ -318,36 +318,50 @@ filesInput.addEventListener('change', async () => {
   await detectLocation(selectedFiles[0]);
 });
 
-// ── Bildkomprimierung ─────────────────────────────────────────────────
+// ── Bildkomprimierung (robust, kein createImageBitmap) ───────────────
+function loadImage(file) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); res(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Bild lädt nicht')); };
+    img.src = url;
+  });
+}
+
 async function compress(file, maxDim, quality) {
-  const bitmap = await createImageBitmap(file);
-  let { width: w, height: h } = bitmap;
+  const img = await loadImage(file);
+  let w = img.naturalWidth, h = img.naturalHeight;
+  if (w === 0 || h === 0) throw new Error('Bild hat keine Größe');
   if (w > h && w > maxDim) { h = Math.round(h * maxDim / w); w = maxDim; }
   else if (h > maxDim) { w = Math.round(w * maxDim / h); h = maxDim; }
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
-  c.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+  c.getContext('2d').drawImage(img, 0, 0, w, h);
+  // WebP versuchen, JPEG als Fallback
   let blob = await new Promise(r => c.toBlob(r, 'image/webp', quality));
-  if (!blob || blob.size === 0) blob = await new Promise(r => c.toBlob(r, 'image/jpeg', quality));
+  if (!blob || blob.size < 100) blob = await new Promise(r => c.toBlob(r, 'image/jpeg', quality));
+  if (!blob) throw new Error('Komprimierung fehlgeschlagen');
   return blob;
 }
 
 async function compressAdaptive(file) {
+  // Zielgröße: max 1.5MB
   let blob = await compress(file, 1600, 0.82);
-  if (blob.size > 1.5*1024*1024) blob = await compress(file, 1200, 0.72);
-  if (blob.size > 1.5*1024*1024) blob = await compress(file, 900, 0.65);
+  if (blob.size > 1.5*1024*1024) blob = await compress(file, 1200, 0.75);
+  if (blob.size > 1.5*1024*1024) blob = await compress(file, 900, 0.68);
   return blob;
 }
 
 async function compressThumb(file) {
-  return compress(file, 480, 0.78);
+  return compress(file, 480, 0.80);
 }
 
 function blobToB64(blob) {
-  return new Promise((res,rej) => {
+  return new Promise((res, rej) => {
     const r = new FileReader();
     r.onloadend = () => res(r.result.split(',')[1]);
-    r.onerror = rej;
+    r.onerror = () => rej(new Error('Base64 Konvertierung fehlgeschlagen'));
     r.readAsDataURL(blob);
   });
 }
@@ -371,17 +385,11 @@ submitBtn.addEventListener('click', async () => {
       progBar.style.width = '50%';
     }
 
-    // Web Push Token holen (falls vorhanden)
+    // Push Token überspringen (Service Worker deaktiviert)
     let pushToken = null;
-    try {
-      if ('serviceWorker' in navigator) {
-        const reg = await navigator.serviceWorker.ready;
-        const sub = await reg.pushManager.getSubscription();
-        if (sub) pushToken = JSON.stringify(sub);
-      }
-    } catch(e) {}
 
-    progBar.style.width = '75%';
+    progBar.style.width = '80%';
+    submitBtn.textContent = 'Wird gespeichert…';
 
     const payload = {
       images, thumbs, imageMimes, thumbMimes,
@@ -426,3 +434,4 @@ submitBtn.addEventListener('click', async () => {
 <script src="/menu.js"></script>
 </body>
 </html>
+
