@@ -1,1 +1,260 @@
+<!doctype html>
+<html lang="de" id="html-root">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Köln 50969 — Sticker-Funde</title>
+<meta name="description" content="Ein Sticker aus Köln-Zollstock auf Reisen. Finde ihn. Fotografiere ihn. Werde Teil der Geschichte.">
+<meta property="og:title" content="Köln 50969 — Sticker-Funde">
+<meta property="og:description" content="Ein Sticker aus Köln-Zollstock — gefunden irgendwo auf der Welt. Zeig wo du ihn entdeckt hast.">
+<meta property="og:image" content="https://koeln50969.de/sticker-hero.jpg">
+<meta property="og:url" content="https://koeln50969.de">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="/manifest.json">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<!-- ── ONBOARDING OVERLAY (nur beim ersten Besuch) ── -->
+<div class="onboarding" id="onboarding" hidden>
+  <div class="onboarding-box">
+    <div class="onboarding-sticker">📍</div>
+    <h2 class="onboarding-title" data-de="Hallo, Entdecker." data-en="Hello, Explorer.">Hallo, Entdecker.</h2>
+    <p class="onboarding-text" data-de="Du hast einen Sticker aus Köln-Zollstock gefunden — dem Zollywood Tower, der überall hingereist ist. Hier sammeln sich alle Funde weltweit." data-en="You found a sticker from Cologne's Zollstock neighbourhood — the Zollywood Tower, travelling everywhere. All finds from around the world land here.">Du hast einen Sticker aus Köln-Zollstock gefunden — dem Zollywood Tower, der überall hingereist ist. Hier sammeln sich alle Funde weltweit.</p>
+    <button class="onboarding-btn" id="onboardingClose" data-de="Verstanden — zeig mir die Funde!" data-en="Got it — show me the finds!">Verstanden — zeig mir die Funde!</button>
+  </div>
+</div>
+
+<header>
+  <button class="menu-btn" id="menuOpenBtn">☰</button>
+  <a class="brand" href="/">KÖLN <b>50969</b></a>
+  <span class="header-tagline-always" data-de="Zollywood überall." data-en="Zollywood everywhere.">Zollywood überall.</span>
+  <div class="spacer"></div>
+  <button class="lang-btn" id="langBtn" title="Sprache wechseln">EN</button>
+
+</header>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <!-- Tower SVG Hintergrund -->
+  <div class="hero-sticker-wrap">
+    <img src="/sticker-hero.jpg" alt="Der Köln 50969 Sticker" class="hero-sticker-img">
+  </div>
+  <div class="hero-text">
+    <h1 class="hero-headline">
+      <span class="hero-line" data-de="Ein Sticker." data-en="One sticker.">Ein Sticker.</span>
+      <span class="hero-line" data-de="Eine Stadt." data-en="One city.">Eine Stadt.</span>
+      <span class="hero-line" data-de="Überall zuhause." data-en="At home everywhere.">Überall zuhause.</span>
+    </h1>
+    <p class="hero-sub" data-de="Der Zollywood Tower aus Köln-Zollstock reist mit. Finde ihn. Fotografiere ihn. Zeig der Welt, wo er aufgetaucht ist." data-en="The Zollywood Tower from Cologne's Zollstock travels with you. Find it. Photograph it. Show the world where it appeared.">Der Zollywood Tower aus Köln-Zollstock reist mit. Finde ihn. Fotografiere ihn. Zeig der Welt, wo er aufgetaucht ist.</p>
+    <div class="hero-counter" id="heroCounter"></div>
+  </div>
+</div>
+
+<main>
+  <!-- Versteckte Selects für JS (kein UI) -->
+  <select id="ortSelect" hidden><option value="">Alle Orte</option></select>
+  <select id="nameSelect" hidden><option value="">Alle Namen</option></select>
+  <select id="sortSelect" hidden><option value="new">Neueste zuerst</option></select>
+  <span id="filterInfo" hidden></span>
+
+  <div id="list" class="fund-grid-gallery"></div>
+  <div id="empty" class="empty-state" hidden>
+    <p data-de="Noch keine Funde — sei der Erste!" data-en="No finds yet — be the first!">Noch keine Funde — sei der Erste!</p>
+    <a href="/hochladen.html" class="upload-fab" style="display:inline-flex;margin-top:14px" data-de="Sticker hochladen" data-en="Upload sticker">Sticker hochladen</a>
+  </div>
+</main>
+
+<footer>
+  <p style="margin:0 0 6px;font-size:0.75rem;color:var(--muted)">Inspiriert von <a href="https://danke-max.de" target="_blank" rel="noopener" style="color:var(--red)">danke-max.de</a> 🙏</p>
+  <a href="/faq.html">FAQ</a> ·
+  <a href="/karte.html" data-de="Karte" data-en="Map">Karte</a> ·
+  <a href="/statistik.html" data-de="Statistik" data-en="Stats">Statistik</a> ·
+  <a href="/kontakt.html" data-de="Kontakt" data-en="Contact">Kontakt</a> ·
+  <a href="/impressum.html">Impressum</a> ·
+  <a href="/datenschutz.html" data-de="Datenschutz" data-en="Privacy">Datenschutz</a>
+</footer>
+
+<div class="lang-popup" id="langPopup" hidden>
+  <div class="lang-popup-inner">
+    <button class="lang-option active" data-lang="de">🇩🇪 Deutsch</button>
+    <button class="lang-option" data-lang="en">🇬🇧 English</button>
+  </div>
+</div>
+
+<script src="/menu.js"></script>
+<script src="/i18n.js"></script>
+<script>
+// Onboarding: nur beim ersten Besuch
+(function(){
+  if(!localStorage.getItem('koeln50969_visited')){
+    document.getElementById('onboarding').hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  document.getElementById('onboardingClose').addEventListener('click', function(){
+    localStorage.setItem('koeln50969_visited','1');
+    document.getElementById('onboarding').hidden = true;
+    document.body.style.overflow = '';
+  });
+  // i18n auf Onboarding-Inhalt anwenden
+  document.addEventListener('langchange', function(e){
+    var lang = e.detail;
+    document.querySelectorAll('#onboarding [data-de]').forEach(function(el){
+      el.innerHTML = lang==='en'?(el.dataset.en||el.dataset.de):el.dataset.de;
+    });
+  });
+})();
+
+let allPosts = [];
+
+function escapeHtml(s){ const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
+
+function fmtDate(iso){
+  return new Date(iso).toLocaleDateString(window._lang==='en'?'en-GB':'de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+
+function isNew(iso){
+  return Date.now() - new Date(iso).getTime() < 24*60*60*1000; // 24h
+}
+
+function getFilters(){
+  const p=new URLSearchParams(location.search);
+  return {ort:p.get('ort')||'',name:p.get('name')||''};
+}
+
+function setUrl(ort,name){
+  const p=new URLSearchParams();
+  if(ort)p.set('ort',ort);
+  if(name)p.set('name',name);
+  history.replaceState(null,'',(p.toString()?'/?'+p:'/'));
+}
+
+function populateSelects(){
+  const {ort,name}=getFilters();
+  const lang=window._lang||'de';
+  const orte=[...new Set(allPosts.map(p=>p.locationText).filter(Boolean))].sort();
+  const namen=[...new Set(allPosts.map(p=>p.displayName).filter(Boolean))].sort();
+  document.getElementById('ortSelect').innerHTML=
+    `<option value="">${lang==='en'?'All places':'Alle Orte'}</option>`+
+    orte.map(o=>`<option value="${escapeHtml(o)}"${o===ort?' selected':''}>${escapeHtml(o)}</option>`).join('');
+  document.getElementById('nameSelect').innerHTML=
+    `<option value="">${lang==='en'?'All names':'Alle Namen'}</option>`+
+    namen.map(n=>`<option value="${escapeHtml(n)}"${n===name?' selected':''}>${escapeHtml(n)}</option>`).join('');
+  document.getElementById('sortSelect').innerHTML=
+    `<option value="new">${lang==='en'?'Newest first':'Neueste zuerst'}</option>`+
+    `<option value="old">${lang==='en'?'Oldest first':'Älteste zuerst'}</option>`;
+}
+
+function updateCounter(){
+  const n=allPosts.length;
+  const lang=window._lang||'de';
+  const el=document.getElementById('heroCounter');
+  if(n===0){ el.innerHTML=''; return; }
+  const label=lang==='en'?`Find${n===1?'':'s'} worldwide`:`Fund${n===1?'':'e'} weltweit`;
+  el.innerHTML=`<span class="counter-num" id="counterNum">0</span> <span class="counter-label">${label}</span>`;
+  // Zählt von 0 auf n hoch
+  let current=0;
+  const step=Math.max(1,Math.floor(n/20));
+  const numEl=document.getElementById('counterNum');
+  const timer=setInterval(()=>{
+    current=Math.min(current+step,n);
+    numEl.textContent=current;
+    numEl.classList.remove('pop');
+    void numEl.offsetWidth; // reflow
+    numEl.classList.add('pop');
+    if(current>=n) clearInterval(timer);
+  },40);
+}
+
+function render(){
+  const ort=document.getElementById('ortSelect').value;
+  const name=document.getElementById('nameSelect').value;
+  const sort=document.getElementById('sortSelect').value;
+  setUrl(ort,name);
+
+  let posts=allPosts.slice();
+  if(ort) posts=posts.filter(p=>p.locationText===ort);
+  if(name) posts=posts.filter(p=>p.displayName===name);
+  posts.sort((a,b)=>{
+    const d=new Date(a.createdAt)-new Date(b.createdAt);
+    return sort==='old'?d:-d;
+  });
+
+  const lang=window._lang||'de';
+  const info=document.getElementById('filterInfo');
+  info.textContent=(ort||name)?`${posts.length} ${lang==='en'?'found':'Funde'}`:'';
+
+  const list=document.getElementById('list');
+  const empty=document.getElementById('empty');
+
+  if(posts.length===0){ list.innerHTML=''; empty.hidden=false; return; }
+  empty.hidden=true;
+
+  list.innerHTML=posts.map(p=>{
+    const rawLoc = p.locationText ? p.locationText.charAt(0).toUpperCase() + p.locationText.slice(1) : '';
+    const loc=rawLoc?escapeHtml(rawLoc):(lang==='en'?'Unknown location':'Unbekannter Ort');
+    const date=fmtDate(p.createdAt);
+    const thumb=p.images[0].thumb;
+    const newBadge=isNew(p.createdAt)?`<span class="new-badge">NEU</span>`:'';
+    return `<a class="fund-card" href="/fund.html?id=${p.id}">
+      <div class="fund-card-img">
+        <img src="${thumb}" alt="${loc}" loading="lazy">
+        ${newBadge}
+      </div>
+      <div class="fund-card-info">
+        <div class="fund-card-loc">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          ${loc}
+        </div>
+        <div class="fund-card-date">${date}</div>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+async function load(){
+  try{
+    const res=await fetch('/api/posts');
+    const data=await res.json();
+    allPosts=data.posts||[];
+  }catch(e){ allPosts=[]; }
+  updateCounter();
+  populateSelects();
+  const {ort,name}=getFilters();
+  document.getElementById('ortSelect').value=ort;
+  document.getElementById('nameSelect').value=name;
+  render();
+}
+
+document.getElementById('ortSelect').addEventListener('change',render);
+document.getElementById('nameSelect').addEventListener('change',render);
+document.getElementById('sortSelect').addEventListener('change',render);
+
+document.addEventListener('langchange',()=>{ populateSelects(); updateCounter(); render(); });
+
+load();
+
+// Parallax: nur auf Desktop mit echter Maus (kein Touch, kein reduced-motion)
+const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const hasHover = window.matchMedia('(hover: hover)').matches;
+if (hasHover && !prefersReduced) {
+  window.addEventListener('scroll', () => {
+    const wrap = document.querySelector('.hero-sticker-wrap');
+    if (!wrap) return;
+    wrap.style.transform = `rotate(-3deg) translateY(${window.scrollY * 0.12}px)`;
+  }, { passive: true });
+}
+</script>
+
+<!-- Floating Upload Button (Mobile, immer sichtbar) -->
+<a class="fab-float" href="/hochladen.html" data-de="📍 Fund melden" data-en="📍 Report find">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+  <span data-de="Fund melden" data-en="Report find">Fund melden</span>
+</a>
+</body>
+</html>
+
+
+
+
 
