@@ -5,288 +5,395 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Fund melden — Köln 50969</title>
 <link rel="stylesheet" href="/style.css">
-<!-- exifr: robuste EXIF-Library, liest GPS zuverlässig aus iOS/Android/Windows-Fotos -->
+<!-- exifr: robuste GPS-Extraktion aus Fotos -->
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
 </head>
 <body>
 <header>
   <button class="menu-btn" id="menuOpenBtn">☰</button>
   <a class="brand" href="/">KÖLN <b>50969</b></a>
+  <div class="spacer"></div>
 </header>
 
 <main>
-  <div class="card" id="formCard">
-    <h1 style="margin-top:0">Fund melden</h1>
-    <p class="hint">Foto vom Sticker, Fundort dazu — fertig. Wird erst nach kurzer Prüfung sichtbar.</p>
+<div class="card" id="formCard">
+  <h1 style="margin-top:0">Fund melden</h1>
+  <p class="hint">Foto hochladen — Standort wird automatisch erkannt. Fertig!</p>
 
-    <label for="files">Foto (bis zu 2)</label>
-    <input type="file" id="files" accept="image/*" multiple>
+  <!-- Schritt 1: Foto -->
+  <div class="upload-step" id="step1">
+    <label class="photo-upload-area" id="photoLabel" for="files">
+      <div class="photo-upload-icon">📷</div>
+      <div class="photo-upload-text">Foto antippen zum Auswählen</div>
+      <div class="photo-upload-hint">Bis zu 2 Fotos · JPG, PNG, HEIC</div>
+    </label>
+    <input type="file" id="files" accept="image/*" multiple style="display:none">
     <div class="preview-row" id="previewRow"></div>
-
-    <div id="geoBox" class="geo-box" hidden>
-      <div class="geo-status" id="geoStatus"></div>
-      <button class="geo-btn" id="geoBtn" hidden>📍 Aktuellen Standort nutzen</button>
-    </div>
-
-    <label for="displayName">Name (optional)</label>
-    <input type="text" id="displayName" maxlength="80" placeholder="Wie du genannt werden willst">
-
-    <label for="locationText">Fundort <span style="color:var(--red)">*</span></label>
-    <input type="text" id="locationText" maxlength="160" placeholder="z.B. Zollstock, Köln oder Paris, Eiffelturm">
-    <p class="hint" style="margin-top:4px">Standort wird automatisch erkannt — oder tippe den Ort ein. Ohne Ort kann dein Fund nicht auf der Karte angezeigt werden.</p>
-
-    <label for="comment">Kommentar (optional)</label>
-    <textarea id="comment" maxlength="500" placeholder="Wo genau, wie überrascht warst du..."></textarea>
-
-    <!-- Honeypot -->
-    <input type="text" class="hp-field" id="website" name="website" tabindex="-1" autocomplete="off">
-
-    <div class="upload-progress" id="uploadProgress">
-      <div class="upload-progress-bar" id="uploadProgressBar"></div>
-    </div>
-
-    <div id="errorMsg" class="error" hidden></div>
-    <button class="primary" id="submitBtn" disabled>Erst Foto auswählen</button>
-    <p class="hint">Mit dem Absenden bestätigst du, dass keine fremden Personen erkennbar sind und dir das Bild gehört. GPS-Daten werden nur grob (auf ca. 10 m) gespeichert. <a href="/datenschutz.html">Mehr dazu</a>.</p>
   </div>
 
-  <div class="success" id="successCard" hidden>
-    <div style="font-size:3rem;margin-bottom:16px">🎉</div>
-    <h1>Danke!</h1>
-    <p>Dein Fund wird geprüft und erscheint bald in der Galerie.</p>
-    <a href="/" style="display:inline-block;margin-top:16px;padding:12px 24px;background:var(--red);color:#fff;border-radius:999px;text-decoration:none;font-weight:700">Zur Galerie →</a>
+  <!-- Standort-Status (automatisch, kein Textfeld) -->
+  <div class="location-block" id="locationBlock" hidden>
+    <div class="location-status" id="locationStatus">
+      <div class="location-spinner" id="locationSpinner"></div>
+      <span id="locationText">Standort wird ermittelt…</span>
+    </div>
+    <button class="location-retry-btn" id="locationRetryBtn" hidden>
+      🔄 Nochmal versuchen
+    </button>
   </div>
+
+  <!-- Name optional -->
+  <label for="displayName">Dein Name <span class="optional-label">(optional)</span></label>
+  <input type="text" id="displayName" maxlength="80" placeholder="Wie sollen wir dich nennen?">
+
+  <!-- Kommentar optional -->
+  <label for="comment">Kommentar <span class="optional-label">(optional)</span></label>
+  <textarea id="comment" maxlength="500" placeholder="Wo genau hast du ihn entdeckt?"></textarea>
+
+  <!-- Honeypot -->
+  <input type="text" class="hp-field" id="website" name="website" tabindex="-1" autocomplete="off">
+
+  <!-- Fortschritt -->
+  <div class="upload-progress" id="uploadProgress">
+    <div class="upload-progress-bar" id="uploadProgressBar"></div>
+  </div>
+
+  <div id="errorMsg" class="error" hidden></div>
+  <button class="primary" id="submitBtn" disabled>Erst Foto auswählen</button>
+  <p class="hint" style="margin-top:10px;font-size:0.76rem">
+    Mit dem Absenden bestätigst du, dass keine fremden Personen erkennbar sind und dir das Bild gehört.
+    GPS-Daten werden nur grob gespeichert. <a href="/datenschutz.html">Datenschutz</a>
+  </p>
+</div>
+
+<div class="success" id="successCard" hidden>
+  <div style="font-size:3rem;margin-bottom:14px">🎉</div>
+  <h1>Danke!</h1>
+  <p>Dein Fund wird geprüft und erscheint bald in der Galerie.</p>
+  <a href="/" style="display:inline-block;margin-top:16px;padding:13px 26px;background:var(--red);color:#fff;border-radius:999px;text-decoration:none;font-weight:700">Zur Galerie →</a>
+</div>
 </main>
 
 <style>
-.geo-box { margin: 10px 0; }
-.geo-status {
-  font-size: 0.84rem; padding: 8px 12px;
-  border-radius: 8px; border: 1px solid var(--border);
-  background: var(--bg-elevated);
-  display: flex; align-items: center; gap: 8px;
+/* Upload-Bereich */
+.photo-upload-area {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 2px dashed var(--border); border-radius: 14px;
+  padding: 28px 20px; cursor: pointer; text-align: center;
+  background: var(--bg-elevated); transition: border-color 0.15s, background 0.15s;
+  gap: 6px; margin-bottom: 10px;
 }
-.geo-status.ok { border-color: #2e7d32; color: #2e7d32; background: #f0faf0; }
-.geo-status.warn { border-color: #b8862e; color: #7a5a1e; background: #fdf8f0; }
-.geo-status.err { border-color: var(--border); color: var(--muted); }
-.geo-btn {
-  margin-top: 8px; padding: 8px 14px;
+.photo-upload-area:hover, .photo-upload-area:active {
+  border-color: var(--red); background: var(--red-soft);
+}
+.photo-upload-icon { font-size: 2.2rem; line-height: 1; }
+.photo-upload-text { font-weight: 700; font-size: 0.95rem; color: var(--ink); }
+.photo-upload-hint { font-size: 0.78rem; color: var(--muted); }
+.photo-upload-area.has-photos {
+  border-style: solid; border-color: var(--red);
+}
+
+/* Standort-Block */
+.location-block {
   background: var(--bg-elevated); border: 1px solid var(--border);
-  border-radius: 8px; font-size: 0.84rem; font-weight: 600;
-  cursor: pointer; font-family: inherit; color: var(--ink);
-  transition: background 0.12s;
+  border-radius: 12px; padding: 14px 16px; margin: 14px 0;
 }
-.geo-btn:hover { background: var(--border); }
+.location-status {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.88rem; font-weight: 600;
+}
+.location-status.ok  { color: #2e7d32; }
+.location-status.err { color: var(--red); }
+.location-status.warn{ color: #b8862e; }
+
+.location-spinner {
+  width: 16px; height: 16px; flex-shrink: 0;
+  border: 2px solid var(--border);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.location-spinner.hidden { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.location-retry-btn {
+  margin-top: 10px; padding: 7px 14px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; font-family: inherit; color: var(--ink);
+}
+.optional-label { font-size: 0.75rem; color: var(--muted); font-weight: 400; }
 </style>
 
 <script>
-const filesInput  = document.getElementById('files');
-const previewRow  = document.getElementById('previewRow');
-const submitBtn   = document.getElementById('submitBtn');
-const errorMsg    = document.getElementById('errorMsg');
-const locationInp = document.getElementById('locationText');
-const geoBox      = document.getElementById('geoBox');
-const geoStatus   = document.getElementById('geoStatus');
-const geoBtn      = document.getElementById('geoBtn');
-const progEl      = document.getElementById('uploadProgress');
-const progBar     = document.getElementById('uploadProgressBar');
+const filesInput    = document.getElementById('files');
+const photoLabel    = document.getElementById('photoLabel');
+const previewRow    = document.getElementById('previewRow');
+const submitBtn     = document.getElementById('submitBtn');
+const errorMsg      = document.getElementById('errorMsg');
+const locationBlock = document.getElementById('locationBlock');
+const locationSt    = document.getElementById('locationStatus');
+const locationTxt   = document.getElementById('locationText');
+const locationSpn   = document.getElementById('locationSpinner');
+const retryBtn      = document.getElementById('locationRetryBtn');
+const progEl        = document.getElementById('uploadProgress');
+const progBar       = document.getElementById('uploadProgressBar');
 
 let selectedFiles = [];
 let detectedLat = null, detectedLng = null;
+let detectedLocationText = null;
+let locationDone = false;
 
-function setGeoStatus(msg, type) {
-  geoBox.hidden = false;
-  geoStatus.textContent = msg;
-  geoStatus.className = 'geo-status ' + (type||'');
+// ── Standort-Anzeige ─────────────────────────────────────────────────
+function setLocation(lat, lng, text, status) {
+  detectedLat = lat;
+  detectedLng = lng;
+  detectedLocationText = text;
+  locationDone = true;
+  locationBlock.hidden = false;
+  locationSpn.className = 'location-spinner hidden';
+  locationSt.className = 'location-status ' + status;
+  locationTxt.textContent = text;
+  retryBtn.hidden = (status === 'ok');
+  updateSubmitBtn();
 }
 
-// ── GPS aus Foto lesen via exifr ──────────────────────────────────────
-async function tryReadExif(file) {
-  try {
-    // exifr.gps() liest nur GPS-Tags — schnell und zuverlässig
-    const gps = await exifr.gps(file);
-    if (gps && typeof gps.latitude === 'number' && typeof gps.longitude === 'number') {
-      // Plausibilitätsprüfung: Koordinaten müssen auf der Erde liegen
-      // und nicht 0,0 (häufiger Fallback-Wert bei kaputten EXIF)
-      if (Math.abs(gps.latitude) < 0.01 && Math.abs(gps.longitude) < 0.01) return null;
-      return { lat: gps.latitude, lng: gps.longitude };
-    }
-  } catch(e) {
-    // exifr nicht geladen oder kein EXIF — kein Problem
+function setLocationSearching(msg) {
+  locationBlock.hidden = false;
+  locationSpn.className = 'location-spinner';
+  locationSt.className = 'location-status';
+  locationTxt.textContent = msg || 'Standort wird ermittelt…';
+  retryBtn.hidden = true;
+}
+
+function setLocationError(msg) {
+  locationBlock.hidden = false;
+  locationSpn.className = 'location-spinner hidden';
+  locationSt.className = 'location-status err';
+  locationTxt.textContent = msg;
+  retryBtn.hidden = false;
+  locationDone = true; // Fehler = auch "fertig", Upload trotzdem erlaubt
+  updateSubmitBtn();
+}
+
+function updateSubmitBtn() {
+  if (selectedFiles.length > 0 && locationDone) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Fund melden';
   }
-  return null;
 }
 
-// ── Browser Geolocation ───────────────────────────────────────────────
-function askBrowserLocation() {
-  if (!navigator.geolocation) {
-    setGeoStatus('Standort nicht verfügbar', 'err');
-    return;
-  }
-  setGeoStatus('Standort wird ermittelt…', '');
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      detectedLat = Math.round(pos.coords.latitude  * 10000) / 10000;
-      detectedLng = Math.round(pos.coords.longitude * 10000) / 10000;
-      setGeoStatus('📍 Standort erkannt ✓', 'ok');
-      // Reverse Geocode für lesbaren Ortsnamen
-      reverseGeocode(detectedLat, detectedLng);
-    },
-    err => {
-      setGeoStatus('Standort verweigert — bitte Ort manuell eingeben', 'warn');
-    },
-    { enableHighAccuracy: true, timeout: 10000 }
-  );
-}
-
-// ── Reverse Geocoding: Koordinaten → Ortsname ─────────────────────────
+// ── Reverse Geocoding ─────────────────────────────────────────────────
 async function reverseGeocode(lat, lng) {
   try {
     const r = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14`,
-      { headers: { 'Accept-Language': 'de' } }
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14&accept-language=de`,
+      { headers: { 'User-Agent': 'koeln50969.de/1.0' } }
     );
     const d = await r.json();
+    const a = d.address || {};
     const parts = [];
-    if (d.address) {
-      const a = d.address;
-      if (a.suburb || a.neighbourhood || a.quarter) parts.push(a.suburb || a.neighbourhood || a.quarter);
-      if (a.city || a.town || a.village) parts.push(a.city || a.town || a.village);
-      if (a.country && a.country !== 'Deutschland') parts.push(a.country);
-    }
-    if (parts.length > 0 && !locationInp.value.trim()) {
-      locationInp.value = parts.join(', ');
-    }
-  } catch(e) {}
+    if (a.suburb || a.neighbourhood || a.quarter || a.city_district)
+      parts.push(a.suburb || a.neighbourhood || a.quarter || a.city_district);
+    if (a.city || a.town || a.village || a.municipality)
+      parts.push(a.city || a.town || a.village || a.municipality);
+    if (a.country_code && a.country_code !== 'de')
+      parts.push(a.country);
+    return parts.length ? parts.join(', ') : d.display_name?.split(',').slice(0,2).join(',').trim() || null;
+  } catch(e) { return null; }
 }
+
+// ── GPS aus EXIF ──────────────────────────────────────────────────────
+async function tryExifGPS(file) {
+  try {
+    if (typeof exifr === 'undefined') return null;
+    const gps = await exifr.gps(file);
+    if (!gps || typeof gps.latitude !== 'number') return null;
+    // 0,0 = kaputtes EXIF
+    if (Math.abs(gps.latitude) < 0.01 && Math.abs(gps.longitude) < 0.01) return null;
+    return { lat: gps.latitude, lng: gps.longitude };
+  } catch(e) { return null; }
+}
+
+// ── Browser GPS ───────────────────────────────────────────────────────
+function getBrowserGPS() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve(null); return;
+    }
+    // Zuerst schnell mit niedrigerer Genauigkeit
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy }),
+      err => {
+        // Bei Fehler: nochmal mit Timeout
+        navigator.geolocation.getCurrentPosition(
+          pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy }),
+          () => resolve(null),
+          { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+        );
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+    );
+  });
+}
+
+// ── Hauptfluss: Standort ermitteln ────────────────────────────────────
+async function detectLocation(file) {
+  setLocationSearching('Suche GPS im Foto…');
+
+  // 1. EXIF aus Foto
+  const exifGPS = await tryExifGPS(file);
+  if (exifGPS) {
+    setLocationSearching('GPS gefunden, Ort wird ermittelt…');
+    const name = await reverseGeocode(exifGPS.lat, exifGPS.lng);
+    const lat = Math.round(exifGPS.lat * 10000) / 10000;
+    const lng = Math.round(exifGPS.lng * 10000) / 10000;
+    setLocation(lat, lng, '📍 ' + (name || `${lat}, ${lng}`), 'ok');
+    return;
+  }
+
+  // 2. Browser-GPS
+  setLocationSearching('Kein GPS im Foto — frage deinen Standort ab…');
+  const bGPS = await getBrowserGPS();
+  if (bGPS) {
+    const lat = Math.round(bGPS.lat * 10000) / 10000;
+    const lng = Math.round(bGPS.lng * 10000) / 10000;
+    setLocationSearching('Standort ermittelt, Ort wird geladen…');
+    const name = await reverseGeocode(lat, lng);
+    const accText = bGPS.acc ? ` (~${Math.round(bGPS.acc)}m)` : '';
+    setLocation(lat, lng, '📍 ' + (name || `${lat}, ${lng}`) + accText, 'ok');
+    return;
+  }
+
+  // 3. Beides fehlgeschlagen
+  setLocationError('Standort nicht verfügbar — Fund wird ohne Karte gespeichert');
+}
+
+// ── Retry Button ──────────────────────────────────────────────────────
+retryBtn.addEventListener('click', async () => {
+  locationDone = false;
+  detectedLat = null; detectedLng = null; detectedLocationText = null;
+  retryBtn.hidden = true;
+  setLocationSearching('Standort wird erneut abgefragt…');
+  const bGPS = await getBrowserGPS();
+  if (bGPS) {
+    const lat = Math.round(bGPS.lat * 10000) / 10000;
+    const lng = Math.round(bGPS.lng * 10000) / 10000;
+    setLocationSearching('Ort wird geladen…');
+    const name = await reverseGeocode(lat, lng);
+    setLocation(lat, lng, '📍 ' + (name || `${lat}, ${lng}`), 'ok');
+  } else {
+    setLocationError('Standort verweigert — bitte Standort in den Einstellungen erlauben');
+  }
+});
 
 // ── Foto-Auswahl ──────────────────────────────────────────────────────
 filesInput.addEventListener('change', async () => {
   selectedFiles = Array.from(filesInput.files).slice(0, 2);
   previewRow.innerHTML = '';
   errorMsg.hidden = true;
-  detectedLat = null;
-  detectedLng = null;
+  locationDone = false;
+  detectedLat = null; detectedLng = null; detectedLocationText = null;
 
   if (selectedFiles.length === 0) {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Erst Foto auswählen';
-    geoBox.hidden = true;
+    locationBlock.hidden = true;
+    photoLabel.classList.remove('has-photos');
     return;
   }
 
   // Vorschau
+  photoLabel.classList.add('has-photos');
   for (const f of selectedFiles) {
     const img = document.createElement('img');
     img.src = URL.createObjectURL(f);
     previewRow.appendChild(img);
   }
 
-  submitBtn.disabled = false;
-  submitBtn.textContent = 'Fund melden';
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Standort wird ermittelt…';
 
-  // GPS aus erstem Foto via exifr
-  setGeoStatus('Suche GPS im Foto…', '');
-  geoBtn.hidden = true;
-
-  const gps = await tryReadExif(selectedFiles[0]);
-  if (gps) {
-    detectedLat = Math.round(gps.lat * 10000) / 10000;
-    detectedLng = Math.round(gps.lng * 10000) / 10000;
-    setGeoStatus('📍 GPS aus Foto erkannt ✓', 'ok');
-    // Ortsnamen automatisch befüllen
-    reverseGeocode(detectedLat, detectedLng);
-  } else {
-    // Kein EXIF-GPS → Browser-Location anbieten
-    setGeoStatus('Kein GPS im Foto — Standort manuell eingeben oder:', 'warn');
-    geoBtn.hidden = false;
-  }
+  // Standort automatisch ermitteln
+  await detectLocation(selectedFiles[0]);
 });
 
-geoBtn.addEventListener('click', askBrowserLocation);
-
-// ── Forward Geocoding beim Tippen (optional) ──────────────────────────
-locationInp.addEventListener('change', async () => {
-  const q = locationInp.value.trim();
-  if (!q || detectedLat) return; // GPS schon bekannt
-  try {
-    const r = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`,
-      { headers: { 'Accept-Language': 'de' } }
-    );
-    const results = await r.json();
-    if (results[0]) {
-      detectedLat = parseFloat(results[0].lat);
-      detectedLng = parseFloat(results[0].lon);
-      setGeoStatus('📍 Ort gefunden ✓', 'ok');
-    }
-  } catch(e) {}
-});
-
-// ── Komprimierung ─────────────────────────────────────────────────────
+// ── Bildkomprimierung ─────────────────────────────────────────────────
 async function compress(file, maxDim, quality) {
   const bitmap = await createImageBitmap(file);
-  let { width, height } = bitmap;
-  if (width > height && width > maxDim) { height = Math.round(height * maxDim / width); width = maxDim; }
-  else if (height > maxDim) { width = Math.round(width * maxDim / height); height = maxDim; }
-  const canvas = document.createElement('canvas');
-  canvas.width = width; canvas.height = height;
-  canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height);
-  let blob = await new Promise(r => canvas.toBlob(r, 'image/webp', quality));
-  if (!blob || blob.size === 0) blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', quality));
-  return { blob, width, height };
+  let { width: w, height: h } = bitmap;
+  if (w > h && w > maxDim) { h = Math.round(h * maxDim / w); w = maxDim; }
+  else if (h > maxDim) { w = Math.round(w * maxDim / h); h = maxDim; }
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  c.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+  let blob = await new Promise(r => c.toBlob(r, 'image/webp', quality));
+  if (!blob || blob.size === 0) blob = await new Promise(r => c.toBlob(r, 'image/jpeg', quality));
+  return blob;
 }
 
-function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result.split(',')[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
+async function compressAdaptive(file) {
+  let blob = await compress(file, 1600, 0.82);
+  if (blob.size > 1.5*1024*1024) blob = await compress(file, 1200, 0.72);
+  if (blob.size > 1.5*1024*1024) blob = await compress(file, 900, 0.65);
+  return blob;
+}
+
+async function compressThumb(file) {
+  return compress(file, 480, 0.78);
+}
+
+function blobToB64(blob) {
+  return new Promise((res,rej) => {
+    const r = new FileReader();
+    r.onloadend = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(blob);
   });
-}
-
-async function compressAdaptive(file, startDim, targetBytes) {
-  let dim = startDim, quality = 0.82, result = await compress(file, dim, quality), tries = 0;
-  while (result.blob.size > targetBytes && tries < 5) {
-    quality = Math.max(0.4, quality - 0.15);
-    dim = Math.max(640, Math.round(dim * 0.82));
-    result = await compress(file, dim, quality);
-    tries++;
-  }
-  return { base64: await blobToBase64(result.blob), mime: result.blob.type || 'image/webp' };
 }
 
 // ── Upload ────────────────────────────────────────────────────────────
 submitBtn.addEventListener('click', async () => {
   if (selectedFiles.length === 0) return;
   submitBtn.disabled = true;
-  submitBtn.textContent = 'Wird gesendet…';
+  submitBtn.textContent = 'Wird hochgeladen…';
   errorMsg.hidden = true;
   progEl.style.display = 'block';
-  progBar.style.width = '15%';
+  progBar.style.width = '10%';
 
   try {
-    const images = [], thumbs = [], imageMimes = [], thumbMimes = [];
+    const images=[], thumbs=[], imageMimes=[], thumbMimes=[];
     for (const f of selectedFiles) {
-      const full  = await compressAdaptive(f, 1600, 1.5 * 1024 * 1024);
-      const thumb = await compressAdaptive(f,  480,       300 * 1024);
-      images.push(full.base64);  imageMimes.push(full.mime);
-      thumbs.push(thumb.base64); thumbMimes.push(thumb.mime);
+      const full  = await compressAdaptive(f);
+      const thumb = await compressThumb(f);
+      images.push(await blobToB64(full));   imageMimes.push(full.type||'image/webp');
+      thumbs.push(await blobToB64(thumb));  thumbMimes.push(thumb.type||'image/webp');
+      progBar.style.width = '50%';
     }
-    progBar.style.width = '60%';
+
+    // Web Push Token holen (falls vorhanden)
+    let pushToken = null;
+    try {
+      if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) pushToken = JSON.stringify(sub);
+      }
+    } catch(e) {}
+
+    progBar.style.width = '75%';
 
     const payload = {
       images, thumbs, imageMimes, thumbMimes,
       displayName:  document.getElementById('displayName').value.trim() || null,
-      locationText: locationInp.value.trim() || null,
+      locationText: detectedLocationText ? detectedLocationText.replace('📍 ','').split('(')[0].trim() : null,
       comment:      document.getElementById('comment').value.trim() || null,
       website:      document.getElementById('website').value,
       lat: detectedLat,
       lng: detectedLng,
+      pushToken,
     };
 
-    progBar.style.width = '80%';
     const res = await fetch('/api/upload', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -302,6 +409,7 @@ submitBtn.addEventListener('click', async () => {
     setTimeout(() => {
       document.getElementById('formCard').hidden = true;
       document.getElementById('successCard').hidden = false;
+      window.scrollTo(0,0);
     }, 300);
 
   } catch(e) {
@@ -310,11 +418,11 @@ submitBtn.addEventListener('click', async () => {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Fund melden';
     progEl.style.display = 'none';
+    progBar.style.width = '0';
   }
 });
 </script>
+
 <script src="/menu.js"></script>
 </body>
 </html>
-
-

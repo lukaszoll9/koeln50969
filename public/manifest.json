@@ -1,10 +1,27 @@
 {
-  "name": "Köln 50969",
+  "name": "Köln 50969 — Sticker-Funde",
   "short_name": "Köln 50969",
+  "description": "Zollywood Tower Sticker-Galerie — finde ihn, melde ihn!",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#16130f",
+  "background_color": "#f5ead8",
   "theme_color": "#c41c22",
-  "description": "Sticker gefunden? Foto hochladen, Fundort markieren.",
-  "icons": []
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/sticker-hero.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Fund melden",
+      "short_name": "Melden",
+      "description": "Neuen Sticker-Fund hochladen",
+      "url": "/hochladen.html",
+      "icons": [{ "src": "/sticker-hero.jpg", "sizes": "96x96" }]
+    }
+  ]
 }
