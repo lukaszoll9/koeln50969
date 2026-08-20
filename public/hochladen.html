@@ -19,7 +19,7 @@
     <h1 style="margin-top:0">Fund melden</h1>
     <p class="hint">Foto vom Sticker, Fundort dazu — fertig. Wird erst nach kurzer Prüfung sichtbar.</p>
 
-    <label for="files">Foto (bis zu 3)</label>
+    <label for="files">Foto (bis zu 2)</label>
     <input type="file" id="files" accept="image/*" multiple>
     <div class="preview-row" id="previewRow"></div>
 
@@ -31,9 +31,9 @@
     <label for="displayName">Name (optional)</label>
     <input type="text" id="displayName" maxlength="80" placeholder="Wie du genannt werden willst">
 
-    <label for="locationText">Fundort</label>
+    <label for="locationText">Fundort <span style="color:var(--red)">*</span></label>
     <input type="text" id="locationText" maxlength="160" placeholder="z.B. Zollstock, Köln oder Paris, Eiffelturm">
-    <p class="hint" style="margin-top:4px">Wo hast du den Sticker gefunden?</p>
+    <p class="hint" style="margin-top:4px">Standort wird automatisch erkannt — oder tippe den Ort ein. Ohne Ort kann dein Fund nicht auf der Karte angezeigt werden.</p>
 
     <label for="comment">Kommentar (optional)</label>
     <textarea id="comment" maxlength="500" placeholder="Wo genau, wie überrascht warst du..."></textarea>
@@ -162,7 +162,7 @@ async function reverseGeocode(lat, lng) {
 
 // ── Foto-Auswahl ──────────────────────────────────────────────────────
 filesInput.addEventListener('change', async () => {
-  selectedFiles = Array.from(filesInput.files).slice(0, 3);
+  selectedFiles = Array.from(filesInput.files).slice(0, 2);
   previewRow.innerHTML = '';
   errorMsg.hidden = true;
   detectedLat = null;
@@ -316,4 +316,5 @@ submitBtn.addEventListener('click', async () => {
 <script src="/menu.js"></script>
 </body>
 </html>
+
 

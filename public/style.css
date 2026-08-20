@@ -863,3 +863,120 @@ main {
   align-items: center;
   gap: 8px;
 }
+
+
+/* ── FLOATING UPLOAD BUTTON (immer sichtbar unten) ── */
+.fab-float {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--red);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 13px 22px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  font-family: inherit;
+  box-shadow: 0 6px 24px rgba(196,28,34,0.38);
+  transition: transform 0.18s, box-shadow 0.18s;
+  animation: fab-pulse 3s ease-in-out infinite;
+}
+.fab-float:hover {
+  transform: translateX(-50%) scale(1.05);
+  box-shadow: 0 8px 32px rgba(196,28,34,0.5);
+}
+@keyframes fab-pulse {
+  0%,100% { box-shadow: 0 6px 24px rgba(196,28,34,0.38); }
+  50%      { box-shadow: 0 6px 32px rgba(196,28,34,0.6); }
+}
+
+/* Auf Desktop verstecken (FAB im Header reicht) */
+@media (min-width: 680px) {
+  .fab-float { display: none; }
+}
+
+/* Galerie-Abstand für Float-FAB */
+main { padding-bottom: 80px; }
+@media (min-width: 680px) { main { padding-bottom: 20px; } }
+
+/* ── GALLERY HEADER ── */
+.gallery-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0 6px;
+  margin-bottom: 8px;
+}
+.gallery-count {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+.filter-toggle-btn {
+  display: flex; align-items: center;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: background 0.12s, color 0.12s;
+}
+.filter-toggle-btn:hover { background: var(--border); color: var(--ink); }
+
+/* ── FILTER DRAWER ── */
+.filter-drawer {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 10px 0 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+.filter-drawer select {
+  flex: 1; min-width: 140px;
+  padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--ink); font-family: inherit;
+  font-size: 0.84rem;
+}
+
+/* ── PFEIL BUTTON (fund-row-arrow) — schöner ── */
+.fund-row-arrow {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--border);
+  border-radius: 50%;
+  color: var(--muted);
+  flex-shrink: 0;
+  transition: background 0.12s, color 0.12s;
+}
+.fund-row:hover .fund-row-arrow {
+  background: var(--red);
+  color: #fff;
+}
+
+/* ── KARTE: Leaflet-Customizing ── */
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15) !important;
+}
+.leaflet-control-zoom a {
+  width: 36px !important; height: 36px !important;
+  line-height: 36px !important;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: var(--ink) !important;
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border) !important;
+}
+.leaflet-control-zoom a:hover {
+  background: var(--border) !important;
+}
+.leaflet-control-zoom-in { border-radius: 10px 10px 0 0 !important; }
+.leaflet-control-zoom-out { border-radius: 0 0 10px 10px !important; }
