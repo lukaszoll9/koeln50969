@@ -785,12 +785,15 @@ main {
 
 .fund-card-img {
   position: relative;
-  aspect-ratio: 4/3;
+  width: 100%;
+  padding-top: 75%; /* 4:3 aspect ratio */
   overflow: hidden;
   background: var(--border);
 }
 
 .fund-card-img img {
+  position: absolute;
+  top: 0; left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -1095,3 +1098,4 @@ header {
 
 /* Galerie direkt nach Hero, kein Abstand */
 main { padding-top: 8px; }
+
