@@ -60,7 +60,7 @@ export default async (req) => {
     // Push-Benachrichtigung an Admin (du bekommst Bescheid wenn jemand freigeschaltet wird)
     sendAdminPush("✅ Fund freigeschaltet", `Fund #${body.id} ist jetzt in der Galerie sichtbar.`, "/admin.html").catch(()=>{});
   } else if (body.action === "murks") {
-    await db.sql`UPDATE posts SET status = 'murks', moderated_at = now() WHERE id = ${body.id}`;
+    await db.sql`UPDATE posts SET status = 'rejected', moderated_at = now() WHERE id = ${body.id}`;
   } else if (body.action === "delete") {
     const [row] = await db.sql`SELECT image_keys FROM posts WHERE id = ${body.id}`;
     if (row) {
@@ -78,4 +78,5 @@ export default async (req) => {
 };
 
 export const config = { path: "/.netlify/functions/admin-moderate" };
+
 

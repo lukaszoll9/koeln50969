@@ -26,7 +26,7 @@
     <div style="display:flex;gap:8px;margin-bottom:16px">
       <button class="ghost" data-status="pending">Neu</button>
       <button class="ghost" data-status="approved">Freigeschaltet</button>
-      <button class="ghost" data-status="murks">Murks</button>
+      <button class="ghost" data-status="ablehnen">Ablehnen</button>
     </div>
     <div id="list"></div>
   </div>
@@ -84,9 +84,9 @@ async function loadList(status) {
         <div class="admin-actions">
           ${status === 'pending' ? `
             <button class="btn-approve" data-id="${p.id}" data-action="approve">Freischalten</button>
-            <button class="btn-murks" data-id="${p.id}" data-action="murks">Murks</button>
+            <button class="btn-ablehnen" data-id="${p.id}" data-action="ablehnen">Ablehnen</button>
           ` : ''}
-          ${status === 'murks' ? `
+          ${status === 'ablehnen' ? `
             <button class="btn-approve" data-id="${p.id}" data-action="approve">Freischalten</button>
           ` : ''}
           <button class="btn-delete" data-id="${p.id}" data-action="delete">Löschen</button>
@@ -118,3 +118,4 @@ if (password) tryLogin();
 </script>
 </body>
 </html>
+
