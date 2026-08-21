@@ -49,13 +49,17 @@ export default async (req) => {
   if (req.method !== "POST") return json(405, { error: "method not allowed" });
 
   const body = await req.json().catch(() => null);
-  if (!body || !body.id || !["approve", "murks", "delete"].includes(body.action)) {
+  if (!body || !body.id || !["approve", "feature", "murks", "delete"].includes(body.action)) {
     return json(400, { error: "invalid request" });
   }
 
   const db = getDatabase();
 
-  if (body.action === "approve") {
+  if (body.action === "feature") {
+    await db.sql`UPDATE posts SET featured = false WHERE featured = true`;
+    await db.sql`UPDATE posts SET featured = true WHERE id = ${body.id}`;
+    return json(200, { ok: true });
+  } else if (body.action === "approve") {
     await db.sql`UPDATE posts SET status = 'approved', moderated_at = now() WHERE id = ${body.id}`;
     // Push-Benachrichtigung an Admin (du bekommst Bescheid wenn jemand freigeschaltet wird)
     sendAdminPush("✅ Fund freigeschaltet", `Fund #${body.id} ist jetzt in der Galerie sichtbar.`, "/admin.html").catch(()=>{});
@@ -78,5 +82,6 @@ export default async (req) => {
 };
 
 export const config = { path: "/.netlify/functions/admin-moderate" };
+
 
 

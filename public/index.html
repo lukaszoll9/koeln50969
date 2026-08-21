@@ -150,9 +150,25 @@ function updateCounter(){
   const lang=window._lang||'de';
   const el=document.getElementById('heroCounter');
   if(n===0){ el.innerHTML=''; return; }
+  
+  // Länder zählen via locationText (letztes Wort oft Land, oder via lat/lng)
+  // Einfache Heuristik: einzigartige Länder aus reverseGeocode-Ergebnissen
+  // Hier: Länder aus locationText schätzen (enthält oft Länderkennung)
+  const countrySet = new Set();
+  allPosts.forEach(p => {
+    if(p.lat && p.lng) {
+      // Grobe Länder-Erkennung via Koordinaten
+      if(p.lat >= 47 && p.lat <= 55 && p.lng >= 6 && p.lng <= 15) countrySet.add('DE');
+      else if(p.lat >= 46 && p.lat <= 48 && p.lng >= 5 && p.lng <= 10) countrySet.add('CH');
+      else if(p.lat >= 46 && p.lat <= 49 && p.lng >= 9 && p.lng <= 17) countrySet.add('AT');
+      else if(p.lat && p.lng) countrySet.add(`${Math.round(p.lat/10)}_${Math.round(p.lng/10)}`);
+    }
+  });
+  const countries = Math.max(1, countrySet.size);
   const label=lang==='en'?`Find${n===1?'':'s'} worldwide`:`Fund${n===1?'':'e'} weltweit`;
-  el.innerHTML=`<span class="counter-num" id="counterNum">0</span> <span class="counter-label">${label}</span>`;
-  // Zählt von 0 auf n hoch
+  const cLabel=lang==='en'?`${countries} countr${countries===1?'y':'ies'}`:`${countries} Land${countries===1?'':'er'}`;
+  
+  el.innerHTML=`<span class="counter-num" id="counterNum">0</span> <span class="counter-label">${label}</span><span class="counter-sep">·</span><span class="counter-countries">${cLabel}</span>`;
   let current=0;
   const step=Math.max(1,Math.floor(n/20));
   const numEl=document.getElementById('counterNum');
@@ -160,7 +176,7 @@ function updateCounter(){
     current=Math.min(current+step,n);
     numEl.textContent=current;
     numEl.classList.remove('pop');
-    void numEl.offsetWidth; // reflow
+    void numEl.offsetWidth;
     numEl.classList.add('pop');
     if(current>=n) clearInterval(timer);
   },40);
@@ -253,6 +269,7 @@ if (hasHover && !prefersReduced) {
 </a>
 </body>
 </html>
+
 
 
 

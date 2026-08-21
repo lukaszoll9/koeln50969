@@ -1083,3 +1083,42 @@ header {
 main { padding-top: 8px; }
 
 
+
+
+
+/* ── FUND DES MONATS ── */
+.featured-card {
+  display: block; text-decoration: none; color: var(--ink);
+  border: 2px solid #c9a227;
+  border-radius: 16px; overflow: hidden;
+  background: var(--bg-elevated);
+  box-shadow: 0 4px 20px rgba(201,162,39,0.2);
+  margin-bottom: 14px;
+  position: relative;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.featured-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(201,162,39,0.3);
+}
+.featured-badge {
+  position: absolute; top: 10px; left: 10px; z-index: 2;
+  background: #c9a227; color: #fff;
+  font-size: 0.75rem; font-weight: 800;
+  padding: 4px 10px; border-radius: 999px;
+  letter-spacing: 0.03em;
+}
+.featured-img { width: 100%; height: 200px; overflow: hidden; }
+.featured-img img { width: 100%; height: 100%; object-fit: cover; }
+.featured-info { padding: 10px 14px 12px; }
+.featured-loc { font-weight: 700; font-size: 0.95rem; }
+.featured-date { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+/* ── LÄNDER-COUNTER ── */
+.counter-sep {
+  margin: 0 8px; color: var(--border); font-size: 1rem;
+}
+.counter-countries {
+  font-size: 0.82rem; color: var(--muted); font-weight: 600;
+  align-self: flex-end; padding-bottom: 3px;
+}
