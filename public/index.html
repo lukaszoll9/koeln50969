@@ -211,7 +211,7 @@ function render(){
     const loc=rawLoc?escapeHtml(rawLoc):(lang==='en'?'Unknown location':'Unbekannter Ort');
     const date=fmtDate(p.createdAt);
     const thumb=p.images[0].thumb;
-    const newBadge=isNew(p.createdAt)?`<span class="new-badge">NEU</span>`:'';
+    const newBadge=isNew(p.createdAt)?`<span class="new-badge">${window._lang==='en'?'NEW':'NEU'}</span>`:'';
     return `<a class="fund-card" href="/fund.html?id=${p.id}">
       <div class="fund-card-img">
         <img src="${thumb}" alt="${loc}" loading="lazy">
@@ -269,6 +269,7 @@ if (hasHover && !prefersReduced) {
 </a>
 </body>
 </html>
+
 
 
 

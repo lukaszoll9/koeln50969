@@ -17,15 +17,15 @@
 
 <main>
 <div class="card" id="formCard">
-  <h1 style="margin-top:0">Fund melden</h1>
-  <p class="hint">Foto hochladen — Standort wird automatisch erkannt. Fertig!</p>
+  <h1 style="margin-top:0" data-de="Fund melden" data-en="Report a find">Fund melden</h1>
+  <p class="hint" data-de="Foto hochladen — Standort wird automatisch erkannt. Fertig!" data-en="Upload a photo — location is detected automatically. Done!">Foto hochladen — Standort wird automatisch erkannt. Fertig!</p>
 
   <!-- Schritt 1: Foto -->
   <div class="upload-step" id="step1">
     <label class="photo-upload-area" id="photoLabel" for="files">
       <div class="photo-upload-icon">📷</div>
-      <div class="photo-upload-text">Foto antippen zum Auswählen</div>
-      <div class="photo-upload-hint">Bis zu 2 Fotos · JPG, PNG, HEIC</div>
+      <div class="photo-upload-text" data-de="Foto antippen zum Auswählen" data-en="Tap to select photo">Foto antippen zum Auswählen</div>
+      <div class="photo-upload-hint" data-de="Bis zu 2 Fotos · JPG, PNG, HEIC" data-en="Up to 2 photos · JPG, PNG, HEIC">Bis zu 2 Fotos · JPG, PNG, HEIC</div>
     </label>
     <input type="file" id="files" accept="image/*" multiple style="display:none">
     <div class="preview-row" id="previewRow"></div>
@@ -43,12 +43,12 @@
   </div>
 
   <!-- Name optional -->
-  <label for="displayName">Dein Name <span class="optional-label">(optional)</span></label>
-  <input type="text" id="displayName" maxlength="80" placeholder="Wie sollen wir dich nennen?">
+  <label for="displayName" data-de="Dein Name" data-en="Your name">Dein Name</label> <span class="optional-label" data-de="(optional)" data-en="(optional)">(optional)</span>
+  <input type="text" id="displayName" maxlength="80" data-placeholder-de="Wie sollen wir dich nennen?" data-placeholder-en="What should we call you?" placeholder="Wie sollen wir dich nennen?">
 
   <!-- Kommentar optional -->
-  <label for="comment">Kommentar <span class="optional-label">(optional)</span></label>
-  <textarea id="comment" maxlength="500" placeholder="Wo genau hast du ihn entdeckt?"></textarea>
+  <label for="comment" data-de="Kommentar" data-en="Comment">Kommentar</label> <span class="optional-label" data-de="(optional)" data-en="(optional)">(optional)</span>
+  <textarea id="comment" maxlength="500" data-placeholder-de="Wo genau hast du ihn entdeckt?" data-placeholder-en="Where exactly did you spot it?">		</textarea>
 
   <!-- Honeypot -->
   <input type="text" class="hp-field" id="website" name="website" tabindex="-1" autocomplete="off">
@@ -239,7 +239,7 @@ function getBrowserGPS() {
 
 // ── Hauptfluss: Standort ermitteln ────────────────────────────────────
 async function detectLocation(file) {
-  setLocationSearching('Suche GPS im Foto…');
+  setLocationSearching((window._locTxts?.searching_exif?.[localStorage.getItem('koeln50969_lang')||'de']) || 'Suche GPS im Foto…');
 
   // 1. EXIF aus Foto
   const exifGPS = await tryExifGPS(file);
@@ -253,12 +253,12 @@ async function detectLocation(file) {
   }
 
   // 2. Browser-GPS
-  setLocationSearching('Kein GPS im Foto — frage deinen Standort ab…');
+  setLocationSearching((window._locTxts?.searching_browser?.[localStorage.getItem('koeln50969_lang')||'de']) || 'Kein GPS im Foto — frage deinen Standort ab…');
   const bGPS = await getBrowserGPS();
   if (bGPS) {
     const lat = Math.round(bGPS.lat * 10000) / 10000;
     const lng = Math.round(bGPS.lng * 10000) / 10000;
-    setLocationSearching('Standort ermittelt, Ort wird geladen…');
+    setLocationSearching((window._locTxts?.geocoding?.[localStorage.getItem('koeln50969_lang')||'de']) || 'Standort ermittelt, Ort wird geladen…');
     const name = await reverseGeocode(lat, lng);
     const accText = bGPS.acc ? ` (~${Math.round(bGPS.acc)}m)` : '';
     setLocation(lat, lng, '📍 ' + (name || `${lat}, ${lng}`) + accText, 'ok');
@@ -266,7 +266,7 @@ async function detectLocation(file) {
   }
 
   // 3. Beides fehlgeschlagen
-  setLocationError('Standort nicht verfügbar — Fund wird ohne Karte gespeichert');
+  setLocationError((window._locTxts?.no_location?.[localStorage.getItem('koeln50969_lang')||'de']) || 'Standort nicht verfügbar');
 }
 
 // ── Retry Button ──────────────────────────────────────────────────────
@@ -431,7 +431,35 @@ submitBtn.addEventListener('click', async () => {
 });
 </script>
 
+<script src="/i18n.js"></script>
+
+<script>
+// Placeholder i18n
+function applyPlaceholders() {
+  const lang = localStorage.getItem('koeln50969_lang') || 'de';
+  document.querySelectorAll('[data-placeholder-de]').forEach(el => {
+    el.placeholder = lang === 'en' ? (el.dataset.placeholderEn || el.dataset.placeholderDe) : el.dataset.placeholderDe;
+  });
+  // Button-Texte
+  const btn = document.getElementById('submitBtn');
+  if (btn && btn.disabled) {
+    btn.textContent = lang === 'en' ? 'Select photo first' : 'Erst Foto auswählen';
+  }
+  // Standort-Texte
+  const locTxts = {
+    searching_exif: { de: 'Suche GPS im Foto…', en: 'Reading GPS from photo…' },
+    searching_browser: { de: 'Kein GPS im Foto — frage deinen Standort ab…', en: 'No GPS in photo — requesting your location…' },
+    geocoding: { de: 'Standort ermittelt, Ort wird geladen…', en: 'Location found, loading place name…' },
+    no_location: { de: 'Standort nicht verfügbar — Fund wird ohne Karte gespeichert', en: 'Location unavailable — find will be saved without map' },
+    retry: { de: '🔄 Nochmal versuchen', en: '🔄 Try again' },
+  };
+  window._locTxts = locTxts;
+}
+document.addEventListener('DOMContentLoaded', applyPlaceholders);
+document.addEventListener('langchange', applyPlaceholders);
+</script>
 <script src="/menu.js"></script>
 </body>
 </html>
+
 

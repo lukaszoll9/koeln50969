@@ -53,11 +53,13 @@
 <footer>
   <a href="/faq.html">FAQ</a> · <a href="/karte.html">Karte</a> · <a href="/kontakt.html">Kontakt</a> · <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a>
 </footer>
+<script src="/i18n.js"></script>
 <script src="/menu.js"></script>
 <script>
 function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 
 function buildWeekChart(posts){
+  const lang = localStorage.getItem('koeln50969_lang')||'de';
   const days=['Mo','Di','Mi','Do','Fr','Sa','So'];
   const now=new Date();
   const dayData=Array(7).fill(0);
@@ -82,6 +84,7 @@ function buildWeekChart(posts){
 }
 
 async function load(){
+  const lang = localStorage.getItem('koeln50969_lang')||'de';
   const el=document.getElementById('content');
   try {
     const res=await fetch('/api/posts?limit=500');
@@ -161,3 +164,4 @@ load();
 </script>
 </body>
 </html>
+
