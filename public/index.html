@@ -85,10 +85,22 @@
 <script src="/menu.js"></script>
 <script src="/i18n.js"></script>
 <script>
+
+function applyOnboardingLang() {
+  const lang = localStorage.getItem('koeln50969_lang') || 'de';
+  document.querySelectorAll('#onboarding [data-de]').forEach(el => {
+    el.innerHTML = lang === 'en' ? (el.dataset.en || el.dataset.de) : el.dataset.de;
+  });
+  const btn = document.getElementById('onboardingClose');
+  if (btn) btn.textContent = lang === 'en' ? 'Got it — show me the finds!' : 'Verstanden — zeig mir die Funde!';
+}
+document.addEventListener('langchange', applyOnboardingLang);
+
 // Onboarding: nur beim ersten Besuch
 (function(){
   if(!localStorage.getItem('koeln50969_visited')){
     document.getElementById('onboarding').hidden = false;
+    applyOnboardingLang();
     document.body.style.overflow = 'hidden';
   }
   document.getElementById('onboardingClose').addEventListener('click', function(){
@@ -248,6 +260,16 @@ document.getElementById('sortSelect').addEventListener('change',render);
 
 document.addEventListener('langchange',()=>{ populateSelects(); updateCounter(); render(); });
 
+
+// Scroll-Position wiederherstellen
+(function() {
+  const pos = sessionStorage.getItem('scrollPos_' + location.href);
+  if (pos) {
+    sessionStorage.removeItem('scrollPos_' + location.href);
+    window.addEventListener('load', () => setTimeout(() => window.scrollTo(0, parseInt(pos)), 100));
+  }
+})();
+
 load();
 
 // Parallax: nur auf Desktop mit echter Maus (kein Touch, kein reduced-motion)
@@ -269,6 +291,7 @@ if (hasHover && !prefersReduced) {
 </a>
 </body>
 </html>
+
 
 
 

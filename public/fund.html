@@ -34,6 +34,7 @@
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="/i18n.js"></script>
 <script src="/menu.js"></script>
 <script>
 const id = new URLSearchParams(location.search).get('id');
@@ -46,6 +47,29 @@ lightbox.addEventListener('click', e => { if(e.target===lightbox) closeLightbox(
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeLightbox(); });
 function openLightbox(src){ lightboxImg.src=src; lightbox.classList.add('open'); document.body.style.overflow='hidden'; }
 function closeLightbox(){ lightbox.classList.remove('open'); document.body.style.overflow=''; }
+
+
+function shareFind() {
+  const url = window.location.href;
+  const title = document.title;
+  const lang = localStorage.getItem('koeln50969_lang') || 'de';
+  const text = lang === 'en' ? 'Found this sticker — check it out!' : 'Schau dir diesen Sticker-Fund an!';
+  if (navigator.share) {
+    navigator.share({ title, text, url }).catch(() => copyToClipboard(url));
+  } else {
+    copyToClipboard(url);
+  }
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('shareBtn');
+    const lang = localStorage.getItem('koeln50969_lang') || 'de';
+    const orig = btn.querySelector('span').textContent;
+    btn.querySelector('span').textContent = lang === 'en' ? 'Copied!' : 'Kopiert!';
+    setTimeout(() => btn.querySelector('span').textContent = orig, 2000);
+  }).catch(() => {});
+}
 
 function escapeHtml(s){ const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
 
@@ -93,6 +117,15 @@ async function load(){
         </div>
         ${post.displayName?`<div class="fund-meta-name">von <a href="/?name=${encodeURIComponent(post.displayName)}" style="color:inherit;text-decoration:underline;font-weight:700">${escapeHtml(post.displayName)}</a></div>`:''}
         ${post.comment?`<p class="fund-comment">${escapeHtml(post.comment)}</p>`:''}
+
+        <!-- Teilen -->
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="share-btn" onclick="shareFind()" id="shareBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            <span data-de="Teilen" data-en="Share">Teilen</span>
+          </button>
+          <a class="share-btn" href="/" id="backBtn" data-de="← Alle Funde" data-en="← All finds">← Alle Funde</a>
+        </div>
         ${hasLoc?`
           <div id="minimap"></div>
           <a href="/karte.html?lat=${post.lat}&lng=${post.lng}&zoom=16" class="map-link">Auf der großen Karte ansehen →</a>
@@ -122,7 +155,17 @@ async function load(){
 
 load();
 </script>
+
+<script>
+// Scroll-Position merken für Zurück-Navigation
+window.addEventListener('beforeunload', () => {
+  if (document.referrer.includes(location.hostname)) {
+    sessionStorage.setItem('scrollPos_' + document.referrer, window.scrollY);
+  }
+});
+</script>
 </body>
 </html>
+
 
 
