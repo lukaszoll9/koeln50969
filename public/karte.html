@@ -83,6 +83,7 @@ body { margin: 0; overflow: hidden; }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css">
 <script src="/menu.js"></script>
 <script>
@@ -165,6 +166,15 @@ async function initMap(){
 
   map.addLayer(cluster);
 
+  // Heatmap erstellen
+  if (bounds.length > 0 && L.heatLayer) {
+    const heatData = posts.map(p => [p.lat, p.lng, 1]);
+    heatLayer = L.heatLayer(heatData, {
+      radius: 35, blur: 25, maxZoom: 13,
+      gradient: { 0.3: '#f5ead8', 0.6: '#e8a87c', 1.0: '#c41c22' }
+    });
+  }
+
   if(hasDeep && deepMarker) {
     cluster.zoomToShowLayer(deepMarker, () => deepMarker.openPopup());
   } else if(bounds.length>0) {
@@ -176,4 +186,5 @@ initMap();
 </script>
 </body>
 </html>
+
 

@@ -29,7 +29,7 @@ async function notifyNewUpload(locationText, displayName, possibleDuplicate = fa
   } catch (e) { console.error("Mail-Fehler:", e); }
 }
 
-const MAX_IMAGES = 3;
+const MAX_IMAGES = 2;
 const MAX_BYTES_PER_IMAGE = 4 * 1024 * 1024; // 4 MB Sicherheitsnetz (Client komprimiert adaptiv auf ~1,5 MB)
 const RATE_LIMIT_PER_HOUR = 8;
 
@@ -59,10 +59,29 @@ export default async (req) => {
   if (images.length === 0 || images.length > MAX_IMAGES || images.length !== thumbs.length) {
     return json(400, { error: "1-3 Bilder erforderlich" });
   }
-  for (const img of images) {
-    const approxBytes = (img.length * 3) / 4;
+  const ALLOWED_MIME = ['image/jpeg','image/png','image/webp','image/heic','image/gif'];
+  for (let i = 0; i < images.length; i++) {
+    const approxBytes = (images[i].length * 3) / 4;
     if (approxBytes > MAX_BYTES_PER_IMAGE) {
       return json(400, { error: "Bild zu gross" });
+    }
+    // MIME-Typ serverseitig prüfen
+    const mime = imageMimes[i] || '';
+    if (!ALLOWED_MIME.includes(mime)) {
+      return json(400, { error: "Ungültiges Bildformat" });
+    }
+    // Base64-Prefix prüfen: echte Bilder haben spezifische Magic Bytes
+    const sample = Buffer.from(images[i].slice(0, 16), 'base64');
+    const isJpeg = sample[0] === 0xFF && sample[1] === 0xD8;
+    const isPng  = sample[0] === 0x89 && sample[1] === 0x50;
+    const isWebP = sample[8] === 0x57 && sample[9] === 0x45; // WEBP
+    const isHeic = true; // HEIC schwer zu prüfen, MIME reicht
+    if (!isJpeg && !isPng && !isWebP) {
+      // Nur ablehnen wenn eindeutig kein Bild
+      const b64start = images[i].slice(0, 8);
+      if (b64start === 'AAAAAAA=' || images[i].length < 100) {
+        return json(400, { error: "Kein gültiges Bild" });
+      }
     }
   }
 
@@ -70,13 +89,21 @@ export default async (req) => {
   const ipHash = hashIp(ip);
 
   const rl = getStore("rate-limit");
-  const rlKey = `${ipHash}:${new Date().toISOString().slice(0, 13)}`; // pro Stunde
+  // Stündliches Limit
+  const rlKey = `${ipHash}:${new Date().toISOString().slice(0, 13)}`;
   const current = (await rl.get(rlKey, { type: "text" })) || "0";
   const count = parseInt(current, 10);
   if (count >= RATE_LIMIT_PER_HOUR) {
     return json(429, { error: "Zu viele Uploads, bitte spaeter erneut versuchen" });
   }
+  // Tägliches Limit: max 20 pro Tag pro IP
+  const rlDayKey = `${ipHash}:day:${new Date().toISOString().slice(0, 10)}`;
+  const dayCount = parseInt((await rl.get(rlDayKey, { type: "text" })) || "0", 10);
+  if (dayCount >= 20) {
+    return json(429, { error: "Tageslimit erreicht, bitte morgen erneut versuchen" });
+  }
   await rl.set(rlKey, String(count + 1));
+  await rl.set(rlDayKey, String(dayCount + 1), { expirationTtl: 86400 });
 
   const displayName = typeof body.displayName === "string" ? body.displayName.slice(0, 80) : null;
   const locationText = typeof body.locationText === "string" ? body.locationText.slice(0, 160) : null;
@@ -160,6 +187,7 @@ export default async (req) => {
 };
 
 export const config = { path: "/.netlify/functions/upload" };
+
 
 
 

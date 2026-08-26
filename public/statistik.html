@@ -131,7 +131,7 @@ async function load(){
         ${topFinder.map(([name,n],i)=>`
           <div class="top-finder-card">
             <span class="top-finder-rank ${rankClass[i]||''}">${medals[i]||'#'+(i+1)}</span>
-            <span class="top-finder-name">${escapeHtml(name)}</span>
+            <a class="top-finder-name" href="/finder.html?name=${encodeURIComponent(name)}" style="text-decoration:none;color:inherit">${escapeHtml(name)}</a>
             <span class="top-finder-count">${n} Fund${n===1?'':'e'}</span>
           </div>`).join('')}
       </div>`:''}
@@ -164,4 +164,5 @@ load();
 </script>
 </body>
 </html>
+
 
