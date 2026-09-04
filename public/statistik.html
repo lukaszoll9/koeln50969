@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Statistik — Köln 50969</title>
+<title>Statistik &mdash; K&ouml;ln 50969</title>
 <link rel="stylesheet" href="/style.css">
 <style>
-.stat-page { max-width: 680px; margin: 0 auto; padding: 16px 18px; }
+.stat-page { max-width: 680px; margin: 0 auto; padding: 16px 18px 90px; }
 .stat-hero {
   text-align: center; padding: 24px 0 16px;
   border-bottom: 1px solid var(--border); margin-bottom: 16px;
@@ -22,24 +22,16 @@
 .week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .week-bar {
   width: 100%; background: var(--red); border-radius: 4px 4px 0 0;
-  min-height: 2px; transition: height 0.4s ease;
-  opacity: 0.85;
+  min-height: 2px; transition: height 0.4s ease; opacity: 0.85;
 }
 .week-bar.today { opacity: 1; box-shadow: 0 0 0 2px var(--red), 0 0 0 4px rgba(196,28,34,0.15); }
 .week-label { font-size: 0.65rem; color: var(--muted); font-weight: 600; }
-
-.medal { font-size: 1.3rem; }
-.finder-streak {
-  font-size: 0.72rem; color: var(--muted);
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: 999px; padding: 1px 7px; margin-left: 4px;
-}
 </style>
 </head>
 <body>
 <header>
-  <button class="menu-btn" id="menuOpenBtn">☰</button>
-  <a class="brand" href="/">KÖLN <b>50969</b></a>
+  <button class="menu-btn" id="menuOpenBtn">&#9776;</button>
+  <a class="brand" href="/">K&Ouml;LN <b>50969</b></a>
   <div class="spacer"></div>
   <a class="upload-fab" href="/hochladen.html" aria-label="Sticker hochladen">
     <span class="fab-plus">+</span><span class="fab-label">Sticker hochladen</span>
@@ -51,112 +43,195 @@
 </div>
 
 <footer>
-  <a href="/faq.html">FAQ</a> · <a href="/karte.html">Karte</a> · <a href="/kontakt.html">Kontakt</a> · <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a>
+  <a href="/faq.html">FAQ</a> &middot; <a href="/karte.html">Karte</a> &middot; <a href="/kontakt.html">Kontakt</a> &middot; <a href="/impressum.html">Impressum</a> &middot; <a href="/datenschutz.html">Datenschutz</a>
 </footer>
+
+<a class="fab-float" href="/hochladen.html">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+  Fund melden
+</a>
+
 <script src="/i18n.js"></script>
 <script src="/menu.js"></script>
 <script>
-function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function escapeHtml(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+var KOELN_LAT = 50.9044, KOELN_LNG = 6.9406;
+
+function haversine(lat1,lng1,lat2,lng2){
+  var R=6371;
+  var dLat=(lat2-lat1)*Math.PI/180;
+  var dLng=(lng2-lng1)*Math.PI/180;
+  var a=Math.sin(dLat/2)*Math.sin(dLat/2)+
+        Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+        Math.sin(dLng/2)*Math.sin(dLng/2);
+  return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));
+}
+
+var _uid=0;
+function expandable(items,renderFn,limit){
+  var uid='ex'+(++_uid);
+  var rest=items.slice(limit);
+  var html=items.slice(0,limit).map(function(item,i){return renderFn(item,i);}).join('');
+  if(rest.length>0){
+    html+='<div id="'+uid+'" hidden>'+rest.map(function(item,i){return renderFn(item,limit+i);}).join('')+'</div>';
+    html+='<button class="expand-btn" onclick="document.getElementById(\''+uid+'\').hidden=false;this.remove()">Alle '+items.length+' anzeigen \u2193</button>';
+  }
+  return html;
+}
 
 function buildWeekChart(posts){
-  const lang = localStorage.getItem('koeln50969_lang')||'de';
-  const days=['Mo','Di','Mi','Do','Fr','Sa','So'];
-  const now=new Date();
-  const dayData=Array(7).fill(0);
-  const todayDow=(now.getDay()+6)%7; // 0=Mo
-  posts.forEach(p=>{
-    const d=new Date(p.createdAt);
-    const diff=Math.floor((now-d)/(1000*60*60*24));
-    if(diff<7){
-      const dow=(d.getDay()+6)%7;
-      dayData[dow]++;
-    }
+  var days=['Mo','Di','Mi','Do','Fr','Sa','So'];
+  var now=new Date();
+  var dayData=Array(7).fill(0);
+  var todayDow=(now.getDay()+6)%7;
+  posts.forEach(function(p){
+    var d=new Date(p.createdAt);
+    var diff=Math.floor((now-d)/(1000*60*60*24));
+    if(diff<7){var dow=(d.getDay()+6)%7;dayData[dow]++;}
   });
-  const max=Math.max(...dayData,1);
-  return `<div style="font-size:0.8rem;font-weight:600;color:var(--muted);margin-bottom:6px">Funde der letzten 7 Tage</div>
-    <div class="week-chart">
-      ${days.map((d,i)=>`
-        <div class="week-bar-wrap">
-          <div class="week-bar${i===todayDow?' today':''}" style="height:${Math.round(dayData[i]/max*56)+2}px"></div>
-          <span class="week-label">${d}</span>
-        </div>`).join('')}
-    </div>`;
+  var max=Math.max.apply(null,dayData.concat([1]));
+  return '<div style="font-size:0.8rem;font-weight:600;color:var(--muted);margin-bottom:6px">Funde der letzten 7 Tage</div>'+
+    '<div class="week-chart">'+
+    days.map(function(d,i){
+      return '<div class="week-bar-wrap">'+
+        '<div class="week-bar'+(i===todayDow?' today':'')+'" style="height:'+(Math.round(dayData[i]/max*56)+2)+'px"></div>'+
+        '<span class="week-label">'+d+'</span>'+
+        '</div>';
+    }).join('')+'</div>';
 }
 
 async function load(){
-  const lang = localStorage.getItem('koeln50969_lang')||'de';
-  const el=document.getElementById('content');
-  try {
-    const res=await fetch('/api/posts?limit=500');
-    const data=await res.json();
-    const posts=data.posts||[];
+  var el=document.getElementById('content');
+  try{
+    var res=await fetch('/api/posts?limit=500');
+    var data=await res.json();
+    var posts=data.posts||[];
 
     if(posts.length===0){
-      el.innerHTML='<div class="card"><p class="hint">Noch keine Funde — die Statistik füllt sich, sobald der erste da ist.</p></div>';
+      el.innerHTML='<div class="card"><p class="hint">Noch keine Funde &mdash; die Statistik f&uuml;llt sich, sobald der erste da ist.</p></div>';
       return;
     }
 
-    const ortCounts={};
-    posts.filter(p=>p.locationText).forEach(p=>{ortCounts[p.locationText]=(ortCounts[p.locationText]||0)+1;});
-    const topOrte=Object.entries(ortCounts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    // Orte
+    var ortCounts={};
+    posts.filter(function(p){return p.locationText;}).forEach(function(p){
+      ortCounts[p.locationText]=(ortCounts[p.locationText]||0)+1;
+    });
+    var topOrte=Object.entries(ortCounts).sort(function(a,b){return b[1]-a[1];});
 
-    const finderCounts={};
-    posts.filter(p=>p.displayName).forEach(p=>{finderCounts[p.displayName]=(finderCounts[p.displayName]||0)+1;});
-    const topFinder=Object.entries(finderCounts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    // Finder
+    var finderCounts={};
+    posts.filter(function(p){return p.displayName;}).forEach(function(p){
+      finderCounts[p.displayName]=(finderCounts[p.displayName]||0)+1;
+    });
+    var topFinder=Object.entries(finderCounts).sort(function(a,b){return b[1]-a[1];});
 
-    const weekAgo=Date.now()-7*24*60*60*1000;
-    const thisWeek=posts.filter(p=>new Date(p.createdAt)>weekAgo).length;
-    const daySet=new Set(posts.map(p=>new Date(p.createdAt).toDateString()));
-    const latestCity=posts[0]?.locationText||'—';
-    const medals=['🥇','🥈','🥉'];
-    const rankClass=['gold','silver','bronze'];
+    // Distanz von Koeln-Zollstock
+    var postsWithDist=posts
+      .filter(function(p){return p.lat&&p.lng;})
+      .map(function(p){return Object.assign({},p,{km:haversine(KOELN_LAT,KOELN_LNG,p.lat,p.lng)});})
+      .sort(function(a,b){return b.km-a.km;});
 
-    el.innerHTML=`
-      <div class="stat-hero">
-        <span class="stat-hero-num">${posts.length}</span>
-        <span class="stat-hero-label">Sticker-Fund${posts.length===1?'':'e'} weltweit</span>
-        ${buildWeekChart(posts)}
-      </div>
+    // Kennzahlen
+    var weekAgo=Date.now()-7*24*60*60*1000;
+    var thisWeek=posts.filter(function(p){return new Date(p.createdAt)>weekAgo;}).length;
+    var daySet=new Set(posts.map(function(p){return new Date(p.createdAt).toDateString();}));
+    var latestCity=posts[0]&&posts[0].locationText?posts[0].locationText:'&mdash;';
+    var medals=['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
+    var rankClass=['gold','silver','bronze'];
 
-      <div class="card">
-        <div class="stat-row"><span><span class="stat-row-label"><svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> Verschiedene Orte</span></span><span class="stat-count">${Object.keys(ortCounts).length}</span></div>
-        <div class="stat-row"><span><span class="stat-row-label"><svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Aktive Tage</span></span><span class="stat-count">${daySet.size}</span></div>
-        <div class="stat-row"><span><span class="stat-row-label"><svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg> Diese Woche</span></span><span class="stat-count">${thisWeek}</span></div>
-        <div class="stat-row"><span><span class="stat-row-label"><svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Zuletzt in</span></span><span class="stat-count" style="text-align:right;max-width:55%">${escapeHtml(latestCity)}</span></div>
-      </div>
+    // Distanz-Sektion
+    var distSection='';
+    if(postsWithDist.length>0){
+      var rec=postsWithDist[0];
+      var banner=
+        '<a class="dist-record-banner" href="/fund.html?id='+rec.id+'">'+
+        '<img src="'+rec.images[0].thumb+'" alt="" style="width:62px;height:62px;border-radius:10px;object-fit:cover;flex-shrink:0;border:2px solid #c9a227">'+
+        '<div>'+
+        '<div class="dist-record-label">\u2708\uFE0F Weiteste Reise</div>'+
+        '<div class="dist-record-km">'+rec.km.toLocaleString('de-DE')+' km</div>'+
+        '<div class="dist-record-loc">'+escapeHtml(rec.locationText||'&mdash;')+'</div>'+
+        (rec.displayName?'<div class="dist-record-finder">gefunden von '+escapeHtml(rec.displayName)+'</div>':'')+
+        '</div></a>';
 
-      ${topFinder.length>0?`
-      <div class="card">
-        <h2 style="margin-top:0;font-size:1rem">🏆 Top-Finder</h2>
-        ${topFinder.map(([name,n],i)=>`
-          <div class="top-finder-card">
-            <span class="top-finder-rank ${rankClass[i]||''}">${medals[i]||'#'+(i+1)}</span>
-            <a class="top-finder-name" href="/finder.html?name=${encodeURIComponent(name)}" style="text-decoration:none;color:inherit">${escapeHtml(name)}</a>
-            <span class="top-finder-count">${n} Fund${n===1?'':'e'}</span>
-          </div>`).join('')}
-      </div>`:''}
+      var distRest=postsWithDist.slice(1);
+      var listHtml=distRest.length>0?expandable(distRest,function(p,i){
+        return '<div class="dist-row">'+
+          '<span class="dist-rank">#'+(i+2)+'</span>'+
+          '<span class="dist-km">'+p.km.toLocaleString('de-DE')+' km</span>'+
+          '<a href="/fund.html?id='+p.id+'" class="dist-place">'+escapeHtml(p.locationText||'&mdash;')+'</a>'+
+          '</div>';
+      },4):'';
 
-      ${topOrte.length>0?`
-      <div class="card">
-        <h2 style="margin-top:0;font-size:1rem"><span class="stat-row-label"><svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> Top-Orte</span></h2>
-        ${topOrte.map(([ort,n],i)=>`
-          <div class="stat-row">
-            <span style="display:flex;align-items:center;gap:8px">
-              <span style="font-size:0.75rem;font-weight:800;color:var(--muted);min-width:18px">#${i+1}</span>
-              <a href="/?ort=${encodeURIComponent(ort)}" style="color:inherit;text-decoration:underline">${escapeHtml(ort)}</a>
-            </span>
-            <span class="stat-count">${n}</span>
-          </div>`).join('')}
-      </div>`:''}
+      distSection=
+        '<div class="card">'+
+        '<h2 style="margin-top:0;font-size:1rem">\u2708\uFE0F Distanz-Rangliste</h2>'+
+        '<p class="hint" style="margin-top:0;margin-bottom:12px">Wie weit ist der Sticker von K&ouml;ln-Zollstock gereist?</p>'+
+        banner+listHtml+
+        '</div>';
+    }
 
-      <div class="card" style="text-align:center">
-        <p style="margin:0 0 14px;color:var(--muted);font-size:0.9rem">Teil der Geschichte werden</p>
-        <a href="/hochladen.html" class="upload-fab" style="display:inline-flex;justify-content:center">
-          <span class="fab-plus">+</span>
-          <span class="fab-label" style="display:block">Fund melden</span>
-        </a>
-      </div>`;
-  } catch(e) {
+    el.innerHTML=
+      '<div class="stat-hero">'+
+      '<span class="stat-hero-num">'+posts.length+'</span>'+
+      '<span class="stat-hero-label">Sticker-Fund'+(posts.length===1?'':'e')+' weltweit</span>'+
+      buildWeekChart(posts)+
+      '</div>'+
+
+      '<div class="card">'+
+      '<div class="stat-row"><span><span class="stat-row-label">'+
+      '<svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>'+
+      ' Verschiedene Orte</span></span><span class="stat-count">'+Object.keys(ortCounts).length+'</span></div>'+
+      '<div class="stat-row"><span><span class="stat-row-label">'+
+      '<svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+
+      ' Aktive Tage</span></span><span class="stat-count">'+daySet.size+'</span></div>'+
+      '<div class="stat-row"><span><span class="stat-row-label">'+
+      '<svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>'+
+      ' Diese Woche</span></span><span class="stat-count">'+thisWeek+'</span></div>'+
+      '<div class="stat-row"><span><span class="stat-row-label">'+
+      '<svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'+
+      ' Zuletzt in</span></span><span class="stat-count" style="text-align:right;max-width:55%">'+escapeHtml(latestCity)+'</span></div>'+
+      '</div>'+
+
+      distSection+
+
+      (topFinder.length>0?
+      '<div class="card">'+
+      '<h2 style="margin-top:0;font-size:1rem">\uD83C\uDFC6 Top-Finder</h2>'+
+      expandable(topFinder,function(entry,i){
+        var name=entry[0],n=entry[1];
+        return '<div class="top-finder-card">'+
+          '<span class="top-finder-rank '+(rankClass[i]||'')+'">'+( medals[i]||'#'+(i+1))+'</span>'+
+          '<a class="top-finder-name" href="/finder.html?name='+encodeURIComponent(name)+'" style="text-decoration:none;color:inherit">'+escapeHtml(name)+'</a>'+
+          '<span class="top-finder-count">'+n+' Fund'+(n===1?'':'e')+'</span>'+
+          '</div>';
+      },3)+
+      '</div>':'')+
+
+      (topOrte.length>0?
+      '<div class="card">'+
+      '<h2 style="margin-top:0;font-size:1rem"><span class="stat-row-label">'+
+      '<svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>'+
+      ' Top-Orte</span></h2>'+
+      expandable(topOrte,function(entry,i){
+        var ort=entry[0],n=entry[1];
+        return '<div class="stat-row">'+
+          '<span style="display:flex;align-items:center;gap:8px">'+
+          '<span style="font-size:0.75rem;font-weight:800;color:var(--muted);min-width:18px">#'+(i+1)+'</span>'+
+          '<a href="/?ort='+encodeURIComponent(ort)+'" style="color:inherit;text-decoration:underline">'+escapeHtml(ort)+'</a>'+
+          '</span>'+
+          '<span class="stat-count">'+n+'</span>'+
+          '</div>';
+      },3)+
+      '</div>':'')+
+
+      '<div class="card" style="text-align:center">'+
+      '<p style="margin:0 0 12px;color:var(--muted);font-size:0.9rem">Teil der Geschichte werden</p>'+
+      '<a href="/hochladen.html" class="cta-upload-btn">\uD83D\uDCCD Fund melden</a>'+
+      '</div>';
+
+  }catch(e){
     el.innerHTML='<div class="card"><p class="hint">Fehler beim Laden.</p></div>';
   }
 }
@@ -164,5 +239,3 @@ load();
 </script>
 </body>
 </html>
-
-

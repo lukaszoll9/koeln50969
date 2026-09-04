@@ -1122,3 +1122,93 @@ main { padding-top: 8px; }
   font-size: 0.82rem; color: var(--muted); font-weight: 600;
   align-self: flex-end; padding-bottom: 3px;
 }
+
+
+/* ── STATISTIK: CTA-Upload-Button ── */
+.cta-upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 15px 20px;
+  background: var(--red);
+  color: #fff;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 16px rgba(196,28,34,0.28);
+  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+}
+.cta-upload-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(196,28,34,0.38);
+}
+
+/* Expand-Button in Statistik-Listen */
+.expand-btn {
+  display: block; width: 100%;
+  padding: 8px; margin-top: 8px;
+  background: none; border: 1px solid var(--border);
+  border-radius: 8px; font-size: 0.82rem; font-weight: 600;
+  color: var(--muted); cursor: pointer; font-family: inherit;
+  transition: background 0.12s, color 0.12s;
+}
+.expand-btn:hover { background: var(--border); color: var(--ink); }
+
+/* Distanz-Rangliste */
+.dist-record-banner {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--ink); border-radius: 14px;
+  padding: 14px 16px; margin-bottom: 12px;
+  text-decoration: none; color: #fff;
+  transition: opacity 0.15s;
+}
+.dist-record-banner:hover { opacity: 0.9; }
+.dist-record-label {
+  font-size: 0.72rem; font-weight: 700;
+  color: #c9a227; text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+.dist-record-km {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.2rem; color: #c9a227; line-height: 1;
+  letter-spacing: 0.04em;
+}
+.dist-record-loc {
+  font-size: 0.88rem; color: rgba(255,255,255,0.85);
+  font-weight: 600; margin-top: 2px;
+}
+.dist-record-finder {
+  font-size: 0.75rem; color: rgba(255,255,255,0.55); margin-top: 2px;
+}
+.dist-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+}
+.dist-row:last-of-type { border-bottom: none; }
+.dist-rank {
+  font-size: 0.78rem; font-weight: 800;
+  color: var(--muted); min-width: 24px; text-align: center;
+}
+.dist-km {
+  font-weight: 800; color: var(--red);
+  font-size: 0.88rem; min-width: 64px;
+}
+.dist-place {
+  flex: 1; font-size: 0.88rem; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+  color: inherit; text-decoration: none;
+}
+.dist-place:hover { text-decoration: underline; }
+
+/* ── HEADER: Upload-FAB auf Mobile ausblenden ── */
+/* Floating FAB (.fab-float) uebernimmt auf Mobile */
+@media (max-width: 679px) {
+  header .upload-fab { display: none !important; }
+}
