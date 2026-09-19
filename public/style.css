@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700;800&family=Caveat:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,600&display=swap');
 
 :root {
   --bg: #f5ead8;
@@ -80,8 +80,9 @@ header {
 }
 .brand b { color: var(--red); }
 .header-tagline {
-  font-family: 'Caveat', cursive;
-  font-size: 1rem; color: var(--muted); font-weight: 700;
+  font-family: 'Work Sans', sans-serif;
+  font-style: italic;
+  font-size: 1rem; color: var(--muted); font-weight: 600;
   align-self: flex-end; padding-bottom: 3px;
   display: none;
 }
@@ -757,16 +758,17 @@ main {
 }
 
 
-/* ── GALERIE GRID (danke-max Style) ── */
+/* ── GALERIE GRID (Masonry / danke-max Style) ── */
 .fund-grid-gallery {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  columns: 2;
+  column-gap: 10px;
   margin-top: 4px;
 }
 
 .fund-card {
   display: block;
+  break-inside: avoid;
+  margin-bottom: 10px;
   text-decoration: none;
   color: var(--ink);
   border-radius: 14px;
@@ -786,17 +788,13 @@ main {
 .fund-card-img {
   position: relative;
   width: 100%;
-  padding-top: 75%; /* 4:3 aspect ratio */
   overflow: hidden;
   background: var(--border);
 }
 
 .fund-card-img img {
-  position: absolute;
-  top: 0; left: 0;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
   display: block;
   transition: transform 0.3s ease;
 }
@@ -840,6 +838,14 @@ main {
   margin-top: 2px;
 }
 
+.fund-card-dist {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--red);
+  margin-top: 3px;
+  letter-spacing: 0.01em;
+}
+
 /* Staggered für Grid */
 .fund-card:nth-child(1) { animation-delay: 0.04s; }
 .fund-card:nth-child(2) { animation-delay: 0.08s; }
@@ -851,7 +857,7 @@ main {
 
 /* Auf Desktop 3 Spalten */
 @media (min-width: 600px) {
-  .fund-grid-gallery { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .fund-grid-gallery { columns: 3; column-gap: 12px; }
 }
 
 /* Statistik: Emojis durch SVG ersetzen — kein Emoji-Kästchen auf Android */
@@ -1005,7 +1011,8 @@ header {
 
 /* Tagline IMMER sichtbar — kleinere Schrift auf Mobile */
 .header-tagline-always {
-  font-family: 'Caveat', cursive;
+  font-family: 'Work Sans', sans-serif;
+  font-style: italic;
   font-size: 0.85rem;
   color: var(--muted);
   font-weight: 700;

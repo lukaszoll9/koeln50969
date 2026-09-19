@@ -129,6 +129,19 @@ function isNew(iso){
   return Date.now() - new Date(iso).getTime() < 24*60*60*1000; // 24h
 }
 
+
+// Haversine-Distanz in km von Köln-Zollstock (50.9053, 6.9374)
+const KOELN_LAT = 50.9053;
+const KOELN_LNG = 6.9374;
+function haversineDist(lat, lng) {
+  const R = 6371;
+  const dLat = (lat - KOELN_LAT) * Math.PI / 180;
+  const dLng = (lng - KOELN_LNG) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 +
+    Math.cos(KOELN_LAT * Math.PI/180) * Math.cos(lat * Math.PI/180) *
+    Math.sin(dLng/2)**2;
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+}
 function getFilters(){
   const p=new URLSearchParams(location.search);
   return {ort:p.get('ort')||'',name:p.get('name')||''};
@@ -224,6 +237,8 @@ function render(){
     const date=fmtDate(p.createdAt);
     const thumb=p.images[0].thumb;
     const newBadge=isNew(p.createdAt)?`<span class="new-badge">${window._lang==='en'?'NEW':'NEU'}</span>`:'';
+const dist = (p.lat && p.lng) ? haversineDist(p.lat, p.lng) : null;
+const distBadge = dist !== null && dist > 0 ? '<div class="fund-card-dist">📍 ' + dist.toLocaleString('de-DE') + ' km</div>' : '';
     return `<a class="fund-card" href="/fund.html?id=${p.id}">
       <div class="fund-card-img">
         <img src="${thumb}" alt="${loc}" loading="lazy">
