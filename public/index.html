@@ -220,7 +220,7 @@
     var seen = {}, items = [];
     allPosts.forEach(function (p) {
       var km = K.distKm(p.lat, p.lng); var loc = K.prettyLoc(p.locationText);
-      if (km == null || !loc || seen[loc]) return; seen[loc] = 1;
+      if (km == null || km < 30 || !loc || seen[loc]) return; seen[loc] = 1;
       items.push('<span class="tick"><b>50969</b> → ' + K.escapeHtml(loc) + ' <em>' + K.fmtKm(km) + '</em></span>');
     });
     if (items.length < 3) return;

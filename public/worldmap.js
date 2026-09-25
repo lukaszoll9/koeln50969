@@ -28,12 +28,16 @@
       var km = window.K ? K.distKm(p.lat, p.lng) : 999;
       if (km < (opts.minKm == null ? 60 : opts.minKm)) return; // Köln selbst: keine Linie
       var key = Math.round(p.lat / grid) + ',' + Math.round(p.lng / grid);
-      if (seen[key]) { seen[key].n++; return; }
-      var name = window.K ? K.prettyLoc(p.locationText).split(',')[0] : '';
-      if (window.K && /Thailand|Deutschland/.test(name) && K.prettyLoc(p.locationText).indexOf(',') === -1) name = '';
-      seen[key] = { lat: p.lat, lng: p.lng, n: 1, post: p, km: km, name: name };
-      dest.push(seen[key]);
+      var full = window.K ? K.prettyLoc(p.locationText) : '';
+      var parts = full.split(',').map(function (x) { return x.trim(); });
+      // Stadt bevorzugen (zweiter Teil), sonst erster Teil; reine Ländernamen weglassen
+      var name = parts.length > 1 && !/^(Thailand|Deutschland)$/.test(parts[1]) ? parts[1] : parts[0];
+      if (/^(Thailand|Deutschland)$/.test(name)) name = '';
+      if (!seen[key]) { seen[key] = { lat: p.lat, lng: p.lng, n: 0, post: p, km: km, names: {} }; dest.push(seen[key]); }
+      var d = seen[key]; d.n++;
+      if (name) d.names[name] = (d.names[name] || 0) + 1;
     });
+    dest.forEach(function (d) { d.name = Object.keys(d.names).sort(function (a, b) { return d.names[b] - d.names[a]; })[0] || ''; });
     // wichtigste Ziele behalten (viele Funde, weite Reise), dann weiteste zuletzt zeichnen
     dest.sort(function (a, b) { return (b.n * 2 + b.km / 2000) - (a.n * 2 + a.km / 2000); });
     dest = dest.slice(0, maxLines);
