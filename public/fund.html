@@ -2,18 +2,24 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Fund — Köln 50969</title>
 <meta property="og:image" content="https://koeln50969.de/sticker-hero.jpg">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="/style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css">
 </head>
 <body>
 <header>
-  <button class="menu-btn" id="menuOpenBtn">☰</button>
+  <button class="menu-btn" id="menuOpenBtn" aria-label="Menü öffnen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg></button>
   <a class="brand" href="/">KÖLN <b>50969</b></a>
+  <span class="brand-tag" data-de="Zollywood überall." data-en="Zollywood everywhere.">Zollywood überall.</span>
   <div class="spacer"></div>
-
+  <button class="lang-btn" id="langBtn">EN</button>
+  <a class="header-cta" href="/hochladen.html"><span data-de="Fund melden" data-en="Report a find">Fund melden</span></a>
 </header>
 
 <div class="lightbox" id="lightbox" role="dialog" aria-modal="true">
@@ -21,7 +27,7 @@
   <img id="lightboxImg" src="" alt="">
 </div>
 
-<main id="content" style="max-width:680px;margin:0 auto;padding:16px 18px">
+<main id="content">
   <div class="fund-skeleton">
     <div class="skel skel-img"></div>
     <div class="skel skel-line" style="width:60%"></div>
@@ -30,11 +36,20 @@
 </main>
 
 <footer>
-  <a href="/faq.html">FAQ</a> · <a href="/karte.html">Karte</a> · <a href="/kontakt.html">Kontakt</a> · <a href="/impressum.html">Impressum</a> · <a href="/datenschutz.html">Datenschutz</a>
+  <div class="foot-inner">
+    <div class="foot-brand">KÖLN <b>50969</b><small>Zollywood überall.</small></div>
+    <nav class="foot-links">
+      <a href="/">Galerie</a><a href="/karte.html">Karte</a><a href="/statistik.html">Statistik</a><a href="/faq.html">FAQ</a><a href="/kontakt.html">Kontakt</a><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a>
+    </nav>
+    <div class="foot-meta">50.9053° N · 6.9374° E · Köln-Zollstock · Inspiriert von <a href="https://danke-max.de" target="_blank" rel="noopener">danke-max.de</a></div>
+  </div>
 </footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
 <script src="/i18n.js"></script>
+<script src="/common.js"></script>
+<script src="/worldmap.js"></script>
+<script src="/mapkit.js"></script>
 <script src="/menu.js"></script>
 <script>
 const id = new URLSearchParams(location.search).get('id');
@@ -45,7 +60,7 @@ const lightboxImg = document.getElementById('lightboxImg');
 document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
 lightbox.addEventListener('click', e => { if(e.target===lightbox) closeLightbox(); });
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeLightbox(); });
-function openLightbox(src){ lightboxImg.src=src; lightbox.classList.add('open'); document.body.style.overflow='hidden'; }
+function openLightbox(src){ lightboxImg.onerror=function(){ if(lightboxImg.src.indexOf('/.netlify/images')!==-1) lightboxImg.src=src; }; lightboxImg.src=K.cdn(src,1600); lightbox.classList.add('open'); document.body.style.overflow='hidden'; }
 function closeLightbox(){ lightbox.classList.remove('open'); document.body.style.overflow=''; }
 
 
@@ -71,101 +86,109 @@ function copyToClipboard(text) {
   }).catch(() => {});
 }
 
-function escapeHtml(s){ const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
-
-function fmtDateLong(iso){
-  return new Date(iso).toLocaleDateString('de-DE',{day:'numeric',month:'long',year:'numeric'});
-}
+function escapeHtml(s){ return K.escapeHtml(s); }
+function T(de,en){ return (window._lang||'de')==='en'?en:de; }
 
 async function load(){
   const content = document.getElementById('content');
   try {
-    const res = await fetch('/api/posts?limit=500');
-    const data = await res.json();
-    const post = (data.posts||[]).find(p=>String(p.id)===String(id));
+    let post = null;
+    const r1 = await fetch('/api/posts?id=' + encodeURIComponent(id));
+    if (r1.ok) { const d1 = await r1.json(); post = (d1.posts||[]).find(p=>String(p.id)===String(id)); }
+    if (!post) {
+      const r2 = await fetch('/api/posts?limit=1000');
+      const d2 = await r2.json();
+      post = (d2.posts||[]).find(p=>String(p.id)===String(id));
+    }
 
     if(!post){
-      content.innerHTML='<div class="card"><p class="hint">Fund nicht gefunden. <a href="/">Zur Galerie</a></p></div>';
+      content.innerHTML='<div class="card"><h1>'+T('Fund nicht gefunden','Find not found')+'</h1><p class="hint">'+T('Vielleicht wurde er entfernt.','It may have been removed.')+'</p><a class="btn" href="/">'+T('Zur Galerie','Back to gallery')+'</a></div>';
       return;
     }
 
-    // OG-Image dynamisch setzen
-    if(post.images&&post.images[0]){
-      const og=document.querySelector('meta[property="og:image"]');
-      if(og) og.content=post.images[0].full;
-    }
-
-    const date = fmtDateLong(post.createdAt);
+    const loc = K.prettyLoc(post.locationText);
+    const km = K.distKm(post.lat, post.lng);
     const hasLoc = typeof post.lat==='number' && typeof post.lng==='number';
     const isNew = Date.now()-new Date(post.createdAt).getTime() < 72*60*60*1000;
+    const dateLong = new Date(post.createdAt).toLocaleDateString(T('de-DE','en-GB'),{day:'numeric',month:'long',year:'numeric'});
+    document.title = (loc || T('Fund','Find')) + ' — Köln 50969';
+    const country = K.countryOf(post);
 
     content.innerHTML = `
-      <a href="/" class="back-link">← Alle Funde</a>
+      <a href="/" class="back-link" id="backLink">← ${T('Alle Funde','All finds')}</a>
 
-      <div class="fund-grid">
+      <div class="fund-grid${post.images.length>1?' two':''}">
         ${post.images.map((im,i)=>`
-          <a href="#" data-full="${im.full}" class="fund-photo">
-            <img src="${im.thumb}" loading="${i===0?'eager':'lazy'}" alt="Sticker-Foto ${i+1}">
+          <a href="#" data-full="${im.full}" class="fund-photo anim-in anim-d${i+1}">
+            ${K.imgTag(im,{w: post.images.length>1?480:900, eager:true, alt: loc||'Sticker-Foto', sizes:'(min-width:720px) 700px, 100vw'})}
+            ${i===0 && km!=null ? `<span class="km-badge">${K.fmtKm(km)} ${T('ab Zollstock','from Zollstock')}</span>`:''}
           </a>`).join('')}
       </div>
 
-      <div class="card">
+      <div class="anim-in anim-d2">
         <div class="fund-meta">
-          ${isNew?'<span class="new-badge" style="margin-right:8px">NEU</span>':''}
-          ${post.locationText?`<span class="fund-meta-loc">📍 <a href="/?ort=${encodeURIComponent(post.locationText)}" style="color:inherit;text-decoration:underline">${escapeHtml(post.locationText)}</a></span>`:''}
-          <span class="fund-meta-date">${date}</span>
+          ${isNew?`<span class="new-badge">${T('NEU','NEW')}</span>`:''}
+          <span class="fund-meta-date">${dateLong}</span>
         </div>
-        ${post.displayName?`<div class="fund-meta-name">von <a href="/?name=${encodeURIComponent(post.displayName)}" style="color:inherit;text-decoration:underline;font-weight:700">${escapeHtml(post.displayName)}</a></div>`:''}
+        <h1 class="fund-title">${loc?`<a href="/?ort=${encodeURIComponent(post.locationText)}">${escapeHtml(loc)}</a>`:T('Unbekannter Ort','Unknown place')}</h1>
+        ${post.displayName?`<div class="fund-meta-name">${T('Gefunden von','Found by')} <a href="/finder.html?name=${encodeURIComponent(post.displayName)}">${escapeHtml(post.displayName)}</a></div>`:''}
         ${post.comment?`<p class="fund-comment">${escapeHtml(post.comment)}</p>`:''}
 
-        <!-- Teilen -->
-        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
-          <button class="share-btn" onclick="shareFind()" id="shareBtn">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            <span data-de="Teilen" data-en="Share">Teilen</span>
-          </button>
-          <a class="share-btn" href="/" id="backBtn" data-de="← Alle Funde" data-en="← All finds">← Alle Funde</a>
+        <div class="fund-facts">
+          <div><span>${T('Entfernung','Distance')}</span><strong>${km!=null?K.fmtKm(km):'–'}</strong></div>
+          <div><span>${T('Land','Country')}</span><strong>${country && country.indexOf('geo:')!==0?escapeHtml(country):'–'}</strong></div>
+          <div><span>${T('Koordinaten','Coordinates')}</span><strong class="mono" style="font-size:0.9rem;font-family:var(--mono)">${hasLoc?post.lat.toFixed(3)+', '+post.lng.toFixed(3):'–'}</strong></div>
         </div>
-        ${hasLoc?`
-          <div id="minimap"></div>
-          <a href="/karte.html?lat=${post.lat}&lng=${post.lng}&zoom=16" class="map-link">Auf der großen Karte ansehen →</a>
-        `:''}
+
+        <div class="fund-actions">
+          <button class="btn" onclick="shareFind()" id="shareBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            <span>${T('Teilen','Share')}</span>
+          </button>
+          ${hasLoc?`<a class="btn-ghost" href="/karte.html?lat=${post.lat}&lng=${post.lng}&zoom=16">${T('Auf der Karte','On the map')} →</a>`:''}
+        </div>
+        ${hasLoc && km>=30?`<div class="route-card"><canvas id="routeCanvas" aria-label="Route von Köln-Zollstock zum Fundort"></canvas><div class="route-card-cap"><span><b>50969</b> Köln-Zollstock</span><span>→</span><span>${escapeHtml(loc||'Fundort')}</span><strong>${K.fmtKm(km)}</strong></div></div>`:''}
+        ${hasLoc?`<div id="minimap"></div>`:''}
       </div>
     `;
 
-    // Lightbox
+    // Zurück: echte History nutzen, wenn wir aus der Galerie kommen (Scroll-Position bleibt)
+    document.getElementById('backLink').addEventListener('click', e => {
+      if (document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1) { e.preventDefault(); history.back(); }
+    });
+
     document.querySelectorAll('.fund-photo').forEach(a=>{
       a.addEventListener('click',e=>{e.preventDefault();openLightbox(a.dataset.full);});
     });
 
-    // Minimap mit CartoDB
-    if(hasLoc){
-      const m=L.map('minimap',{zoomControl:false,scrollWheelZoom:false,dragging:false}).setView([post.lat,post.lng],15);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-        attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom:19
-      }).addTo(m);
-      const icon=L.divIcon({className:'',html:'<div style="width:16px;height:16px;background:var(--red);border-radius:50%;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>',iconSize:[16,16],iconAnchor:[8,8]});
-      L.marker([post.lat,post.lng],{icon}).addTo(m);
+    const rc = document.getElementById('routeCanvas');
+    if (rc && window.drawWorld) {
+      const h = K.HOME;
+      const lngMin = Math.min(h.lng, post.lng), lngMax = Math.max(h.lng, post.lng);
+      const latMin = Math.min(h.lat, post.lat), latMax = Math.max(h.lat, post.lat);
+      let wDeg = Math.max(12, (lngMax - lngMin) * 1.5), hDeg = wDeg / 2.2;
+      if ((latMax - latMin) * 1.9 > hDeg) { hDeg = (latMax - latMin) * 1.9; wDeg = hDeg * 2.2; }
+      const cx = (lngMin + lngMax) / 2, cy = (latMin + latMax) / 2 + hDeg * 0.12;
+      rc.style.aspectRatio = '2.2 / 1';
+      drawWorld(rc, [post], { animate: true, pulse: true, minKm: 0, bbox: [cx - wDeg / 2, cy + hDeg / 2, cx + wDeg / 2, cy - hDeg / 2] });
+    }
+
+    if (hasLoc && window.maplibregl && window.MapKit) {
+      const m = MapKit.create('minimap', { center: [post.lng, post.lat], zoom: 13.5, interactive: false });
+      const el = document.createElement('div');
+      el.style.cssText = 'width:18px;height:18px;background:#e1141c;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.4)';
+      new maplibregl.Marker({ element: el }).setLngLat([post.lng, post.lat]).addTo(m);
+      document.getElementById('minimap').addEventListener('click', () => { location.href = '/karte.html?lat=' + post.lat + '&lng=' + post.lng + '&zoom=15'; });
     }
   } catch(e) {
-    content.innerHTML='<div class="card"><p class="hint">Fehler beim Laden. <a href="/">Zurück</a></p></div>';
+    content.innerHTML='<div class="card"><p class="hint">'+T('Fehler beim Laden.','Could not load.')+' <a href="/">'+T('Zurück','Back')+'</a></p></div>';
   }
 }
 
 load();
+let _langInit = false;
+document.addEventListener('langchange', () => { if (_langInit) load(); _langInit = true; });
 </script>
 
-<script>
-// Scroll-Position merken für Zurück-Navigation
-window.addEventListener('beforeunload', () => {
-  if (document.referrer.includes(location.hostname)) {
-    sessionStorage.setItem('scrollPos_' + document.referrer, window.scrollY);
-  }
-});
-</script>
 </body>
 </html>
-
-
-

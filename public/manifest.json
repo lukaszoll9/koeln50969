@@ -1,11 +1,11 @@
 {
   "name": "Köln 50969 — Sticker-Funde",
   "short_name": "Köln 50969",
-  "description": "Zollywood Tower Sticker-Galerie — finde ihn, melde ihn!",
+  "description": "Zollywood überall. Die Sticker-Galerie aus Köln-Zollstock.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f5ead8",
-  "theme_color": "#c41c22",
+  "background_color": "#ffffff",
+  "theme_color": "#e1141c",
   "orientation": "portrait-primary",
   "icons": [
     {

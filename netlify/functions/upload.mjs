@@ -2,7 +2,7 @@ import { getStore } from "@netlify/blobs";
 import { getDatabase } from "@netlify/database";
 import { json, hashIp } from "./_shared.mjs";
 
-async function notifyNewUpload(locationText, displayName, possibleDuplicate = false) {
+async function notifyNewUpload(locationText, displayName, possibleDuplicate = false, id = null) {
   const apiKey = process.env.MAILJET_API_KEY;
   const secret = process.env.MAILJET_SECRET_KEY;
   const toEmail = process.env.NOTIFY_EMAIL || "lukasfra437@gmail.com";
@@ -22,7 +22,7 @@ async function notifyNewUpload(locationText, displayName, possibleDuplicate = fa
           From: { Email: "noreply@koeln50969.de", Name: "Köln 50969" },
           To: [{ Email: toEmail }],
           Subject: possibleDuplicate ? `⚠️ Mögl. Duplikat: ${where}` : `🗓️ Neuer Fund: ${where}`,
-          TextPart: `Ein neuer Fund wurde eingereicht!${dupHint}\n\nOrt: ${where}\nName: ${who}\n\nZum Admin-Panel:\nhttps://koeln50969.de/admin.html`,
+          TextPart: `Ein neuer Fund wurde eingereicht!${dupHint}\n\nOrt: ${where}\nName: ${who}\n\nJetzt pruefen:\nhttps://koeln50969.de/admin.html${id ? "#fund-" + id : ""}`,
         }],
       }),
     });
@@ -46,10 +46,7 @@ export default async (req) => {
   // Honeypot: Bots fuellen versteckte Felder aus. Wir tun so, als waere alles ok,
   // speichern aber nichts.
   if (body.website) {
-      // E-Mail-Benachrichtigung
-  notifyNewUpload(body.locationText, body.displayName).catch(() => {});
-
-  return json(200, { ok: true });
+    return json(200, { ok: true });
   }
 
   const images = Array.isArray(body.images) ? body.images : [];
@@ -181,7 +178,7 @@ export default async (req) => {
   `;
 
   // E-Mail-Benachrichtigung (auch bei Duplikat, aber mit Hinweis)
-  notifyNewUpload(locationText, displayName, possibleDuplicate).catch(() => {});
+  notifyNewUpload(locationText, displayName, possibleDuplicate, row.id).catch(() => {});
 
   return json(200, { ok: true, id: row.id, possibleDuplicate });
 };

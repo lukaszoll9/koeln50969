@@ -2,28 +2,35 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Fund melden — Köln 50969</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="/style.css">
 <!-- exifr: robuste GPS-Extraktion aus Fotos -->
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/lite.umd.js"></script>
 </head>
 <body>
 <header>
-  <button class="menu-btn" id="menuOpenBtn">☰</button>
+  <button class="menu-btn" id="menuOpenBtn" aria-label="Menü öffnen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg></button>
   <a class="brand" href="/">KÖLN <b>50969</b></a>
+  <span class="brand-tag" data-de="Zollywood überall." data-en="Zollywood everywhere.">Zollywood überall.</span>
   <div class="spacer"></div>
+  <button class="lang-btn" id="langBtn">EN</button>
 </header>
 
 <main>
 <div class="card" id="formCard">
+  <div class="eyebrow" style="margin-bottom:8px" data-de="Sticker entdeckt?" data-en="Spotted the sticker?">Sticker entdeckt?</div>
   <h1 style="margin-top:0" data-de="Fund melden" data-en="Report a find">Fund melden</h1>
   <p class="hint" data-de="Foto hochladen — Standort wird automatisch erkannt. Fertig!" data-en="Upload a photo — location is detected automatically. Done!">Foto hochladen — Standort wird automatisch erkannt. Fertig!</p>
 
   <!-- Schritt 1: Foto -->
   <div class="upload-step" id="step1">
     <label class="photo-upload-area" id="photoLabel" for="files">
-      <div class="photo-upload-icon">📷</div>
+      <div class="photo-upload-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
       <div class="photo-upload-text" data-de="Foto antippen zum Auswählen" data-en="Tap to select photo">Foto antippen zum Auswählen</div>
       <div class="photo-upload-hint" data-de="Bis zu 2 Fotos · JPG, PNG, HEIC" data-en="Up to 2 photos · JPG, PNG, HEIC">Bis zu 2 Fotos · JPG, PNG, HEIC</div>
     </label>
@@ -38,8 +45,16 @@
       <span id="locationText">Standort wird ermittelt…</span>
     </div>
     <button class="location-retry-btn" id="locationRetryBtn" hidden>
-      🔄 Nochmal versuchen
+      Nochmal versuchen
     </button>
+    <details class="loc-manual" id="locManual">
+      <summary data-de="Ort stimmt nicht? Selbst eingeben" data-en="Wrong place? Enter it yourself">Ort stimmt nicht? Selbst eingeben</summary>
+      <div class="loc-search">
+        <input type="text" id="locQuery" data-placeholder-de="z. B. Bangkok, Khao San Road" data-placeholder-en="e.g. Bangkok, Khao San Road" placeholder="z. B. Bangkok, Khao San Road" autocomplete="off">
+        <button type="button" class="btn-ghost" id="locSearchBtn" data-de="Suchen" data-en="Search">Suchen</button>
+      </div>
+      <div class="loc-results" id="locResults"></div>
+    </details>
   </div>
 
   <!-- Name optional -->
@@ -48,7 +63,7 @@
 
   <!-- Kommentar optional -->
   <label for="comment" data-de="Kommentar" data-en="Comment">Kommentar</label> <span class="optional-label" data-de="(optional)" data-en="(optional)">(optional)</span>
-  <textarea id="comment" maxlength="500" data-placeholder-de="Wo genau hast du ihn entdeckt?" data-placeholder-en="Where exactly did you spot it?">		</textarea>
+  <textarea id="comment" maxlength="500" data-placeholder-de="Wo genau hast du ihn entdeckt?" data-placeholder-en="Where exactly did you spot it?" placeholder="Wo genau hast du ihn entdeckt?"></textarea>
 
   <!-- Honeypot -->
   <input type="text" class="hp-field" id="website" name="website" tabindex="-1" autocomplete="off">
@@ -68,10 +83,10 @@
 </div>
 
 <div class="success" id="successCard" hidden>
-  <div style="font-size:3rem;margin-bottom:14px">🎉</div>
+  <div class="success-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
   <h1>Danke!</h1>
   <p>Dein Fund wird geprüft und erscheint bald in der Galerie.</p>
-  <a href="/" style="display:inline-block;margin-top:16px;padding:13px 26px;background:var(--red);color:#fff;border-radius:999px;text-decoration:none;font-weight:700">Zur Galerie →</a>
+  <a href="/" class="btn" style="margin-top:16px">Zur Galerie →</a>
 </div>
 </main>
 
@@ -79,15 +94,16 @@
 /* Upload-Bereich */
 .photo-upload-area {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  border: 2px dashed var(--border); border-radius: 14px;
-  padding: 28px 20px; cursor: pointer; text-align: center;
+  border: 2px dashed var(--line-strong); border-radius: 16px;
+  padding: 34px 20px; cursor: pointer; text-align: center;
   background: var(--bg-elevated); transition: border-color 0.15s, background 0.15s;
   gap: 6px; margin-bottom: 10px;
 }
 .photo-upload-area:hover, .photo-upload-area:active {
   border-color: var(--red); background: var(--red-soft);
 }
-.photo-upload-icon { font-size: 2.2rem; line-height: 1; }
+.photo-upload-icon { width: 58px; height: 58px; border-radius: 50%; background: var(--red-soft); color: var(--red); display: grid; place-items: center; margin-bottom: 4px; transition: transform 0.3s var(--ease-spring); }
+.photo-upload-area:hover .photo-upload-icon { transform: scale(1.08) rotate(-4deg); }
 .photo-upload-text { font-weight: 700; font-size: 0.95rem; color: var(--ink); }
 .photo-upload-hint { font-size: 0.78rem; color: var(--muted); }
 .photo-upload-area.has-photos {
@@ -103,7 +119,7 @@
   display: flex; align-items: center; gap: 10px;
   font-size: 0.88rem; font-weight: 600;
 }
-.location-status.ok  { color: #2e7d32; }
+.location-status.ok  { color: var(--ok); }
 .location-status.err { color: var(--red); }
 .location-status.warn{ color: #b8862e; }
 
@@ -124,6 +140,15 @@
   cursor: pointer; font-family: inherit; color: var(--ink);
 }
 .optional-label { font-size: 0.75rem; color: var(--muted); font-weight: 400; }
+.loc-manual { margin-top: 10px; font-size: 0.88rem; }
+.loc-manual summary { cursor: pointer; color: var(--muted); font-weight: 600; }
+.loc-manual[open] summary { color: var(--ink); margin-bottom: 8px; }
+.loc-search { display: flex; gap: 8px; }
+.loc-search input { flex: 1; padding: 10px 12px; }
+.loc-search .btn-ghost { min-height: 44px; }
+.loc-results { display: grid; gap: 4px; margin-top: 8px; }
+.loc-result { text-align: left; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-family: inherit; font-size: 0.88rem; cursor: pointer; color: var(--ink); }
+.loc-result:hover { border-color: var(--ink); }
 </style>
 
 <script>
@@ -174,6 +199,7 @@ function setLocationError(msg) {
   locationTxt.textContent = msg;
   retryBtn.hidden = false;
   locationDone = true; // Fehler = auch "fertig", Upload trotzdem erlaubt
+  const lm = document.getElementById('locManual'); if (lm) lm.open = true;
   updateSubmitBtn();
 }
 
@@ -188,7 +214,7 @@ function updateSubmitBtn() {
 async function reverseGeocode(lat, lng) {
   try {
     const r = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14&accept-language=de`,
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=14&accept-language=de,en`,
       { headers: { 'User-Agent': 'koeln50969.de/1.0' } }
     );
     const d = await r.json();
@@ -249,7 +275,7 @@ async function detectLocation(file) {
     const name = await reverseGeocode(exifGPS.lat, exifGPS.lng);
     const lat = Math.round(exifGPS.lat * 10000) / 10000;
     const lng = Math.round(exifGPS.lng * 10000) / 10000;
-    setLocation(lat, lng, '📍 ' + (name || `${lat}, ${lng}`), 'ok');
+    setLocation(lat, lng, (name || `${lat}, ${lng}`), 'ok');
     return;
   }
 
@@ -262,13 +288,42 @@ async function detectLocation(file) {
     setLocationSearching((window._locTxts?.geocoding?.[localStorage.getItem('koeln50969_lang')||'de']) || 'Standort ermittelt, Ort wird geladen…');
     const name = await reverseGeocode(lat, lng);
     const accText = bGPS.acc ? ` (~${Math.round(bGPS.acc)}m)` : '';
-    setLocation(lat, lng, '📍 ' + (name || `${lat}, ${lng}`) + accText, 'ok');
+    setLocation(lat, lng, (name || `${lat}, ${lng}`) + accText, 'ok');
     return;
   }
 
   // 3. Beides fehlgeschlagen
   setLocationError((window._locTxts?.no_location?.[localStorage.getItem('koeln50969_lang')||'de']) || 'Standort nicht verfügbar');
 }
+
+// ── Ort manuell suchen (wenn GPS fehlt oder falsch ist) ──────────────
+async function searchPlace() {
+  const q = document.getElementById('locQuery').value.trim();
+  const box = document.getElementById('locResults');
+  if (q.length < 2) return;
+  box.innerHTML = '<div class="hint">Suche…</div>';
+  try {
+    const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&addressdetails=1&accept-language=de,en&q=' + encodeURIComponent(q));
+    const list = await r.json();
+    if (!list.length) { box.innerHTML = '<div class="hint">Nichts gefunden. Versuch es mit Stadt + Land.</div>'; return; }
+    box.innerHTML = list.map((it, i) => `<button type="button" class="loc-result" data-i="${i}">${it.display_name.split(',').slice(0,3).join(',')}</button>`).join('');
+    box.querySelectorAll('.loc-result').forEach(b => b.addEventListener('click', () => {
+      const it = list[+b.dataset.i], a = it.address || {};
+      const parts = [];
+      const sub = a.suburb || a.neighbourhood || a.quarter || a.city_district;
+      const city = a.city || a.town || a.village || a.municipality;
+      if (sub) parts.push(sub); if (city) parts.push(city);
+      if (a.country_code && a.country_code !== 'de' && a.country) parts.push(a.country);
+      const name = parts.length ? parts.join(', ') : it.display_name.split(',').slice(0,2).join(',').trim();
+      const lat = Math.round(parseFloat(it.lat) * 10000) / 10000, lng = Math.round(parseFloat(it.lon) * 10000) / 10000;
+      setLocation(lat, lng, name, 'ok');
+      box.innerHTML = '';
+      document.getElementById('locManual').open = false;
+    }));
+  } catch (e) { box.innerHTML = '<div class="hint">Suche gerade nicht erreichbar.</div>'; }
+}
+document.getElementById('locSearchBtn').addEventListener('click', searchPlace);
+document.getElementById('locQuery').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); searchPlace(); } });
 
 // ── Retry Button ──────────────────────────────────────────────────────
 retryBtn.addEventListener('click', async () => {
@@ -282,7 +337,7 @@ retryBtn.addEventListener('click', async () => {
     const lng = Math.round(bGPS.lng * 10000) / 10000;
     setLocationSearching('Ort wird geladen…');
     const name = await reverseGeocode(lat, lng);
-    setLocation(lat, lng, '📍 ' + (name || `${lat}, ${lng}`), 'ok');
+    setLocation(lat, lng, (name || `${lat}, ${lng}`), 'ok');
   } else {
     setLocationError('Standort verweigert — bitte Standort in den Einstellungen erlauben');
   }
@@ -341,7 +396,8 @@ async function compress(file, maxDim, quality) {
   c.getContext('2d').drawImage(img, 0, 0, w, h);
   // WebP versuchen, JPEG als Fallback
   let blob = await new Promise(r => c.toBlob(r, 'image/webp', quality));
-  if (!blob || blob.size < 100) blob = await new Promise(r => c.toBlob(r, 'image/jpeg', quality));
+  // Safari/iOS kann kein WebP erzeugen und liefert dann still PNG (10x groesser) -> dann JPEG
+  if (!blob || blob.size < 100 || blob.type !== 'image/webp') blob = await new Promise(r => c.toBlob(r, 'image/jpeg', quality));
   if (!blob) throw new Error('Komprimierung fehlgeschlagen');
   return blob;
 }
@@ -452,15 +508,23 @@ function applyPlaceholders() {
     searching_browser: { de: 'Kein GPS im Foto — frage deinen Standort ab…', en: 'No GPS in photo — requesting your location…' },
     geocoding: { de: 'Standort ermittelt, Ort wird geladen…', en: 'Location found, loading place name…' },
     no_location: { de: 'Standort nicht verfügbar — Fund wird ohne Karte gespeichert', en: 'Location unavailable — find will be saved without map' },
-    retry: { de: '🔄 Nochmal versuchen', en: '🔄 Try again' },
+    retry: { de: 'Nochmal versuchen', en: 'Try again' },
   };
   window._locTxts = locTxts;
 }
 document.addEventListener('DOMContentLoaded', applyPlaceholders);
 document.addEventListener('langchange', applyPlaceholders);
 </script>
+<footer>
+  <div class="foot-inner">
+    <div class="foot-brand">KÖLN <b>50969</b><small>Zollywood überall.</small></div>
+    <nav class="foot-links">
+      <a href="/">Galerie</a><a href="/karte.html">Karte</a><a href="/statistik.html">Statistik</a><a href="/faq.html">FAQ</a><a href="/kontakt.html">Kontakt</a><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a>
+    </nav>
+    <div class="foot-meta">50.9053° N · 6.9374° E · Köln-Zollstock · Inspiriert von <a href="https://danke-max.de" target="_blank" rel="noopener">danke-max.de</a></div>
+  </div>
+</footer>
+<script src="/common.js"></script>
 <script src="/menu.js"></script>
 </body>
 </html>
-
-
