@@ -2,20 +2,74 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
 <title>Admin — Köln 50969</title>
+<meta name="theme-color" content="#16130f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="/style.css">
+<style>
+header { background: var(--ink); border-bottom-color: var(--red); }
+header .brand { color: #fff; }
+.admin-tag { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; color: rgba(255,255,255,0.6); text-transform: uppercase; }
+.logout { background: none; border: 1.5px solid rgba(255,255,255,0.3); color: #fff; border-radius: 8px; padding: 6px 10px; font-family: var(--font); font-weight: 650; font-size: 0.82rem; cursor: pointer; }
+.tabs { position: sticky; top: calc(var(--header-h) + 3px); z-index: 50; background: rgba(255,255,255,0.95); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); display: flex; gap: 6px; padding: 12px 0; margin-bottom: 8px; }
+.tab { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border-radius: 12px; border: 1.5px solid var(--line); background: #fff; font-family: var(--font); font-weight: 700; font-size: 0.92rem; color: var(--muted); cursor: pointer; }
+.tab.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.tab .n { font-family: var(--mono); font-size: 0.72rem; padding: 2px 7px; border-radius: 99px; background: var(--bg-soft); color: var(--ink); }
+.tab.active .n { background: rgba(255,255,255,0.18); color: #fff; }
+.tab[data-status="pending"] .n.has { background: var(--red); color: #fff; }
+.a-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; margin-bottom: 16px; transition: opacity 0.3s, transform 0.35s var(--ease-out), max-height 0.4s; }
+.a-card.out { opacity: 0; transform: translateX(40px); }
+.a-card.hl { box-shadow: 0 0 0 3px var(--red); }
+.a-imgs { display: grid; grid-auto-flow: column; grid-auto-columns: 100%; overflow-x: auto; scroll-snap-type: x mandatory; background: var(--ink); }
+.a-imgs.two { grid-auto-columns: 50%; }
+.a-imgs a { scroll-snap-align: start; display: block; aspect-ratio: 4 / 5; max-height: 70vh; }
+.a-imgs img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.a-body { padding: 14px 16px 16px; display: grid; gap: 6px; }
+.a-top { display: flex; justify-content: space-between; gap: 10px; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+.a-loc { font-stretch: 75%; font-weight: 850; font-size: 1.35rem; line-height: 1.1; }
+.a-loc.none { color: var(--red-dark); font-size: 1.05rem; }
+.a-meta { color: var(--ink-2); font-size: 0.92rem; }
+.a-meta a { font-weight: 650; }
+.a-comment { background: var(--bg-soft); border-radius: 10px; padding: 10px 12px; font-size: 0.93rem; }
+.a-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.a-actions button { min-height: 50px; border-radius: 12px; border: 0; font-family: var(--font); font-weight: 750; font-size: 1rem; cursor: pointer; }
+.b-ok { background: var(--ok); color: #fff; }
+.b-no { background: var(--bg-sunk); color: var(--ink); }
+.b-edit, .b-del { background: #fff; border: 1.5px solid var(--line-strong) !important; color: var(--ink); min-height: 44px !important; font-size: 0.9rem !important; }
+.b-del { color: var(--red-dark); }
+.b-del.confirm { background: var(--red); color: #fff; border-color: var(--red) !important; }
+.a-edit { display: grid; gap: 4px; padding-top: 6px; border-top: 1px solid var(--line); margin-top: 6px; }
+.a-edit label { margin: 8px 0 2px; font-size: 0.82rem; }
+.a-edit .row { display: flex; gap: 8px; }
+.a-edit .row input { flex: 1; }
+.a-edit .coords { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+.a-results { display: grid; gap: 4px; }
+.a-results button { text-align: left; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-family: var(--font); font-size: 0.86rem; cursor: pointer; }
+.empty-admin { text-align: center; padding: 48px 12px; color: var(--muted); }
+.empty-admin strong { display: block; font-stretch: 70%; font-weight: 900; font-size: 2rem; color: var(--ink); text-transform: uppercase; margin-bottom: 4px; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translate(-50%, 120px); background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 12px; font-weight: 650; font-size: 0.92rem; z-index: 3000; transition: transform 0.35s var(--ease-out); }
+.toast.show { transform: translate(-50%, 0); }
+@media (min-width: 900px) { #list { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; } .a-card { margin: 0; } }
+</style>
 </head>
 <body>
 <header>
-  <a class="brand" href="/">KÖLN <b>50969</b> · Admin</a>
+  <a class="brand" href="/">KÖLN <b>50969</b></a>
+  <span class="admin-tag">Admin</span>
+  <div class="spacer"></div>
+  <button class="logout" id="logoutBtn" hidden>Abmelden</button>
 </header>
 
-<main>
-  <div class="card" id="loginCard">
-    <label for="pw">Admin-Passwort</label>
+<main class="wide" style="max-width:1000px">
+  <div class="card" id="loginCard" style="max-width:420px;margin:24px auto">
+    <h1>Admin</h1>
+    <label for="pw">Passwort</label>
     <input type="password" id="pw" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
-    <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:0.9rem;color:var(--muted)">
+    <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:0.9rem;color:var(--muted);font-weight:500">
       <input type="checkbox" id="showPw" style="width:auto"> Passwort anzeigen
     </label>
     <button class="primary" id="loginBtn">Anmelden</button>
@@ -23,100 +77,199 @@
   </div>
 
   <div id="panel" hidden>
-    <div style="display:flex;gap:8px;margin-bottom:16px">
-      <button class="ghost" data-status="pending">Neu</button>
-      <button class="ghost" data-status="approved">Freigeschaltet</button>
-      <button class="ghost" data-status="ablehnen">Ablehnen</button>
+    <div class="tabs">
+      <button class="tab active" data-status="pending">Neu <span class="n" id="n-pending">0</span></button>
+      <button class="tab" data-status="approved">Online <span class="n" id="n-approved">0</span></button>
+      <button class="tab" data-status="rejected">Abgelehnt <span class="n" id="n-rejected">0</span></button>
     </div>
     <div id="list"></div>
   </div>
 </main>
 
+<div class="toast" id="toast"></div>
+
+<script src="/common.js"></script>
 <script>
 let password = sessionStorage.getItem('adminPw') || '';
 let currentStatus = 'pending';
+let posts = [];
 
-function authHeaders() {
-  return { authorization: `Bearer ${password}` };
-}
+const $ = id => document.getElementById(id);
+function esc(s) { return K.escapeHtml(s); }
+function authHeaders() { return { authorization: `Bearer ${password}` }; }
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2200); }
 
 async function tryLogin() {
   const res = await fetch('/api/admin/list?status=pending', { headers: authHeaders() });
   if (res.ok) {
-    document.getElementById('loginCard').hidden = true;
-    document.getElementById('panel').hidden = false;
-    loadList('pending');
+    $('loginCard').hidden = true; $('panel').hidden = false; $('logoutBtn').hidden = false;
+    render(await res.json());
   } else {
-    document.getElementById('loginError').hidden = false;
+    $('loginError').hidden = false;
+    sessionStorage.removeItem('adminPw');
   }
 }
 
-document.getElementById('showPw').addEventListener('change', (e) => {
-  document.getElementById('pw').type = e.target.checked ? 'text' : 'password';
-});
-
-document.getElementById('loginBtn').addEventListener('click', () => {
-  password = document.getElementById('pw').value.trim();
+$('showPw').addEventListener('change', e => { $('pw').type = e.target.checked ? 'text' : 'password'; });
+$('loginBtn').addEventListener('click', () => {
+  password = $('pw').value.trim();
   sessionStorage.setItem('adminPw', password);
   tryLogin();
 });
+$('pw').addEventListener('keydown', e => { if (e.key === 'Enter') $('loginBtn').click(); });
+$('logoutBtn').addEventListener('click', () => { sessionStorage.removeItem('adminPw'); location.reload(); });
 
-document.querySelectorAll('[data-status]').forEach(btn => {
-  btn.addEventListener('click', () => loadList(btn.dataset.status));
-});
+document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => loadList(btn.dataset.status)));
 
 async function loadList(status) {
   currentStatus = status;
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.status === status));
+  $('list').innerHTML = '<div class="fund-skeleton"><div class="skel skel-img"></div></div>';
   const res = await fetch(`/api/admin/list?status=${status}`, { headers: authHeaders() });
-  const data = await res.json();
-  const list = document.getElementById('list');
-  if (!data.posts || data.posts.length === 0) {
-    list.innerHTML = '<p class="hint">Nichts hier.</p>';
-    return;
-  }
-  list.innerHTML = data.posts.map(p => `
-    <div class="admin-item">
-      <img src="${p.images[0].thumb}">
-      <div style="flex:1">
-        <div>${p.displayName ? escapeHtml(p.displayName) : '<em>ohne Namen</em>'}</div>
-        <div class="hint">${p.locationText ? escapeHtml(p.locationText) : 'kein Ort angegeben'}</div>
-        ${p.comment ? `<div class="hint">${escapeHtml(p.comment)}</div>` : ''}
-        <div class="admin-actions">
-          ${status === 'pending' ? `
-            <button class="btn-approve" data-id="${p.id}" data-action="approve">Freischalten</button>
-            <button class="btn-ablehnen" data-id="${p.id}" data-action="ablehnen">Ablehnen</button>
-          ` : ''}
-          ${status === 'ablehnen' ? `
-            <button class="btn-approve" data-id="${p.id}" data-action="approve">Freischalten</button>
-          ` : ''}
-          <button class="btn-delete" data-id="${p.id}" data-action="delete">Löschen</button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-
-  list.querySelectorAll('button[data-action]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      btn.disabled = true;
-      await fetch('/api/admin/moderate', {
-        method: 'POST',
-        headers: { ...authHeaders(), 'content-type': 'application/json' },
-        body: JSON.stringify({ id: parseInt(btn.dataset.id, 10), action: btn.dataset.action }),
-      });
-      loadList(currentStatus);
-    });
-  });
+  if (res.status === 401) { sessionStorage.removeItem('adminPw'); location.reload(); return; }
+  render(await res.json());
 }
 
-function escapeHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
+function setCounts(c) {
+  if (!c) return;
+  ['pending', 'approved', 'rejected'].forEach(k => {
+    const el = $('n-' + k); el.textContent = c[k] || 0; el.classList.toggle('has', (c[k] || 0) > 0);
+  });
+  document.title = (c.pending ? '(' + c.pending + ') ' : '') + 'Admin — Köln 50969';
+}
+
+function render(data) {
+  posts = data.posts || [];
+  setCounts(data.counts);
+  const list = $('list');
+  if (!posts.length) {
+    list.innerHTML = currentStatus === 'pending'
+      ? '<div class="empty-admin"><strong>Alles erledigt</strong>Keine neuen Funde zum Prüfen.</div>'
+      : '<div class="empty-admin">Hier ist nichts.</div>';
+    return;
+  }
+  list.innerHTML = posts.map(card).join('');
+  document.querySelectorAll('.a-card').forEach(bindCard);
+  // Direktlink aus der E-Mail: admin.html#fund-123
+  const m = location.hash.match(/fund-(\d+)/);
+  if (m) {
+    const el = $('fund-' + m[1]);
+    if (el) { el.classList.add('hl'); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  }
+}
+
+function card(p) {
+  const loc = K.prettyLoc(p.locationText);
+  const km = K.distKm(p.lat, p.lng);
+  const date = new Date(p.createdAt).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const gps = typeof p.lat === 'number' ? `<a href="https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lng}#map=15/${p.lat}/${p.lng}" target="_blank" rel="noopener">Karte</a> · ${km != null ? K.fmtKm(km) : ''}` : '<span style="color:var(--red-dark)">kein GPS</span>';
+  let actions = '';
+  if (p.status === 'pending') actions = `<button class="b-ok" data-act="approve">Freischalten</button><button class="b-no" data-act="reject">Ablehnen</button>`;
+  else if (p.status === 'rejected') actions = `<button class="b-ok" data-act="approve">Doch freischalten</button><button class="b-no" data-act="view" disabled style="opacity:.4">Abgelehnt</button>`;
+  else actions = `<button class="b-no" data-act="reject">Offline nehmen</button><a class="btn-ghost" style="min-height:50px" href="/fund.html?id=${p.id}" target="_blank">Ansehen</a>`;
+  return `<article class="a-card" id="fund-${p.id}" data-id="${p.id}">
+    <div class="a-imgs${p.images.length > 1 ? ' two' : ''}">
+      ${p.images.map(im => `<a href="${im.full}" target="_blank" rel="noopener"><img src="${K.cdn(im.full, 700)}" onerror="this.onerror=null;this.src='${im.thumb}'" alt="" loading="lazy"></a>`).join('')}
+    </div>
+    <div class="a-body">
+      <div class="a-top"><span>#${p.id} · ${date}</span><span>${gps}</span></div>
+      <div class="a-loc${loc ? '' : ' none'}">${loc ? esc(loc) : 'Kein Ort angegeben'}</div>
+      <div class="a-meta">${p.displayName ? 'von <strong>' + esc(p.displayName) + '</strong>' : '<em>ohne Namen</em>'}</div>
+      ${p.comment ? `<div class="a-comment">${esc(p.comment)}</div>` : ''}
+      <div class="a-actions">
+        ${actions}
+        <button class="b-edit" data-act="edit">Bearbeiten</button>
+        <button class="b-del" data-act="delete">Löschen</button>
+      </div>
+      <div class="a-edit" hidden>
+        <label>Ort (Anzeige)</label>
+        <input type="text" data-f="locationText" value="${esc(p.locationText || '')}">
+        <label>Position suchen (setzt Koordinaten)</label>
+        <div class="row"><input type="text" data-f="search" placeholder="z. B. Khao San Road, Bangkok"><button class="btn-ghost" data-act="search" type="button">Suchen</button></div>
+        <div class="a-results"></div>
+        <div class="coords" data-f="coords">${typeof p.lat === 'number' ? p.lat + ', ' + p.lng : 'keine Koordinaten'}</div>
+        <label>Name</label>
+        <input type="text" data-f="displayName" value="${esc(p.displayName || '')}">
+        <label>Kommentar</label>
+        <textarea data-f="comment">${esc(p.comment || '')}</textarea>
+        <button class="primary" data-act="save" type="button">Speichern</button>
+      </div>
+    </div>
+  </article>`;
+}
+
+async function moderate(id, action, extra) {
+  const res = await fetch('/api/admin/moderate', {
+    method: 'POST',
+    headers: { ...authHeaders(), 'content-type': 'application/json' },
+    body: JSON.stringify(Object.assign({ id, action }, extra || {})),
+  });
+  return res.ok;
+}
+
+function removeCard(el, msg) {
+  el.classList.add('out');
+  setTimeout(() => { el.remove(); if (!document.querySelector('.a-card')) loadList(currentStatus); }, 320);
+  toast(msg);
+  // Zähler neu holen
+  fetch('/api/admin/list?status=' + currentStatus, { headers: authHeaders() }).then(r => r.json()).then(d => setCounts(d.counts)).catch(() => {});
+}
+
+function bindCard(el) {
+  {
+    const id = +el.dataset.id;
+    const post = posts.find(p => p.id === id);
+    let newCoords;
+    el.addEventListener('click', async e => {
+      const b = e.target.closest('[data-act]'); if (!b) return;
+      const act = b.dataset.act;
+      if (act === 'approve' || act === 'reject') {
+        b.disabled = true;
+        if (await moderate(id, act)) removeCard(el, act === 'approve' ? 'Freigeschaltet ✓' : 'Abgelehnt');
+        else { b.disabled = false; toast('Fehler, bitte nochmal'); }
+      } else if (act === 'delete') {
+        if (!b.classList.contains('confirm')) { b.classList.add('confirm'); b.textContent = 'Wirklich löschen?'; setTimeout(() => { b.classList.remove('confirm'); b.textContent = 'Löschen'; }, 3000); return; }
+        b.disabled = true;
+        if (await moderate(id, 'delete')) removeCard(el, 'Gelöscht'); else { b.disabled = false; toast('Fehler beim Löschen'); }
+      } else if (act === 'edit') {
+        const box = el.querySelector('.a-edit'); box.hidden = !box.hidden;
+      } else if (act === 'search') {
+        const q = el.querySelector('[data-f="search"]').value.trim(); if (q.length < 2) return;
+        const out = el.querySelector('.a-results'); out.innerHTML = '<div class="hint">Suche…</div>';
+        try {
+          const list = await (await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&addressdetails=1&accept-language=de,en&q=' + encodeURIComponent(q))).json();
+          out.innerHTML = list.length ? list.map((it, i) => `<button type="button" data-i="${i}">${esc(it.display_name.split(',').slice(0, 3).join(','))}</button>`).join('') : '<div class="hint">Nichts gefunden</div>';
+          out.querySelectorAll('button').forEach(r => r.addEventListener('click', ev => {
+            ev.stopPropagation();
+            const it = list[+r.dataset.i], a = it.address || {};
+            const parts = [a.suburb || a.neighbourhood || a.quarter || a.city_district, a.city || a.town || a.village || a.municipality].filter(Boolean);
+            if (a.country_code && a.country_code !== 'de' && a.country) parts.push(a.country);
+            newCoords = { lat: parseFloat(it.lat), lng: parseFloat(it.lon) };
+            el.querySelector('[data-f="coords"]').textContent = newCoords.lat.toFixed(4) + ', ' + newCoords.lng.toFixed(4) + ' (neu)';
+            el.querySelector('[data-f="locationText"]').value = parts.join(', ') || it.display_name.split(',').slice(0, 2).join(',');
+            out.innerHTML = '';
+          }));
+        } catch (err) { out.innerHTML = '<div class="hint">Suche nicht erreichbar</div>'; }
+      } else if (act === 'save') {
+        const payload = {
+          locationText: el.querySelector('[data-f="locationText"]').value,
+          displayName: el.querySelector('[data-f="displayName"]').value,
+          comment: el.querySelector('[data-f="comment"]').value,
+        };
+        if (newCoords) { payload.lat = newCoords.lat; payload.lng = newCoords.lng; }
+        b.disabled = true;
+        const ok = await moderate(id, 'update', payload);
+        b.disabled = false;
+        if (ok) {
+          Object.assign(post, { locationText: payload.locationText || null, displayName: payload.displayName || null, comment: payload.comment || null }, newCoords || {});
+          const tmp = document.createElement('div'); tmp.innerHTML = card(post); const fresh = tmp.firstElementChild; el.replaceWith(fresh); bindCard(fresh); toast('Gespeichert ✓');
+        } else toast('Speichern fehlgeschlagen');
+      }
+    });
+  }
 }
 
 if (password) tryLogin();
 </script>
 </body>
 </html>
-
-

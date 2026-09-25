@@ -1,14 +1,15 @@
 import { getDatabase } from "@netlify/database";
 import { json, checkAdminAuth } from "./_shared.mjs";
 
+// Status-Namen vereinheitlichen (Frontend nutzte frueher "ablehnen"/"murks")
+const STATUS = { pending: "pending", approved: "approved", rejected: "rejected", murks: "rejected", ablehnen: "rejected" };
+
 export default async (req) => {
   if (!checkAdminAuth(req)) return json(401, { error: "unauthorized" });
 
   const url = new URL(req.url);
-  const status = url.searchParams.get("status") || "pending";
-  if (!["pending", "approved", "murks"].includes(status)) {
-    return json(400, { error: "invalid status" });
-  }
+  const status = STATUS[url.searchParams.get("status") || "pending"];
+  if (!status) return json(400, { error: "invalid status" });
 
   const db = getDatabase();
   const rows = await db.sql`
@@ -16,8 +17,11 @@ export default async (req) => {
     FROM posts
     WHERE status = ${status}
     ORDER BY created_at DESC
-    LIMIT 100
+    LIMIT 300
   `;
+  const countRows = await db.sql`SELECT status, COUNT(*)::int AS n FROM posts GROUP BY status`;
+  const counts = { pending: 0, approved: 0, rejected: 0 };
+  for (const c of countRows) counts[c.status] = c.n;
 
   const posts = rows.map((r) => {
     const pairs = r.image_keys.map((pair) => {
@@ -40,7 +44,7 @@ export default async (req) => {
     };
   });
 
-  return json(200, { posts });
+  return json(200, { posts, counts });
 };
 
 export const config = { path: "/.netlify/functions/admin-list" };

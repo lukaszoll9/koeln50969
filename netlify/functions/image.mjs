@@ -23,6 +23,8 @@ export default async (req) => {
     headers: {
       "content-type": contentType,
       "cache-control": "public, max-age=31536000, immutable",
+      // Am Netlify-CDN dauerhaft cachen: Bilder unter einem Key aendern sich nie
+      "netlify-cdn-cache-control": "public, durable, max-age=31536000, immutable",
     },
   });
 };

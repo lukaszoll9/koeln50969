@@ -2,46 +2,13 @@ import { getDatabase } from "@netlify/database";
 import { getStore } from "@netlify/blobs";
 import { json, checkAdminAuth } from "./_shared.mjs";
 
-async function sendAdminPush(title, body, url) {
-  const vapidKey = process.env.VAPID_PRIVATE_KEY;
-  // Ohne VAPID-Key: stille Benachrichtigung via Mailjet
-  const apiKey = process.env.MAILJET_API_KEY;
-  const secret = process.env.MAILJET_SECRET_KEY;
-  const toEmail = process.env.NOTIFY_EMAIL || "lukasfra437@gmail.com";
-  if (!apiKey || !secret) return;
-  try {
-    await fetch("https://api.mailjet.com/v3.1/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: "Basic " + btoa(`${apiKey}:${secret}`) },
-      body: JSON.stringify({ Messages: [{ From: { Email: "noreply@koeln50969.de", Name: "Köln 50969" }, To: [{ Email: toEmail }], Subject: title, TextPart: body + "\n\nhttps://koeln50969.de" + url }] }),
-    });
-  } catch(e) {}
-}
+const ACTIONS = ["approve", "reject", "murks", "ablehnen", "feature", "delete", "update"];
 
-async function sendNotification(subject, body) {
-  const apiKey = process.env.MAILJET_API_KEY;
-  const secret = process.env.MAILJET_SECRET_KEY;
-  const toEmail = process.env.NOTIFY_EMAIL || "lukasfra437@gmail.com";
-  if (!apiKey || !secret) return; // kein Mailjet konfiguriert → still überspringen
-  try {
-    await fetch("https://api.mailjet.com/v3.1/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Basic " + btoa(`${apiKey}:${secret}`),
-      },
-      body: JSON.stringify({
-        Messages: [{
-          From: { Email: "noreply@koeln50969.de", Name: "Köln 50969" },
-          To: [{ Email: toEmail }],
-          Subject: subject,
-          TextPart: body,
-        }],
-      }),
-    });
-  } catch (e) {
-    console.error("Mail-Fehler:", e);
-  }
+function cleanText(v, max) {
+  if (v === undefined) return undefined;
+  if (v === null) return null;
+  const s = String(v).trim().slice(0, max);
+  return s.length ? s : null;
 }
 
 export default async (req) => {
@@ -49,7 +16,8 @@ export default async (req) => {
   if (req.method !== "POST") return json(405, { error: "method not allowed" });
 
   const body = await req.json().catch(() => null);
-  if (!body || !body.id || !["approve", "feature", "murks", "delete"].includes(body.action)) {
+  const id = body && parseInt(body.id, 10);
+  if (!body || !Number.isFinite(id) || !ACTIONS.includes(body.action)) {
     return json(400, { error: "invalid request" });
   }
 
@@ -57,16 +25,35 @@ export default async (req) => {
 
   if (body.action === "feature") {
     await db.sql`UPDATE posts SET featured = false WHERE featured = true`;
-    await db.sql`UPDATE posts SET featured = true WHERE id = ${body.id}`;
-    return json(200, { ok: true });
+    await db.sql`UPDATE posts SET featured = true WHERE id = ${id}`;
   } else if (body.action === "approve") {
-    await db.sql`UPDATE posts SET status = 'approved', moderated_at = now() WHERE id = ${body.id}`;
-    // Push-Benachrichtigung an Admin (du bekommst Bescheid wenn jemand freigeschaltet wird)
-    sendAdminPush("✅ Fund freigeschaltet", `Fund #${body.id} ist jetzt in der Galerie sichtbar.`, "/admin.html").catch(()=>{});
-  } else if (body.action === "murks") {
-    await db.sql`UPDATE posts SET status = 'rejected', moderated_at = now() WHERE id = ${body.id}`;
+    await db.sql`UPDATE posts SET status = 'approved', moderated_at = now() WHERE id = ${id}`;
+  } else if (["reject", "murks", "ablehnen"].includes(body.action)) {
+    await db.sql`UPDATE posts SET status = 'rejected', moderated_at = now() WHERE id = ${id}`;
+  } else if (body.action === "update") {
+    // Ort, Name, Kommentar und Koordinaten nachtraeglich korrigieren
+    const [cur] = await db.sql`SELECT display_name, location_text, lat, lng, comment FROM posts WHERE id = ${id}`;
+    if (!cur) return json(404, { error: "not found" });
+    const name = cleanText(body.displayName, 80);
+    const loc = cleanText(body.locationText, 160);
+    const comment = cleanText(body.comment, 500);
+    let lat = cur.lat, lng = cur.lng;
+    if (body.lat === null || body.lng === null) { lat = null; lng = null; }
+    else if (typeof body.lat === "number" && typeof body.lng === "number" &&
+             body.lat >= -90 && body.lat <= 90 && body.lng >= -180 && body.lng <= 180) {
+      lat = Math.round(body.lat * 10000) / 10000;
+      lng = Math.round(body.lng * 10000) / 10000;
+    }
+    await db.sql`
+      UPDATE posts SET
+        display_name = ${name === undefined ? cur.display_name : name},
+        location_text = ${loc === undefined ? cur.location_text : loc},
+        comment = ${comment === undefined ? cur.comment : comment},
+        lat = ${lat}, lng = ${lng}
+      WHERE id = ${id}
+    `;
   } else if (body.action === "delete") {
-    const [row] = await db.sql`SELECT image_keys FROM posts WHERE id = ${body.id}`;
+    const [row] = await db.sql`SELECT image_keys FROM posts WHERE id = ${id}`;
     if (row) {
       const store = getStore("post-images");
       for (const pair of row.image_keys) {
@@ -75,13 +62,10 @@ export default async (req) => {
         await store.delete(thumb);
       }
     }
-    await db.sql`DELETE FROM posts WHERE id = ${body.id}`;
+    await db.sql`DELETE FROM posts WHERE id = ${id}`;
   }
 
   return json(200, { ok: true });
 };
 
 export const config = { path: "/.netlify/functions/admin-moderate" };
-
-
-

@@ -1,14 +1,22 @@
 <!doctype html>
-<html lang="de">
+<html lang="de" id="html-root">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Karte — Köln 50969</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 body { margin: 0; overflow: hidden; }
-#map { position: fixed; inset: 0; top: 62px; }
+#map { position: fixed; inset: 0; top: calc(var(--header-h) + 3px); }
+.map-pill { position: fixed; z-index: 500; top: calc(var(--header-h) + 15px); left: 50%; transform: translateX(-50%); background: #fff; border-radius: 999px; padding: 8px 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; animation: rise 0.5s var(--ease-out) 0.3s both; }
+.map-pill b { color: #e1141c; }
+.map-popup-km { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; color: #b80f16; margin-top: 2px; }
+.photo-marker { animation: pop 0.4s var(--ease-spring) both; }
 .leaflet-popup-content-wrapper {
   border-radius: 14px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
@@ -30,30 +38,31 @@ body { margin: 0; overflow: hidden; }
 }
 .map-popup-loc {
   font-weight: 700; font-size: 0.88rem;
-  color: #1e1a14; margin-bottom: 2px;
-  font-family: 'Work Sans', sans-serif;
+  color: #16130f; margin-bottom: 2px;
+  font-family: 'Archivo', sans-serif;
 }
 .map-popup-date {
-  font-size: 0.74rem; color: #7a6e5f;
-  font-family: 'Work Sans', sans-serif;
+  font-size: 0.74rem; color: #6b6660;
+  font-family: 'Archivo', sans-serif;
 }
 .map-popup-link {
   display: block; margin-top: 8px;
   padding: 6px 10px; text-align: center;
-  background: #c41c22; color: #fff;
+  background: #e1141c; color: #fff;
   border-radius: 8px; text-decoration: none;
   font-size: 0.8rem; font-weight: 700;
-  font-family: 'Work Sans', sans-serif;
+  font-family: 'Archivo', sans-serif;
 }
 /* Foto-Marker */
 .photo-marker {
   width: 48px; height: 48px;
-  border-radius: 50%;
-  border: 3px solid #c41c22;
+  border-radius: 12px;
+  border: 3px solid #fff;
+  outline: 2px solid #e1141c;
   box-shadow: 0 3px 12px rgba(0,0,0,0.3);
   background-size: cover;
   background-position: center;
-  background-color: #f5ead8;
+  background-color: #ffffff;
   cursor: pointer;
   transition: transform 0.15s;
 }
@@ -61,22 +70,24 @@ body { margin: 0; overflow: hidden; }
 /* Cluster */
 .cluster-dot {
   width: 38px; height: 38px;
-  background: #c41c22;
+  background: #e1141c;
   border: 3px solid #fff;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-weight: 800; font-size: 0.85rem; color: #fff;
-  box-shadow: 0 3px 12px rgba(196,28,34,0.4);
-  font-family: 'Work Sans', sans-serif;
+  box-shadow: 0 3px 12px rgba(225,20,28,0.4);
+  font-family: 'Archivo', sans-serif;
 }
 </style>
 </head>
 <body>
 <header>
-  <button class="menu-btn" id="menuOpenBtn">☰</button>
+  <button class="menu-btn" id="menuOpenBtn" aria-label="Menü öffnen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg></button>
   <a class="brand" href="/">KÖLN <b>50969</b></a>
+  <span class="brand-tag" data-de="Zollywood überall." data-en="Zollywood everywhere.">Zollywood überall.</span>
   <div class="spacer"></div>
-
+  <button class="lang-btn" id="langBtn">EN</button>
+  <a class="header-cta" href="/hochladen.html"><span data-de="Fund melden" data-en="Report a find">Fund melden</span></a>
 </header>
 
 <div id="map"></div>
@@ -85,6 +96,8 @@ body { margin: 0; overflow: hidden; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css">
+<script src="/i18n.js"></script>
+<script src="/common.js"></script>
 <script src="/menu.js"></script>
 <script>
 function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
@@ -117,14 +130,14 @@ async function initMap(){
     spiderfyOnMaxZoom: true,
   });
 
-  const res = await fetch('/api/posts?limit=500');
+  const res = await fetch('/api/posts?limit=1000');
   const data = await res.json();
   const posts = (data.posts||[]).filter(p => typeof p.lat==='number' && typeof p.lng==='number');
 
   if(posts.length===0){
     const el = document.createElement('div');
-    el.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#fff;padding:12px 20px;border-radius:10px;font-family:Work Sans,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,0.15)';
-    el.innerHTML = 'Noch keine Funde mit Standort. <a href="/hochladen.html" style="color:#c41c22;font-weight:700">Sei der Erste →</a>';
+    el.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#fff;padding:12px 20px;border-radius:10px;font-family:Archivo,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,0.15)';
+    el.innerHTML = 'Noch keine Funde mit Standort. <a href="/hochladen.html" style="color:#e1141c;font-weight:700">Sei der Erste →</a>';
     document.body.appendChild(el);
     return;
   }
@@ -135,11 +148,12 @@ async function initMap(){
   posts.forEach(p => {
     const thumb = p.images&&p.images[0] ? p.images[0].thumb : '';
     const full  = p.images&&p.images[0] ? p.images[0].full : '';
-    const loc   = p.locationText ? escapeHtml(p.locationText) : 'Unbekannter Ort';
+    const loc   = p.locationText ? escapeHtml(K.prettyLoc(p.locationText)) : 'Unbekannter Ort';
+    const km    = K.distKm(p.lat, p.lng);
     const date  = new Date(p.createdAt).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
 
     const icon = L.divIcon({
-      html: `<div class="photo-marker" style="background-image:url('${thumb}')"></div>`,
+      html: `<div class="photo-marker" style="background-image:url('${K.cdn(full||thumb,120)}')"></div>`,
       className: '', iconSize: [48,48], iconAnchor: [24,24]
     });
 
@@ -148,11 +162,12 @@ async function initMap(){
     const popup = L.popup({ maxWidth: 200, minWidth: 200, closeButton: true, offset: [0, -10] })
       .setContent(`
         <div class="map-popup">
-          ${thumb ? `<img class="map-popup-img" src="${thumb}" alt="${loc}">` : ''}
+          ${thumb ? `<img class="map-popup-img" src="${K.cdn(full||thumb,400)}" onerror="this.onerror=null;this.src='${thumb}'" alt="${loc}">` : ''}
           <div class="map-popup-body">
-            <div class="map-popup-loc">📍 ${loc}</div>
+            <div class="map-popup-loc">${loc}</div>
+            ${km!=null?`<div class="map-popup-km">${K.fmtKm(km)} ${K.lang()==='en'?'from Zollstock':'ab Zollstock'}</div>`:''}
             <div class="map-popup-date">${date}</div>
-            <a class="map-popup-link" href="/fund.html?id=${p.id}">Fund ansehen →</a>
+            <a class="map-popup-link" href="/fund.html?id=${p.id}">${K.lang()==='en'?'View find':'Fund ansehen'} →</a>
           </div>
         </div>`);
 
@@ -165,12 +180,18 @@ async function initMap(){
 
   map.addLayer(cluster);
 
+  const pill = document.createElement('div');
+  pill.className = 'map-pill';
+  const en = K.lang() === 'en';
+  pill.innerHTML = '<b>' + posts.length + '</b> ' + (en ? 'finds' : 'Funde') + ' · <b>' + K.countCountries(posts) + '</b> ' + (en ? 'countries' : 'Länder');
+  document.body.appendChild(pill);
+
   // Heatmap erstellen
   if (bounds.length > 0 && L.heatLayer) {
     const heatData = posts.map(p => [p.lat, p.lng, 1]);
     heatLayer = L.heatLayer(heatData, {
       radius: 35, blur: 25, maxZoom: 13,
-      gradient: { 0.3: '#f5ead8', 0.6: '#e8a87c', 1.0: '#c41c22' }
+      gradient: { 0.3: '#ffffff', 0.6: '#f28b8f', 1.0: '#e1141c' }
     });
   }
 
@@ -185,6 +206,3 @@ initMap();
 </script>
 </body>
 </html>
-
-
-

@@ -1,9 +1,13 @@
 <!doctype html>
-<html lang="de">
+<html lang="de" id="html-root">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Statistik &mdash; K&ouml;ln 50969</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="/style.css">
 <style>
 .stat-page { max-width: 680px; margin: 0 auto; padding: 16px 18px 90px; }
@@ -30,12 +34,12 @@
 </head>
 <body>
 <header>
-  <button class="menu-btn" id="menuOpenBtn">&#9776;</button>
-  <a class="brand" href="/">K&Ouml;LN <b>50969</b></a>
+  <button class="menu-btn" id="menuOpenBtn" aria-label="Menü öffnen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg></button>
+  <a class="brand" href="/">KÖLN <b>50969</b></a>
+  <span class="brand-tag" data-de="Zollywood überall." data-en="Zollywood everywhere.">Zollywood überall.</span>
   <div class="spacer"></div>
-  <a class="upload-fab" href="/hochladen.html" aria-label="Sticker hochladen">
-    <span class="fab-plus">+</span><span class="fab-label">Sticker hochladen</span>
-  </a>
+  <button class="lang-btn" id="langBtn">EN</button>
+  <a class="header-cta" href="/hochladen.html"><span data-de="Fund melden" data-en="Report a find">Fund melden</span></a>
 </header>
 
 <div class="stat-page">
@@ -43,20 +47,28 @@
 </div>
 
 <footer>
-  <a href="/faq.html">FAQ</a> &middot; <a href="/karte.html">Karte</a> &middot; <a href="/kontakt.html">Kontakt</a> &middot; <a href="/impressum.html">Impressum</a> &middot; <a href="/datenschutz.html">Datenschutz</a>
+  <div class="foot-inner">
+    <div class="foot-brand">KÖLN <b>50969</b><small>Zollywood überall.</small></div>
+    <nav class="foot-links">
+      <a href="/">Galerie</a><a href="/karte.html">Karte</a><a href="/statistik.html">Statistik</a><a href="/faq.html">FAQ</a><a href="/kontakt.html">Kontakt</a><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a>
+    </nav>
+    <div class="foot-meta">50.9053° N · 6.9374° E · Köln-Zollstock · Inspiriert von <a href="https://danke-max.de" target="_blank" rel="noopener">danke-max.de</a></div>
+  </div>
 </footer>
 
 <a class="fab-float" href="/hochladen.html">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-  Fund melden
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+  <span data-de="Fund melden" data-en="Report a find">Fund melden</span>
 </a>
 
 <script src="/i18n.js"></script>
+<script src="/common.js"></script>
 <script src="/menu.js"></script>
 <script>
+function T(de,en){return K.lang()==='en'?en:de;}
 function escapeHtml(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 
-var KOELN_LAT = 50.9044, KOELN_LNG = 6.9406;
+var KOELN_LAT = K.HOME.lat, KOELN_LNG = K.HOME.lng;
 
 function haversine(lat1,lng1,lat2,lng2){
   var R=6371;
@@ -75,13 +87,13 @@ function expandable(items,renderFn,limit){
   var html=items.slice(0,limit).map(function(item,i){return renderFn(item,i);}).join('');
   if(rest.length>0){
     html+='<div id="'+uid+'" hidden>'+rest.map(function(item,i){return renderFn(item,limit+i);}).join('')+'</div>';
-    html+='<button class="expand-btn" onclick="document.getElementById(\''+uid+'\').hidden=false;this.remove()">Alle '+items.length+' anzeigen \u2193</button>';
+    html+='<button class="expand-btn" onclick="document.getElementById(\''+uid+'\').hidden=false;this.remove()">'+T('Alle '+items.length+' anzeigen','Show all '+items.length)+' \u2193</button>';
   }
   return html;
 }
 
 function buildWeekChart(posts){
-  var days=['Mo','Di','Mi','Do','Fr','Sa','So'];
+  var days=T('Mo Di Mi Do Fr Sa So','Mo Tu We Th Fr Sa Su').split(' ');
   var now=new Date();
   var dayData=Array(7).fill(0);
   var todayDow=(now.getDay()+6)%7;
@@ -91,7 +103,7 @@ function buildWeekChart(posts){
     if(diff<7){var dow=(d.getDay()+6)%7;dayData[dow]++;}
   });
   var max=Math.max.apply(null,dayData.concat([1]));
-  return '<div style="font-size:0.8rem;font-weight:600;color:var(--muted);margin-bottom:6px">Funde der letzten 7 Tage</div>'+
+  return '<div style="font-size:0.8rem;font-weight:600;color:var(--muted);margin-bottom:6px">'+T('Funde der letzten 7 Tage','Finds in the last 7 days')+'</div>'+
     '<div class="week-chart">'+
     days.map(function(d,i){
       return '<div class="week-bar-wrap">'+
@@ -104,7 +116,7 @@ function buildWeekChart(posts){
 async function load(){
   var el=document.getElementById('content');
   try{
-    var res=await fetch('/api/posts?limit=500');
+    var res=await fetch('/api/posts?limit=1000');
     var data=await res.json();
     var posts=data.posts||[];
 
@@ -137,8 +149,8 @@ async function load(){
     var weekAgo=Date.now()-7*24*60*60*1000;
     var thisWeek=posts.filter(function(p){return new Date(p.createdAt)>weekAgo;}).length;
     var daySet=new Set(posts.map(function(p){return new Date(p.createdAt).toDateString();}));
-    var latestCity=posts[0]&&posts[0].locationText?posts[0].locationText:'&mdash;';
-    var medals=['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
+    var latestCity=posts[0]&&posts[0].locationText?K.prettyLoc(posts[0].locationText):'—';
+    var medals=['01','02','03'];
     var rankClass=['gold','silver','bronze'];
 
     // Distanz-Sektion
@@ -149,10 +161,10 @@ async function load(){
         '<a class="dist-record-banner" href="/fund.html?id='+rec.id+'">'+
         '<img src="'+rec.images[0].thumb+'" alt="" style="width:62px;height:62px;border-radius:10px;object-fit:cover;flex-shrink:0;border:2px solid #c9a227">'+
         '<div>'+
-        '<div class="dist-record-label">\u2708\uFE0F Weiteste Reise</div>'+
+        '<div class="dist-record-label">'+T('Weiteste Reise','Furthest trip')+'</div>'+
         '<div class="dist-record-km">'+rec.km.toLocaleString('de-DE')+' km</div>'+
-        '<div class="dist-record-loc">'+escapeHtml(rec.locationText||'&mdash;')+'</div>'+
-        (rec.displayName?'<div class="dist-record-finder">gefunden von '+escapeHtml(rec.displayName)+'</div>':'')+
+        '<div class="dist-record-loc">'+escapeHtml(K.prettyLoc(rec.locationText)||'—')+'</div>'+
+        (rec.displayName?'<div class="dist-record-finder">'+T('gefunden von ','found by ')+escapeHtml(rec.displayName)+'</div>':'')+
         '</div></a>';
 
       var distRest=postsWithDist.slice(1);
@@ -160,51 +172,53 @@ async function load(){
         return '<div class="dist-row">'+
           '<span class="dist-rank">#'+(i+2)+'</span>'+
           '<span class="dist-km">'+p.km.toLocaleString('de-DE')+' km</span>'+
-          '<a href="/fund.html?id='+p.id+'" class="dist-place">'+escapeHtml(p.locationText||'&mdash;')+'</a>'+
+          '<a href="/fund.html?id='+p.id+'" class="dist-place">'+escapeHtml(K.prettyLoc(p.locationText)||'—')+'</a>'+
           '</div>';
       },4):'';
 
       distSection=
         '<div class="card">'+
-        '<h2 style="margin-top:0;font-size:1rem">\u2708\uFE0F Distanz-Rangliste</h2>'+
-        '<p class="hint" style="margin-top:0;margin-bottom:12px">Wie weit ist der Sticker von K&ouml;ln-Zollstock gereist?</p>'+
+        '<h2 style="margin-top:0;font-size:1rem">'+T('Distanz-Rangliste','Distance ranking')+'</h2>'+
+        '<p class="hint" style="margin-top:0;margin-bottom:12px">'+T('Wie weit ist der Sticker von Köln-Zollstock gereist?','How far has the sticker travelled from Cologne-Zollstock?')+'</p>'+
         banner+listHtml+
         '</div>';
     }
 
     el.innerHTML=
       '<div class="stat-hero">'+
-      '<span class="stat-hero-num">'+posts.length+'</span>'+
-      '<span class="stat-hero-label">Sticker-Fund'+(posts.length===1?'':'e')+' weltweit</span>'+
+      '<span class="stat-hero-num" id="heroNum">'+posts.length+'</span>'+
+      '<span class="stat-hero-label">'+T('Sticker-Fund'+(posts.length===1?'':'e')+' weltweit','Sticker find'+(posts.length===1?'':'s')+' worldwide')+'</span>'+
       buildWeekChart(posts)+
       '</div>'+
 
+
       '<div class="card">'+
+      '<div class="stat-row"><span class="stat-row-label"><svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg> '+T('Länder','Countries')+'</span><span class="stat-count">'+K.countCountries(posts)+'</span></div>'+
       '<div class="stat-row"><span><span class="stat-row-label">'+
       '<svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>'+
-      ' Verschiedene Orte</span></span><span class="stat-count">'+Object.keys(ortCounts).length+'</span></div>'+
+      ' '+T('Verschiedene Orte','Different places')+'</span></span><span class="stat-count">'+Object.keys(ortCounts).length+'</span></div>'+
       '<div class="stat-row"><span><span class="stat-row-label">'+
       '<svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+
-      ' Aktive Tage</span></span><span class="stat-count">'+daySet.size+'</span></div>'+
+      ' '+T('Aktive Tage','Active days')+'</span></span><span class="stat-count">'+daySet.size+'</span></div>'+
       '<div class="stat-row"><span><span class="stat-row-label">'+
       '<svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>'+
-      ' Diese Woche</span></span><span class="stat-count">'+thisWeek+'</span></div>'+
+      ' '+T('Diese Woche','This week')+'</span></span><span class="stat-count">'+thisWeek+'</span></div>'+
       '<div class="stat-row"><span><span class="stat-row-label">'+
       '<svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'+
-      ' Zuletzt in</span></span><span class="stat-count" style="text-align:right;max-width:55%">'+escapeHtml(latestCity)+'</span></div>'+
+      ' '+T('Zuletzt in','Latest in')+'</span></span><span class="stat-count" style="text-align:right;max-width:55%">'+escapeHtml(latestCity)+'</span></div>'+
       '</div>'+
 
       distSection+
 
       (topFinder.length>0?
       '<div class="card">'+
-      '<h2 style="margin-top:0;font-size:1rem">\uD83C\uDFC6 Top-Finder</h2>'+
+      '<h2 style="margin-top:0;font-size:1rem">'+T('Top-Finder','Top finders')+'</h2>'+
       expandable(topFinder,function(entry,i){
         var name=entry[0],n=entry[1];
         return '<div class="top-finder-card">'+
           '<span class="top-finder-rank '+(rankClass[i]||'')+'">'+( medals[i]||'#'+(i+1))+'</span>'+
           '<a class="top-finder-name" href="/finder.html?name='+encodeURIComponent(name)+'" style="text-decoration:none;color:inherit">'+escapeHtml(name)+'</a>'+
-          '<span class="top-finder-count">'+n+' Fund'+(n===1?'':'e')+'</span>'+
+          '<span class="top-finder-count">'+n+' '+T('Fund'+(n===1?'':'e'),n===1?'find':'finds')+'</span>'+
           '</div>';
       },3)+
       '</div>':'')+
@@ -213,13 +227,13 @@ async function load(){
       '<div class="card">'+
       '<h2 style="margin-top:0;font-size:1rem"><span class="stat-row-label">'+
       '<svg class="stat-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>'+
-      ' Top-Orte</span></h2>'+
+      ' '+T('Top-Orte','Top places')+'</span></h2>'+
       expandable(topOrte,function(entry,i){
         var ort=entry[0],n=entry[1];
         return '<div class="stat-row">'+
           '<span style="display:flex;align-items:center;gap:8px">'+
           '<span style="font-size:0.75rem;font-weight:800;color:var(--muted);min-width:18px">#'+(i+1)+'</span>'+
-          '<a href="/?ort='+encodeURIComponent(ort)+'" style="color:inherit;text-decoration:underline">'+escapeHtml(ort)+'</a>'+
+          '<a href="/?ort='+encodeURIComponent(ort)+'" style="color:inherit;text-decoration:none;font-weight:600">'+escapeHtml(K.prettyLoc(ort))+'</a>'+
           '</span>'+
           '<span class="stat-count">'+n+'</span>'+
           '</div>';
@@ -227,15 +241,18 @@ async function load(){
       '</div>':'')+
 
       '<div class="card" style="text-align:center">'+
-      '<p style="margin:0 0 12px;color:var(--muted);font-size:0.9rem">Teil der Geschichte werden</p>'+
-      '<a href="/hochladen.html" class="cta-upload-btn">\uD83D\uDCCD Fund melden</a>'+
+      '<p style="margin:0 0 12px;color:var(--muted);font-size:0.9rem">'+T('Teil der Geschichte werden','Become part of the story')+'</p>'+
+      '<a href="/hochladen.html" class="cta-upload-btn">'+T('Fund melden','Report a find')+'</a>'+
       '</div>';
 
+    K.countUp(document.getElementById('heroNum'), posts.length, 900);
+    K.reveal(el.querySelectorAll('.card'));
   }catch(e){
     el.innerHTML='<div class="card"><p class="hint">Fehler beim Laden.</p></div>';
   }
 }
 load();
+document.addEventListener('langchange', function(){ if (document.querySelector('.stat-row')) load(); });
 </script>
 </body>
 </html>

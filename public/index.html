@@ -2,315 +2,357 @@
 <html lang="de" id="html-root">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Köln 50969 — Sticker-Funde</title>
-<meta name="description" content="Ein Sticker aus Köln-Zollstock auf Reisen. Finde ihn. Fotografiere ihn. Werde Teil der Geschichte.">
-<meta property="og:title" content="Köln 50969 — Sticker-Funde">
-<meta property="og:description" content="Ein Sticker aus Köln-Zollstock — gefunden irgendwo auf der Welt. Zeig wo du ihn entdeckt hast.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Köln 50969 — Zollywood überall.</title>
+<meta name="description" content="Ein Sticker aus Köln-Zollstock auf Reisen. Finde ihn. Fotografiere ihn. Werde Teil der Karte.">
+<meta name="theme-color" content="#ffffff">
+<meta property="og:title" content="Köln 50969 — Zollywood überall.">
+<meta property="og:description" content="Ein Sticker aus Köln-Zollstock, gefunden irgendwo auf der Welt. Zeig, wo du ihn entdeckt hast.">
 <meta property="og:image" content="https://koeln50969.de/sticker-hero.jpg">
 <meta property="og:url" content="https://koeln50969.de">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="manifest" href="/manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
-<!-- ── ONBOARDING OVERLAY (nur beim ersten Besuch) ── -->
+<!-- Onboarding (nur beim ersten Besuch) -->
 <div class="onboarding" id="onboarding" hidden>
-  <div class="onboarding-box">
-    <div class="onboarding-sticker">📍</div>
-    <h2 class="onboarding-title" data-de="Hallo, Entdecker." data-en="Hello, Explorer.">Hallo, Entdecker.</h2>
-    <p class="onboarding-text" data-de="Du hast einen Sticker aus Köln-Zollstock gefunden — dem Zollywood Tower, der überall hingereist ist. Hier sammeln sich alle Funde weltweit." data-en="You found a sticker from Cologne's Zollstock neighbourhood — the Zollywood Tower, travelling everywhere. All finds from around the world land here.">Du hast einen Sticker aus Köln-Zollstock gefunden — dem Zollywood Tower, der überall hingereist ist. Hier sammeln sich alle Funde weltweit.</p>
-    <button class="onboarding-btn" id="onboardingClose" data-de="Verstanden — zeig mir die Funde!" data-en="Got it — show me the finds!">Verstanden — zeig mir die Funde!</button>
+  <div class="onboarding-box" role="dialog" aria-modal="true" aria-labelledby="obTitle">
+    <div class="onboarding-sticker"><img src="/sticker-hero.jpg" alt=""></div>
+    <h2 class="onboarding-title" id="obTitle" data-de="Gefunden!" data-en="You found it!">Gefunden!</h2>
+    <p class="onboarding-text" data-de="Du hast einen Sticker aus Köln-Zollstock gefunden. Er zeigt den Zollywood Tower und taucht überall auf der Welt auf. Hier landen alle Funde." data-en="You found a sticker from Cologne's Zollstock neighbourhood. It shows the Zollywood Tower and turns up all over the world. Every find lands here.">Du hast einen Sticker aus Köln-Zollstock gefunden. Er zeigt den Zollywood Tower und taucht überall auf der Welt auf. Hier landen alle Funde.</p>
+    <button class="onboarding-btn" id="onboardingClose" data-de="Funde ansehen" data-en="Show me the finds">Funde ansehen</button>
   </div>
 </div>
 
 <header>
-  <button class="menu-btn" id="menuOpenBtn">☰</button>
+  <button class="menu-btn" id="menuOpenBtn" aria-label="Menü öffnen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg></button>
   <a class="brand" href="/">KÖLN <b>50969</b></a>
-  <span class="header-tagline-always" data-de="Zollywood überall." data-en="Zollywood everywhere.">Zollywood überall.</span>
+  <span class="brand-tag" data-de="Zollywood überall." data-en="Zollywood everywhere.">Zollywood überall.</span>
   <div class="spacer"></div>
-  <button class="lang-btn" id="langBtn" title="Sprache wechseln">EN</button>
-
+  <button class="lang-btn" id="langBtn">EN</button>
+  <a class="header-cta" href="/hochladen.html"><span data-de="Fund melden" data-en="Report a find">Fund melden</span></a>
 </header>
 
-<!-- ── HERO ── -->
-<div class="hero">
-  <!-- Tower SVG Hintergrund -->
-  <div class="hero-sticker-wrap">
-    <img src="/sticker-hero.jpg" alt="Der Köln 50969 Sticker" class="hero-sticker-img">
+<section class="route-hero">
+  <div class="route-inner">
+    <div class="route-text">
+      <div class="hero-kicker anim-in" id="heroKicker"><span class="live-dot"></span><span data-de="Sticker-Funde aus aller Welt" data-en="Sticker finds from around the world">Sticker-Funde aus aller Welt</span></div>
+      <h1 class="hero-headline anim-in anim-d1">
+        <span class="hero-line">Zollywood</span>
+        <span class="hl-red" data-de="überall." data-en="everywhere.">überall.</span>
+      </h1>
+      <p class="hero-sub anim-in anim-d2" data-de="Ein Sticker startet in Köln-Zollstock und taucht überall auf der Welt wieder auf. Jede Linie ist ein Fund. Hast du ihn entdeckt? Dann zeichne die nächste." data-en="A sticker starts in Cologne's Zollstock and turns up all over the world. Every line is a find. Spotted it? Draw the next one.">Ein Sticker startet in Köln-Zollstock und taucht überall auf der Welt wieder auf. Jede Linie ist ein Fund. Hast du ihn entdeckt? Dann zeichne die nächste.</p>
+      <div class="hero-actions anim-in anim-d3">
+        <a class="btn" href="/hochladen.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span data-de="Fund melden" data-en="Report a find">Fund melden</span></a>
+        <a class="btn-ghost dark" href="/karte.html"><span data-de="Karte öffnen" data-en="Open map">Karte öffnen</span> →</a>
+      </div>
+    </div>
+    <div class="hero-sticker-wrap anim-in">
+      <img src="/sticker-hero.jpg" alt="Der Köln-50969-Sticker mit dem Zollywood Tower" class="hero-sticker-img" width="420" height="649" fetchpriority="high">
+    </div>
   </div>
-  <div class="hero-text">
-    <h1 class="hero-headline">
-      <span class="hero-line" data-de="Ein Sticker." data-en="One sticker.">Ein Sticker.</span>
-      <span class="hero-line" data-de="Eine Stadt." data-en="One city.">Eine Stadt.</span>
-      <span class="hero-line" data-de="Überall zuhause." data-en="At home everywhere.">Überall zuhause.</span>
-    </h1>
-    <p class="hero-sub" data-de="Der Zollywood Tower aus Köln-Zollstock reist mit. Finde ihn. Fotografiere ihn. Zeig der Welt, wo er aufgetaucht ist." data-en="The Zollywood Tower from Cologne's Zollstock travels with you. Find it. Photograph it. Show the world where it appeared.">Der Zollywood Tower aus Köln-Zollstock reist mit. Finde ihn. Fotografiere ihn. Zeig der Welt, wo er aufgetaucht ist.</p>
-    <div class="hero-counter" id="heroCounter"></div>
+  <div class="route-map anim-in anim-d2">
+    <canvas id="worldCanvas" aria-label="Weltkarte mit Reiserouten des Stickers ab Köln-Zollstock"></canvas>
   </div>
-</div>
+  <div class="route-stats anim-in anim-d4">
+    <div class="rs"><strong id="statTotalKm">–</strong><span data-de="km insgesamt gereist" data-en="km travelled in total">km insgesamt gereist</span></div>
+    <div class="rs"><strong id="statFinds">–</strong><span data-de="Funde" data-en="Finds">Funde</span></div>
+    <div class="rs"><strong id="statCountries">–</strong><span data-de="Länder" data-en="Countries">Länder</span></div>
+    <div class="rs"><strong id="statKm">–</strong><span data-de="km weiteste Reise" data-en="km furthest trip">km weiteste Reise</span></div>
+  </div>
+</section>
 
-<main>
-  <!-- Versteckte Selects für JS (kein UI) -->
-  <select id="ortSelect" hidden><option value="">Alle Orte</option></select>
-  <select id="nameSelect" hidden><option value="">Alle Namen</option></select>
-  <select id="sortSelect" hidden><option value="new">Neueste zuerst</option></select>
-  <span id="filterInfo" hidden></span>
+<div class="ticker" id="ticker" aria-hidden="true" hidden><div class="ticker-track" id="tickerTrack"></div></div>
 
-  <div id="list" class="fund-grid-gallery"></div>
+
+
+<main class="wide" style="padding-top:0">
+  <div class="gallery-head">
+    <div><div class="eyebrow" data-de="Logbuch" data-en="Logbook">Logbuch</div><h2><span id="galleryTitle" data-de="Neueste Funde" data-en="Latest finds">Neueste Funde</span><span class="count" id="galleryCount"></span></h2></div>
+    <div class="seg" role="group" aria-label="Sortierung">
+      <button class="active" data-sort="new" data-de="Neueste" data-en="Newest">Neueste</button>
+      <button data-sort="old" data-de="Älteste" data-en="Oldest">Älteste</button>
+      <button data-sort="far" data-de="Weiteste" data-en="Furthest">Weiteste</button>
+    </div>
+  </div>
+  <div class="filter-chips" id="chips"></div>
+
+  <div id="list" class="fund-grid-gallery" aria-live="polite"></div>
+  <div class="gallery-more"><button class="btn-ghost" id="moreBtn" hidden></button></div>
   <div id="empty" class="empty-state" hidden>
-    <p data-de="Noch keine Funde — sei der Erste!" data-en="No finds yet — be the first!">Noch keine Funde — sei der Erste!</p>
-    <a href="/hochladen.html" class="upload-fab" style="display:inline-flex;margin-top:14px" data-de="Sticker hochladen" data-en="Upload sticker">Sticker hochladen</a>
+    <p data-de="Noch keine Funde. Sei die oder der Erste!" data-en="No finds yet. Be the first!">Noch keine Funde. Sei die oder der Erste!</p>
+    <a href="/hochladen.html" class="btn" style="margin-top:12px" data-de="Fund melden" data-en="Report a find">Fund melden</a>
   </div>
+
+  <section class="records" id="records" hidden>
+    <div class="eyebrow" data-de="Rekorde" data-en="Records">Rekorde</div>
+    <h2 data-de="Bestenliste" data-en="Hall of fame">Bestenliste</h2>
+    <div class="records-grid" id="recordsGrid"></div>
+  </section>
 </main>
 
+<section class="steps">
+  <div class="steps-inner">
+    <div class="step"><span class="step-no">1</span><div><h3 data-de="Finden" data-en="Spot it">Finden</h3><p data-de="Irgendwo klebt der Sticker mit dem Zollywood Tower. Augen auf." data-en="Somewhere the Zollywood Tower sticker is waiting. Keep your eyes open.">Irgendwo klebt der Sticker mit dem Zollywood Tower. Augen auf.</p></div></div>
+    <div class="step"><span class="step-no">2</span><div><h3 data-de="Fotografieren" data-en="Snap it">Fotografieren</h3><p data-de="Ein Foto reicht. Der Standort kommt automatisch aus dem Bild." data-en="One photo is enough. The location is read from the image.">Ein Foto reicht. Der Standort kommt automatisch aus dem Bild.</p></div></div>
+    <div class="step"><span class="step-no">3</span><div><h3 data-de="Hochladen" data-en="Share it">Hochladen</h3><p data-de="Nach kurzer Prüfung erscheint dein Fund mit eigener Linie auf der Karte." data-en="After a quick check your find appears with its own line on the map.">Nach kurzer Prüfung erscheint dein Fund mit eigener Linie auf der Karte.</p></div></div>
+  </div>
+</section>
+
 <footer>
-  <p style="margin:0 0 6px;font-size:0.75rem;color:var(--muted)">Inspiriert von <a href="https://danke-max.de" target="_blank" rel="noopener" style="color:var(--red)">danke-max.de</a> 🙏</p>
-  <a href="/faq.html">FAQ</a> ·
-  <a href="/karte.html" data-de="Karte" data-en="Map">Karte</a> ·
-  <a href="/statistik.html" data-de="Statistik" data-en="Stats">Statistik</a> ·
-  <a href="/kontakt.html" data-de="Kontakt" data-en="Contact">Kontakt</a> ·
-  <a href="/impressum.html">Impressum</a> ·
-  <a href="/datenschutz.html" data-de="Datenschutz" data-en="Privacy">Datenschutz</a>
+  <div class="foot-inner">
+    <div class="foot-brand">KÖLN <b>50969</b><small>Zollywood überall.</small></div>
+    <nav class="foot-links">
+      <a href="/">Galerie</a><a href="/karte.html">Karte</a><a href="/statistik.html">Statistik</a><a href="/faq.html">FAQ</a><a href="/kontakt.html">Kontakt</a><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a>
+    </nav>
+    <div class="foot-meta">50.9053° N · 6.9374° E · Köln-Zollstock · Inspiriert von <a href="https://danke-max.de" target="_blank" rel="noopener">danke-max.de</a></div>
+  </div>
 </footer>
 
-<div class="lang-popup" id="langPopup" hidden>
-  <div class="lang-popup-inner">
-    <button class="lang-option active" data-lang="de">🇩🇪 Deutsch</button>
-    <button class="lang-option" data-lang="en">🇬🇧 English</button>
-  </div>
-</div>
+<a class="fab-float" href="/hochladen.html">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+  <span data-de="Fund melden" data-en="Report a find">Fund melden</span>
+</a>
 
+<script src="/common.js"></script>
+<script src="/worldmap.js"></script>
 <script src="/menu.js"></script>
 <script src="/i18n.js"></script>
 <script>
+(function () {
+  var PAGE = 24;
+  var allPosts = [];
+  var shown = PAGE;
+  var sort = 'new';
+  var loaded = false;
 
-function applyOnboardingLang() {
-  const lang = localStorage.getItem('koeln50969_lang') || 'de';
-  document.querySelectorAll('#onboarding [data-de]').forEach(el => {
-    el.innerHTML = lang === 'en' ? (el.dataset.en || el.dataset.de) : el.dataset.de;
+  function L(de, en) { return window._lang === 'en' ? en : de; }
+
+  // ── Onboarding ──
+  var ob = document.getElementById('onboarding');
+  try {
+    if (!localStorage.getItem('koeln50969_visited')) { ob.hidden = false; document.body.style.overflow = 'hidden'; }
+  } catch (e) {}
+  document.getElementById('onboardingClose').addEventListener('click', function () {
+    try { localStorage.setItem('koeln50969_visited', '1'); } catch (e) {}
+    ob.hidden = true; document.body.style.overflow = '';
   });
-  const btn = document.getElementById('onboardingClose');
-  if (btn) btn.textContent = lang === 'en' ? 'Got it — show me the finds!' : 'Verstanden — zeig mir die Funde!';
-}
-document.addEventListener('langchange', applyOnboardingLang);
 
-// Onboarding: nur beim ersten Besuch
-(function(){
-  if(!localStorage.getItem('koeln50969_visited')){
-    document.getElementById('onboarding').hidden = false;
-    applyOnboardingLang();
-    document.body.style.overflow = 'hidden';
+  // ── Filter aus URL ──
+  function getFilters() {
+    var p = new URLSearchParams(location.search);
+    return { ort: p.get('ort') || '', name: p.get('name') || '' };
   }
-  document.getElementById('onboardingClose').addEventListener('click', function(){
-    localStorage.setItem('koeln50969_visited','1');
-    document.getElementById('onboarding').hidden = true;
-    document.body.style.overflow = '';
+
+  function renderChips() {
+    var f = getFilters(), html = '';
+    if (f.ort) html += '<a class="chip" href="/' + (f.name ? '?name=' + encodeURIComponent(f.name) : '') + '">' + K.escapeHtml(K.prettyLoc(f.ort)) + ' <span>×</span></a>';
+    if (f.name) html += '<a class="chip" href="/' + (f.ort ? '?ort=' + encodeURIComponent(f.ort) : '') + '">' + L('von ', 'by ') + K.escapeHtml(f.name) + ' <span>×</span></a>';
+    document.getElementById('chips').innerHTML = html;
+  }
+
+  // ── Hero-Zahlen ──
+  function updateHero() {
+    var n = allPosts.length;
+    if (!n) return;
+    K.countUp(document.getElementById('statFinds'), n, 900);
+    K.countUp(document.getElementById('statCountries'), K.countCountries(allPosts), 900);
+    var maxKm = 0;
+    allPosts.forEach(function (p) { var d = K.distKm(p.lat, p.lng); if (d > maxKm) maxKm = d; });
+    K.countUp(document.getElementById('statKm'), maxKm, 1200);
+    var total = 0; allPosts.forEach(function (p) { total += K.distKm(p.lat, p.lng) || 0; });
+    K.countUp(document.getElementById('statTotalKm'), total, 1600);
+
+    var latest = allPosts[0];
+    var where = K.prettyLoc(latest.locationText) || L('irgendwo', 'somewhere');
+    document.getElementById('heroKicker').innerHTML =
+      '<span class="live-dot"></span><span>' + L('Zuletzt gefunden:', 'Latest find:') + ' </span>' +
+      '<a href="/fund.html?id=' + latest.id + '">' + K.escapeHtml(where) + '</a><span> · ' + K.relTime(latest.createdAt) + '</span>';
+  }
+
+  // ── Fund-Nummern: chronologisch, ältester = Nr. 1 ──
+  var numberOf = {};
+  function numberPosts() {
+    allPosts.slice().sort(function (a, b) { return new Date(a.createdAt) - new Date(b.createdAt); })
+      .forEach(function (p, i) { numberOf[p.id] = i + 1; });
+  }
+
+  // ── Weltkarte ──
+  var worldDrawn = false;
+  function updateWorld() {
+    if (worldDrawn || !window.drawWorld) return; worldDrawn = true;
+    drawWorld(document.getElementById('worldCanvas'), allPosts, {
+      animate: true, pulse: true, labels: 5, maxLines: 10, fit: true,
+      onClick: function (p) { location.href = '/fund.html?id=' + p.id; }
+    });
+  }
+
+  // ── Rekorde ──
+  function updateRecords() {
+    if (allPosts.length < 3) return;
+    var far = null, farKm = -1;
+    allPosts.forEach(function (p) { var d = K.distKm(p.lat, p.lng); if (d != null && d > farKm) { farKm = d; far = p; } });
+    var finders = {};
+    allPosts.forEach(function (p) { if (p.displayName) finders[p.displayName] = (finders[p.displayName] || 0) + 1; });
+    var top = Object.keys(finders).sort(function (a, b) { return finders[b] - finders[a]; }).slice(0, 3);
+    var countries = {};
+    allPosts.forEach(function (p) { var c = K.countryOf(p); if (c && c.indexOf('geo:') !== 0) countries[c] = (countries[c] || 0) + 1; });
+    var clist = Object.keys(countries).sort(function (a, b) { return countries[b] - countries[a]; });
+    var html = '';
+    if (far) html += '<a class="rec rec-photo" href="/fund.html?id=' + far.id + '">' + K.imgTag(far.images[0], { w: 600, alt: K.prettyLoc(far.locationText) }) +
+      '<div class="rec-body"><span class="rec-label">' + L('Weiteste Reise', 'Furthest trip') + '</span><strong>' + K.fmtKm(farKm) + '</strong><span>' + K.escapeHtml(K.prettyLoc(far.locationText)) + '</span></div></a>';
+    if (top.length) html += '<div class="rec"><span class="rec-label">' + L('Top-Finder', 'Top finders') + '</span><ol class="rec-list">' +
+      top.map(function (n) { return '<li><a href="/finder.html?name=' + encodeURIComponent(n) + '">' + K.escapeHtml(n) + '</a><em>' + finders[n] + '</em></li>'; }).join('') + '</ol><a class="rec-more" href="/statistik.html">' + L('Alle Statistiken', 'All stats') + ' →</a></div>';
+    if (clist.length) html += '<div class="rec"><span class="rec-label">' + L('Länder', 'Countries') + '</span><ol class="rec-list">' +
+      clist.slice(0, 5).map(function (c) { return '<li><span>' + K.escapeHtml(c) + '</span><em>' + countries[c] + '</em></li>'; }).join('') + '</ol><a class="rec-more" href="/karte.html">' + L('Zur Karte', 'Open map') + ' →</a></div>';
+    document.getElementById('recordsGrid').innerHTML = html;
+    document.getElementById('records').hidden = false;
+    K.reveal(document.querySelectorAll('.rec'));
+  }
+
+  // ── Laufband: 50969 → Fundort, wie eine Stadion-Anzeige ──
+  function updateTicker() {
+    var seen = {}, items = [];
+    allPosts.forEach(function (p) {
+      var km = K.distKm(p.lat, p.lng); var loc = K.prettyLoc(p.locationText);
+      if (km == null || !loc || seen[loc]) return; seen[loc] = 1;
+      items.push('<span class="tick"><b>50969</b> → ' + K.escapeHtml(loc) + ' <em>' + K.fmtKm(km) + '</em></span>');
+    });
+    if (items.length < 3) return;
+    items = items.slice(0, 14);
+    var html = items.join('');
+    document.getElementById('tickerTrack').innerHTML = html + html;
+    document.getElementById('tickerTrack').style.animationDuration = (items.length * 4) + 's';
+    document.getElementById('ticker').hidden = false;
+  }
+
+  // ── Galerie ──
+  function filtered() {
+    var f = getFilters();
+    var posts = allPosts.slice();
+    if (f.ort) posts = posts.filter(function (p) { return p.locationText === f.ort; });
+    if (f.name) posts = posts.filter(function (p) { return p.displayName === f.name; });
+    if (sort === 'old') posts.sort(function (a, b) { return new Date(a.createdAt) - new Date(b.createdAt); });
+    else if (sort === 'far') posts.sort(function (a, b) { return (K.distKm(b.lat, b.lng) || -1) - (K.distKm(a.lat, a.lng) || -1); });
+    else posts.sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+    return posts;
+  }
+
+  function card(p, i) {
+    var loc = K.prettyLoc(p.locationText) || L('Unbekannter Ort', 'Unknown place');
+    var km = K.distKm(p.lat, p.lng);
+    var isNew = Date.now() - new Date(p.createdAt).getTime() < 48 * 3600000;
+    var meta = K.fmtDate(p.createdAt) + (p.displayName ? ' · ' + K.escapeHtml(p.displayName) : '');
+    return '<a class="fund-card" href="/fund.html?id=' + p.id + '">' +
+      '<div class="fund-card-img">' +
+        K.imgTag(p.images[0], { w: 480, alt: loc, eager: i < 4 }) +
+        (isNew ? '<span class="new-badge">' + L('NEU', 'NEW') + '</span>' : '') +
+        (numberOf[p.id] ? '<span class="fund-no">Nr. ' + numberOf[p.id] + '</span>' : '') +
+        (km != null ? '<span class="fund-card-dist' + (km >= 1000 ? ' far' : '') + '">' + K.fmtKm(km) + '</span>' : '') +
+      '</div>' +
+      '<div class="fund-card-info">' +
+        '<div class="fund-card-loc">' + K.escapeHtml(loc) + '</div>' +
+        '<div class="fund-card-date">' + meta + '</div>' +
+      '</div></a>';
+  }
+
+  function render(keepCount) {
+    var posts = filtered();
+    var f = getFilters();
+    var list = document.getElementById('list');
+    var empty = document.getElementById('empty');
+    var more = document.getElementById('moreBtn');
+
+    document.getElementById('galleryCount').textContent = posts.length ? String(posts.length) : '';
+    document.getElementById('galleryTitle').textContent =
+      (f.ort || f.name) ? L('Gefilterte Funde', 'Filtered finds') :
+      sort === 'old' ? L('Erste Funde', 'First finds') :
+      sort === 'far' ? L('Weiteste Reisen', 'Furthest trips') : L('Neueste Funde', 'Latest finds');
+    renderChips();
+
+    if (!posts.length) { list.innerHTML = ''; empty.hidden = !loaded; more.hidden = true; return; }
+    empty.hidden = true;
+    if (!keepCount) shown = PAGE;
+    var slice = posts.slice(0, shown);
+    list.innerHTML = slice.map(card).join('');
+    // bereits gecachte Bilder direkt sichtbar machen
+    list.querySelectorAll('img').forEach(function (img) { if (img.complete && img.naturalWidth) img.classList.add('loaded'); });
+    K.reveal(list.children);
+
+    var rest = posts.length - shown;
+    more.hidden = rest <= 0;
+    more.textContent = L('Mehr laden', 'Load more') + ' (' + rest + ')';
+  }
+
+  document.getElementById('moreBtn').addEventListener('click', function () {
+    var before = document.getElementById('list').children.length;
+    shown += PAGE;
+    var posts = filtered();
+    var list = document.getElementById('list');
+    var frag = posts.slice(before, shown).map(function (p, i) { return card(p, 99); }).join('');
+    list.insertAdjacentHTML('beforeend', frag);
+    var added = Array.prototype.slice.call(list.children, before);
+    added.forEach(function (n, i) { n.style.animation = 'rise 0.5s var(--ease-out) ' + (i % 8) * 40 + 'ms both'; });
+    var rest = posts.length - shown;
+    this.hidden = rest <= 0;
+    this.textContent = L('Mehr laden', 'Load more') + ' (' + rest + ')';
   });
-  // i18n auf Onboarding-Inhalt anwenden
-  document.addEventListener('langchange', function(e){
-    var lang = e.detail;
-    document.querySelectorAll('#onboarding [data-de]').forEach(function(el){
-      el.innerHTML = lang==='en'?(el.dataset.en||el.dataset.de):el.dataset.de;
+
+  document.querySelectorAll('.seg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      sort = b.dataset.sort;
+      document.querySelectorAll('.seg button').forEach(function (x) { x.classList.toggle('active', x === b); });
+      render();
     });
   });
-})();
 
-let allPosts = [];
-
-function escapeHtml(s){ const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
-
-function fmtDate(iso){
-  return new Date(iso).toLocaleDateString(window._lang==='en'?'en-GB':'de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
-}
-
-function isNew(iso){
-  return Date.now() - new Date(iso).getTime() < 24*60*60*1000; // 24h
-}
-
-
-// Haversine-Distanz in km von Köln-Zollstock (50.9053, 6.9374)
-const KOELN_LAT = 50.9053;
-const KOELN_LNG = 6.9374;
-function haversineDist(lat, lng) {
-  const R = 6371;
-  const dLat = (lat - KOELN_LAT) * Math.PI / 180;
-  const dLng = (lng - KOELN_LNG) * Math.PI / 180;
-  const a = Math.sin(dLat/2)**2 +
-    Math.cos(KOELN_LAT * Math.PI/180) * Math.cos(lat * Math.PI/180) *
-    Math.sin(dLng/2)**2;
-  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-}
-function getFilters(){
-  const p=new URLSearchParams(location.search);
-  return {ort:p.get('ort')||'',name:p.get('name')||''};
-}
-
-function setUrl(ort,name){
-  const p=new URLSearchParams();
-  if(ort)p.set('ort',ort);
-  if(name)p.set('name',name);
-  history.replaceState(null,'',(p.toString()?'/?'+p:'/'));
-}
-
-function populateSelects(){
-  const {ort,name}=getFilters();
-  const lang=window._lang||'de';
-  const orte=[...new Set(allPosts.map(p=>p.locationText).filter(Boolean))].sort();
-  const namen=[...new Set(allPosts.map(p=>p.displayName).filter(Boolean))].sort();
-  document.getElementById('ortSelect').innerHTML=
-    `<option value="">${lang==='en'?'All places':'Alle Orte'}</option>`+
-    orte.map(o=>`<option value="${escapeHtml(o)}"${o===ort?' selected':''}>${escapeHtml(o)}</option>`).join('');
-  document.getElementById('nameSelect').innerHTML=
-    `<option value="">${lang==='en'?'All names':'Alle Namen'}</option>`+
-    namen.map(n=>`<option value="${escapeHtml(n)}"${n===name?' selected':''}>${escapeHtml(n)}</option>`).join('');
-  document.getElementById('sortSelect').innerHTML=
-    `<option value="new">${lang==='en'?'Newest first':'Neueste zuerst'}</option>`+
-    `<option value="old">${lang==='en'?'Oldest first':'Älteste zuerst'}</option>`;
-}
-
-function updateCounter(){
-  const n=allPosts.length;
-  const lang=window._lang||'de';
-  const el=document.getElementById('heroCounter');
-  if(n===0){ el.innerHTML=''; return; }
-  
-  // Länder zählen via locationText (letztes Wort oft Land, oder via lat/lng)
-  // Einfache Heuristik: einzigartige Länder aus reverseGeocode-Ergebnissen
-  // Hier: Länder aus locationText schätzen (enthält oft Länderkennung)
-  const countrySet = new Set();
-  allPosts.forEach(p => {
-    if(p.lat && p.lng) {
-      // Grobe Länder-Erkennung via Koordinaten
-      if(p.lat >= 47 && p.lat <= 55 && p.lng >= 6 && p.lng <= 15) countrySet.add('DE');
-      else if(p.lat >= 46 && p.lat <= 48 && p.lng >= 5 && p.lng <= 10) countrySet.add('CH');
-      else if(p.lat >= 46 && p.lat <= 49 && p.lng >= 9 && p.lng <= 17) countrySet.add('AT');
-      else if(p.lat && p.lng) countrySet.add(`${Math.round(p.lat/10)}_${Math.round(p.lng/10)}`);
+  // Galerie-Position merken, wenn ein Fund geöffnet wird
+  document.getElementById('list').addEventListener('click', function (e) {
+    if (e.target.closest('.fund-card')) {
+      try { sessionStorage.setItem('galleryState', JSON.stringify({ y: window.scrollY, shown: shown, sort: sort, url: location.search })); } catch (x) {}
     }
   });
-  const countries = Math.max(1, countrySet.size);
-  const label=lang==='en'?`Find${n===1?'':'s'} worldwide`:`Fund${n===1?'':'e'} weltweit`;
-  const cLabel=lang==='en'?`${countries} countr${countries===1?'y':'ies'}`:`${countries} Land${countries===1?'':'er'}`;
-  
-  el.innerHTML=`<span class="counter-num" id="counterNum">0</span> <span class="counter-label">${label}</span><span class="counter-sep">·</span><span class="counter-countries">${cLabel}</span>`;
-  let current=0;
-  const step=Math.max(1,Math.floor(n/20));
-  const numEl=document.getElementById('counterNum');
-  const timer=setInterval(()=>{
-    current=Math.min(current+step,n);
-    numEl.textContent=current;
-    numEl.classList.remove('pop');
-    void numEl.offsetWidth;
-    numEl.classList.add('pop');
-    if(current>=n) clearInterval(timer);
-  },40);
-}
 
-function render(){
-  const ort=document.getElementById('ortSelect').value;
-  const name=document.getElementById('nameSelect').value;
-  const sort=document.getElementById('sortSelect').value;
-  setUrl(ort,name);
-
-  let posts=allPosts.slice();
-  if(ort) posts=posts.filter(p=>p.locationText===ort);
-  if(name) posts=posts.filter(p=>p.displayName===name);
-  posts.sort((a,b)=>{
-    const d=new Date(a.createdAt)-new Date(b.createdAt);
-    return sort==='old'?d:-d;
-  });
-
-  const lang=window._lang||'de';
-  const info=document.getElementById('filterInfo');
-  info.textContent=(ort||name)?`${posts.length} ${lang==='en'?'found':'Funde'}`:'';
-
-  const list=document.getElementById('list');
-  const empty=document.getElementById('empty');
-
-  if(posts.length===0){ list.innerHTML=''; empty.hidden=false; return; }
-  empty.hidden=true;
-
-  list.innerHTML=posts.map(p=>{
-    const rawLoc = p.locationText ? p.locationText.charAt(0).toUpperCase() + p.locationText.slice(1) : '';
-    const loc=rawLoc?escapeHtml(rawLoc):(lang==='en'?'Unknown location':'Unbekannter Ort');
-    const date=fmtDate(p.createdAt);
-    const thumb=p.images[0].thumb;
-    const newBadge=isNew(p.createdAt)?`<span class="new-badge">${window._lang==='en'?'NEW':'NEU'}</span>`:'';
-const dist = (p.lat && p.lng) ? haversineDist(p.lat, p.lng) : null;
-const distBadge = dist !== null && dist > 0 ? '<div class="fund-card-dist">📍 ' + dist.toLocaleString('de-DE') + ' km</div>' : '';
-    return `<a class="fund-card" href="/fund.html?id=${p.id}">
-      <div class="fund-card-img">
-        <img src="${thumb}" alt="${loc}" loading="lazy">
-        ${newBadge}
-      </div>
-      <div class="fund-card-info">
-        <div class="fund-card-loc">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
-          ${loc}
-        </div>
-        <div class="fund-card-date">${date}</div>
-      </div>
-    </a>`;
-  }).join('');
-}
-
-async function load(){
-  try{
-    const res=await fetch('/api/posts');
-    const data=await res.json();
-    allPosts=data.posts||[];
-  }catch(e){ allPosts=[]; }
-  updateCounter();
-  populateSelects();
-  const {ort,name}=getFilters();
-  document.getElementById('ortSelect').value=ort;
-  document.getElementById('nameSelect').value=name;
-  render();
-}
-
-document.getElementById('ortSelect').addEventListener('change',render);
-document.getElementById('nameSelect').addEventListener('change',render);
-document.getElementById('sortSelect').addEventListener('change',render);
-
-document.addEventListener('langchange',()=>{ populateSelects(); updateCounter(); render(); });
-
-
-// Scroll-Position wiederherstellen
-(function() {
-  const pos = sessionStorage.getItem('scrollPos_' + location.href);
-  if (pos) {
-    sessionStorage.removeItem('scrollPos_' + location.href);
-    window.addEventListener('load', () => setTimeout(() => window.scrollTo(0, parseInt(pos)), 100));
+  function restoreState() {
+    try {
+      var s = JSON.parse(sessionStorage.getItem('galleryState') || 'null');
+      sessionStorage.removeItem('galleryState');
+      if (!s || s.url !== location.search) return null;
+      return s;
+    } catch (e) { return null; }
   }
+
+  async function load() {
+    var state = restoreState();
+    if (state) {
+      sort = state.sort || 'new'; shown = state.shown || PAGE;
+      document.querySelectorAll('.seg button').forEach(function (x) { x.classList.toggle('active', x.dataset.sort === sort); });
+    }
+    // Skeleton
+    document.getElementById('list').innerHTML = Array(8).join('<div class="fund-card"><div class="fund-card-img"></div><div class="fund-card-info"><div class="skel skel-line" style="width:70%"></div></div></div>');
+    try {
+      var res = await fetch('/api/posts?limit=1000');
+      var data = await res.json();
+      allPosts = (data.posts || []).sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+    } catch (e) { allPosts = []; }
+    loaded = true;
+    numberPosts();
+    updateHero();
+    updateWorld();
+    updateTicker();
+    render(!!state);
+    updateRecords();
+    if (state) requestAnimationFrame(function () { window.scrollTo(0, state.y); });
+  }
+
+  document.addEventListener('langchange', function () { if (loaded) { updateHero(); render(true); updateRecords(); } });
+  load();
 })();
-
-load();
-
-// Parallax: nur auf Desktop mit echter Maus (kein Touch, kein reduced-motion)
-const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const hasHover = window.matchMedia('(hover: hover)').matches;
-if (hasHover && !prefersReduced) {
-  window.addEventListener('scroll', () => {
-    const wrap = document.querySelector('.hero-sticker-wrap');
-    if (!wrap) return;
-    wrap.style.transform = `rotate(-3deg) translateY(${window.scrollY * 0.12}px)`;
-  }, { passive: true });
-}
 </script>
-
-<!-- Floating Upload Button (Mobile, immer sichtbar) -->
-<a class="fab-float" href="/hochladen.html" data-de="📍 Fund melden" data-en="📍 Report find">
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-  <span data-de="Fund melden" data-en="Report find">Fund melden</span>
-</a>
 </body>
 </html>
-
-
-
-
-
-
-
-
