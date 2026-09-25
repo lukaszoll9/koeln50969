@@ -152,9 +152,9 @@ html, body { height: 100%; overflow: hidden; }
     const r = regions.find(x => x.key === key); if (!r) return;
     activeRegion = key; renderChips(); closeSheet();
     const b = boundsOf(r.list);
-    const pad = { top: 90, bottom: 110, left: 40, right: 60 };
-    if (r.list.length === 1) map.flyTo({ center: [r.list[0].lng, r.list[0].lat], zoom: 13, speed: 1.6, essential: true });
-    else map.fitBounds(b, { padding: pad, maxZoom: 13, duration: instant ? 0 : 1400, essential: true });
+    const pad = { top: 110, bottom: 120, left: 60, right: 70 };
+    if (r.list.length === 1) map.flyTo({ center: [r.list[0].lng, r.list[0].lat], zoom: 13, speed: 1.6, essential: true }, { fromRegion: true });
+    else map.fitBounds(b, { padding: pad, maxZoom: 13, duration: instant ? 0 : 1400, essential: true }, { fromRegion: true });
     setInfo(T(r.de, r.en), r.list.length);
   }
 
@@ -166,7 +166,7 @@ html, body { height: 100%; overflow: hidden; }
 
   // Beim freien Verschieben: zählen, was im Ausschnitt liegt
   map.on('moveend', e => {
-    if (!e.originalEvent) return; // programmatische Bewegungen haben ihre eigene Beschriftung
+    if (e.fromRegion || !e.originalEvent) return; // programmatische Bewegungen haben ihre eigene Beschriftung
     activeRegion = null; renderChips();
     const b = map.getBounds();
     const n = posts.filter(p => b.contains([p.lng, p.lat])).length;
@@ -182,7 +182,7 @@ html, body { height: 100%; overflow: hidden; }
     const seen = {}, lines = [];
     posts.forEach(p => {
       if (K.distKm(p.lat, p.lng) < 60) return;
-      const k = Math.round(p.lat) + ',' + Math.round(p.lng);
+      const k = Math.round(p.lat / 3) + ',' + Math.round(p.lng / 3);
       if (seen[k]) return; seen[k] = 1;
       lines.push({ type: 'Feature', geometry: { type: 'LineString', coordinates: MapKit.arc([K.HOME.lng, K.HOME.lat], [p.lng, p.lat]) } });
     });
@@ -207,7 +207,7 @@ html, body { height: 100%; overflow: hidden; }
     map.on('click', 'clusters', async e => {
       const f = map.queryRenderedFeatures(e.point, { layers: ['clusters'] })[0];
       const zoom = await map.getSource('finds').getClusterExpansionZoom(f.properties.cluster_id);
-      map.easeTo({ center: f.geometry.coordinates, zoom: Math.min(zoom + 0.5, 16), duration: 700 });
+      map.easeTo({ center: f.geometry.coordinates, zoom: Math.min(zoom + 0.5, 16), duration: 700 }, { fromRegion: true });
     });
     map.on('mouseenter', 'clusters', () => map.getCanvas().style.cursor = 'pointer');
     map.on('mouseleave', 'clusters', () => map.getCanvas().style.cursor = '');

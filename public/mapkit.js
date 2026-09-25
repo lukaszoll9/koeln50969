@@ -5,7 +5,7 @@
     bg: '#f4f3f1', water: '#cfd8de', park: '#e6e9df', road: '#ffffff', roadCase: '#e4e1dc',
     building: '#ebe8e3', border: '#b8b1a7', label: '#6b6660', labelStrong: '#16130f', halo: '#ffffff', red: '#e1141c'
   };
-  var NAME = ['coalesce', ['get', 'name:de'], ['get', 'name_de'], ['get', 'name:latin'], ['get', 'name']];
+  var NAME = ['coalesce', ['get', 'name:de'], ['get', 'name_de'], ['get', 'name:en'], ['get', 'name_en'], ['get', 'name_int'], ['get', 'name:latin'], ['get', 'name']];
 
   function set(map, id, prop, val, layout) {
     try { layout ? map.setLayoutProperty(id, prop, val) : map.setPaintProperty(id, prop, val); } catch (e) {}
