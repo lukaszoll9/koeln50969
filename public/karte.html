@@ -111,6 +111,7 @@ html, body { height: 100%; overflow: hidden; }
   if (!window.maplibregl) { $('mapLoading').textContent = T('Karte konnte nicht geladen werden', 'Map could not be loaded'); return; }
 
   const map = MapKit.create('map', { center: deep ? [dLng, dLat] : [K.HOME.lng, K.HOME.lat], zoom: deep ? (isNaN(dZoom) ? 14 : dZoom) : 3 });
+  const mapReady = new Promise(r => map.once('load', r));
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
   map.addControl(new maplibregl.GeolocateControl({ fitBoundsOptions: { maxZoom: 13 } }), 'top-right');
 
@@ -175,7 +176,7 @@ html, body { height: 100%; overflow: hidden; }
     $('viewInfo').hidden = false;
   });
 
-  map.on('load', () => {
+  mapReady.then(() => {
     $('mapLoading').remove();
 
     // Routen ab Zollstock (gebündelt pro Region ~1°, damit es nicht zu viele werden)
