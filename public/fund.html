@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="/style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css">
 </head>
 <body>
 <header>
@@ -45,10 +45,11 @@
   </div>
 </footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
 <script src="/i18n.js"></script>
 <script src="/common.js"></script>
 <script src="/worldmap.js"></script>
+<script src="/mapkit.js"></script>
 <script src="/menu.js"></script>
 <script>
 const id = new URLSearchParams(location.search).get('id');
@@ -172,14 +173,12 @@ async function load(){
       drawWorld(rc, [post], { animate: true, pulse: true, minKm: 0, bbox: [cx - wDeg / 2, cy + hDeg / 2, cx + wDeg / 2, cy - hDeg / 2] });
     }
 
-    if(hasLoc && window.L && window.L.map){
-      const m=L.map('minimap',{zoomControl:false,scrollWheelZoom:false,dragging:false,attributionControl:true}).setView([post.lat,post.lng],14);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-        attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom:19
-      }).addTo(m);
-      const icon=L.divIcon({className:'',html:'<div style="width:18px;height:18px;background:#e1141c;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>',iconSize:[18,18],iconAnchor:[9,9]});
-      L.marker([post.lat,post.lng],{icon}).addTo(m);
+    if (hasLoc && window.maplibregl && window.MapKit) {
+      const m = MapKit.create('minimap', { center: [post.lng, post.lat], zoom: 13.5, interactive: false });
+      const el = document.createElement('div');
+      el.style.cssText = 'width:18px;height:18px;background:#e1141c;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.4)';
+      new maplibregl.Marker({ element: el }).setLngLat([post.lng, post.lat]).addTo(m);
+      document.getElementById('minimap').addEventListener('click', () => { location.href = '/karte.html?lat=' + post.lat + '&lng=' + post.lng + '&zoom=15'; });
     }
   } catch(e) {
     content.innerHTML='<div class="card"><p class="hint">'+T('Fehler beim Laden.','Could not load.')+' <a href="/">'+T('Zurück','Back')+'</a></p></div>';

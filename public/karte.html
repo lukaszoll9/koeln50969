@@ -4,80 +4,63 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Karte — Köln 50969</title>
+<meta name="description" content="Alle Sticker-Funde auf einer Karte: von Köln-Zollstock bis ans andere Ende der Welt.">
 <meta name="theme-color" content="#ffffff">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@500;700&display=swap">
 <link rel="stylesheet" href="/style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css">
 <style>
-body { margin: 0; overflow: hidden; }
-#map { position: fixed; inset: 0; top: calc(var(--header-h) + 3px); }
-.map-pill { position: fixed; z-index: 500; top: calc(var(--header-h) + 15px); left: 50%; transform: translateX(-50%); background: #fff; border-radius: 999px; padding: 8px 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; animation: rise 0.5s var(--ease-out) 0.3s both; }
-.map-pill b { color: #e1141c; }
-.map-popup-km { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; color: #b80f16; margin-top: 2px; }
-.photo-marker { animation: pop 0.4s var(--ease-spring) both; }
-.leaflet-popup-content-wrapper {
-  border-radius: 14px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-  border: none;
-  padding: 0;
-  overflow: hidden;
-}
-.leaflet-popup-content { margin: 0; }
-.leaflet-popup-tip-container { display: none; }
-.map-popup {
-  width: 200px;
-}
-.map-popup-img {
-  width: 100%; height: 130px;
-  object-fit: cover; display: block;
-}
-.map-popup-body {
-  padding: 10px 12px;
-}
-.map-popup-loc {
-  font-weight: 700; font-size: 0.88rem;
-  color: #16130f; margin-bottom: 2px;
-  font-family: 'Archivo', sans-serif;
-}
-.map-popup-date {
-  font-size: 0.74rem; color: #6b6660;
-  font-family: 'Archivo', sans-serif;
-}
-.map-popup-link {
-  display: block; margin-top: 8px;
-  padding: 6px 10px; text-align: center;
-  background: #e1141c; color: #fff;
-  border-radius: 8px; text-decoration: none;
-  font-size: 0.8rem; font-weight: 700;
-  font-family: 'Archivo', sans-serif;
-}
-/* Foto-Marker */
-.photo-marker {
-  width: 48px; height: 48px;
-  border-radius: 12px;
-  border: 3px solid #fff;
-  outline: 2px solid #e1141c;
-  box-shadow: 0 3px 12px rgba(0,0,0,0.3);
-  background-size: cover;
-  background-position: center;
-  background-color: #ffffff;
-  cursor: pointer;
-  transition: transform 0.15s;
-}
-.photo-marker:hover { transform: scale(1.12); }
-/* Cluster */
-.cluster-dot {
-  width: 38px; height: 38px;
-  background: #e1141c;
-  border: 3px solid #fff;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 0.85rem; color: #fff;
-  box-shadow: 0 3px 12px rgba(225,20,28,0.4);
-  font-family: 'Archivo', sans-serif;
-}
+html, body { height: 100%; overflow: hidden; }
+#map { position: fixed; left: 0; right: 0; bottom: 0; top: calc(var(--header-h) + 3px); background: #f4f3f1; }
+
+/* Regionen oben */
+.map-top { position: fixed; z-index: 10; left: 0; right: 0; top: calc(var(--header-h) + 3px); padding: 12px 12px 0; pointer-events: none; }
+.region-bar { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 6px; pointer-events: auto; }
+.region-bar::-webkit-scrollbar { display: none; }
+.rchip { flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 14px; border-radius: 999px; border: 0; background: #fff; color: var(--ink); font-family: var(--font); font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 10px rgba(22,19,15,0.14); transition: background .15s, color .15s, transform .2s var(--ease-out); }
+.rchip em { font-style: normal; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+.rchip:active { transform: scale(0.96); }
+.rchip.active { background: var(--ink); color: #fff; }
+.rchip.active em { color: rgba(255,255,255,0.65); }
+.rchip.toggle { background: #fff; }
+.rchip.toggle .dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--red); }
+.rchip.toggle.on .dot { background: var(--red); }
+
+/* Info unten links: was man gerade sieht */
+.view-info { position: fixed; z-index: 10; left: 12px; bottom: calc(14px + env(safe-area-inset-bottom)); background: rgba(22,19,15,0.88); color: #fff; border-radius: 12px; padding: 10px 14px; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); max-width: calc(100% - 24px); transition: transform .35s var(--ease-out), opacity .25s; }
+.view-info .vi-label { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.6); }
+.view-info .vi-title { font-stretch: 72%; font-weight: 900; font-size: 1.35rem; line-height: 1.1; text-transform: uppercase; }
+.view-info .vi-title b { color: var(--red); }
+.view-info.hide { opacity: 0; transform: translateY(20px); pointer-events: none; }
+
+/* Marker */
+.photo-marker { width: 52px; height: 52px; border-radius: 12px; border: 3px solid #fff; box-shadow: 0 0 0 2px var(--red), 0 6px 16px rgba(0,0,0,0.3); background: #ddd center / cover no-repeat; cursor: pointer; transition: transform .2s var(--ease-spring); }
+.photo-marker:hover, .photo-marker.sel { transform: scale(1.15); z-index: 5; }
+.photo-marker .n { position: absolute; top: -8px; right: -8px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--red); color: #fff; font: 700 0.68rem/20px var(--mono); text-align: center; }
+.home-marker { position: relative; }
+.home-marker::before { content: ""; position: absolute; left: 0; bottom: 0; width: 14px; height: 14px; border-radius: 50%; background: var(--red); border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.35); }
+.home-marker span { position: absolute; left: 18px; bottom: 10px; background: var(--ink); color: #fff; font: 700 0.7rem/1 var(--mono); padding: 5px 7px; border-radius: 6px; white-space: nowrap; }
+
+/* Fund-Karte (Bottom-Sheet) */
+.find-sheet { position: fixed; z-index: 20; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); max-width: 420px; background: #fff; border-radius: 18px; box-shadow: 0 12px 40px rgba(0,0,0,0.25); overflow: hidden; display: grid; grid-template-columns: 120px 1fr; transform: translateY(130%); transition: transform .4s var(--ease-out); }
+.find-sheet.open { transform: none; }
+.find-sheet img { width: 120px; height: 100%; min-height: 150px; object-fit: cover; display: block; background: var(--bg-soft); }
+.fs-body { padding: 14px 14px 14px 16px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.fs-km { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; color: var(--red); }
+.fs-loc { font-stretch: 75%; font-weight: 850; font-size: 1.2rem; line-height: 1.1; }
+.fs-meta { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); }
+.fs-body .btn { min-height: 40px; font-size: 0.9rem; margin-top: auto; align-self: flex-start; padding: 0 14px; }
+.fs-close { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; border-radius: 50%; border: 0; background: var(--bg-soft); font-size: 1rem; cursor: pointer; }
+.fs-nav { display: flex; gap: 6px; margin-top: 6px; }
+.fs-nav button { border: 1.5px solid var(--line); background: #fff; border-radius: 8px; height: 32px; padding: 0 10px; font-family: var(--font); font-weight: 650; font-size: 0.8rem; cursor: pointer; }
+@media (min-width: 720px) { .find-sheet { left: auto; right: 16px; bottom: 16px; } }
+
+.maplibregl-ctrl-group { border-radius: 12px !important; box-shadow: 0 2px 10px rgba(22,19,15,0.14) !important; }
+.maplibregl-ctrl-top-right { top: 60px !important; }
+.map-loading { position: fixed; inset: calc(var(--header-h) + 3px) 0 0; display: grid; place-items: center; z-index: 5; pointer-events: none; font-family: var(--mono); font-size: 0.75rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
 </style>
 </head>
 <body>
@@ -90,119 +73,208 @@ body { margin: 0; overflow: hidden; }
   <a class="header-cta" href="/hochladen.html"><span data-de="Fund melden" data-en="Report a find">Fund melden</span></a>
 </header>
 
-<div id="map"></div>
+<div id="map" aria-label="Karte aller Sticker-Funde"></div>
+<div class="map-loading" id="mapLoading">Karte lädt…</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css">
+<div class="map-top"><div class="region-bar" id="regions"></div></div>
+
+<div class="view-info" id="viewInfo" hidden>
+  <div class="vi-label" id="viLabel"></div>
+  <div class="vi-title" id="viTitle"></div>
+</div>
+
+<div class="find-sheet" id="sheet" aria-live="polite">
+  <img id="fsImg" alt="">
+  <div class="fs-body">
+    <span class="fs-km" id="fsKm"></span>
+    <span class="fs-loc" id="fsLoc"></span>
+    <span class="fs-meta" id="fsMeta"></span>
+    <div class="fs-nav" id="fsNav"></div>
+    <a class="btn" id="fsLink" href="#"></a>
+  </div>
+  <button class="fs-close" id="fsClose" aria-label="Schließen">×</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
 <script src="/i18n.js"></script>
 <script src="/common.js"></script>
+<script src="/mapkit.js"></script>
 <script src="/menu.js"></script>
 <script>
-function escapeHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
-
-async function initMap(){
+(async function () {
+  const T = (de, en) => (K.lang() === 'en' ? en : de);
+  const $ = id => document.getElementById(id);
   const params = new URLSearchParams(location.search);
-  const dLat = parseFloat(params.get('lat'));
-  const dLng = parseFloat(params.get('lng'));
-  const dZoom = parseInt(params.get('zoom'),10);
-  const hasDeep = !isNaN(dLat) && !isNaN(dLng);
+  const dLat = parseFloat(params.get('lat')), dLng = parseFloat(params.get('lng')), dZoom = parseFloat(params.get('zoom'));
+  const deep = !isNaN(dLat) && !isNaN(dLng);
 
-  // CartoDB Voyager — modern, hell, clean wie danke-max
-  const map = L.map('map', { zoomControl: true }).setView(
-    hasDeep ? [dLat,dLng] : [51.3, 10.2],
-    hasDeep ? (isNaN(dZoom)?16:dZoom) : 6
-  );
+  if (!window.maplibregl) { $('mapLoading').textContent = T('Karte konnte nicht geladen werden', 'Map could not be loaded'); return; }
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom: 19
-  }).addTo(map);
-
-  const cluster = L.markerClusterGroup({
-    maxClusterRadius: 40,
-    iconCreateFunction: c => L.divIcon({
-      html: `<div class="cluster-dot">${c.getChildCount()}</div>`,
-      className: '', iconSize: [38,38]
-    }),
-    showCoverageOnHover: false,
-    spiderfyOnMaxZoom: true,
-  });
+  const map = MapKit.create('map', { center: deep ? [dLng, dLat] : [K.HOME.lng, K.HOME.lat], zoom: deep ? (isNaN(dZoom) ? 14 : dZoom) : 3 });
+  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+  map.addControl(new maplibregl.GeolocateControl({ fitBoundsOptions: { maxZoom: 13 } }), 'top-right');
 
   const res = await fetch('/api/posts?limit=1000');
-  const data = await res.json();
-  const posts = (data.posts||[]).filter(p => typeof p.lat==='number' && typeof p.lng==='number');
+  const all = ((await res.json()).posts || []);
+  const posts = all.filter(p => typeof p.lat === 'number' && typeof p.lng === 'number');
+  const byId = {}; posts.forEach(p => byId[p.id] = p);
 
-  if(posts.length===0){
-    const el = document.createElement('div');
-    el.style.cssText='position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#fff;padding:12px 20px;border-radius:10px;font-family:Archivo,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,0.15)';
-    el.innerHTML = 'Noch keine Funde mit Standort. <a href="/hochladen.html" style="color:#e1141c;font-weight:700">Sei der Erste →</a>';
-    document.body.appendChild(el);
-    return;
+  // ── Regionen: Alle · Köln · Länder ──
+  function boundsOf(list) {
+    const b = new maplibregl.LngLatBounds();
+    list.forEach(p => b.extend([p.lng, p.lat]));
+    return b;
+  }
+  const regions = [{ key: 'all', de: 'Alle Funde', en: 'All finds', list: posts }];
+  const cologne = posts.filter(p => K.distKm(p.lat, p.lng) <= 25);
+  if (cologne.length) regions.push({ key: 'koeln', de: 'Köln', en: 'Cologne', list: cologne });
+  const byCountry = {};
+  posts.forEach(p => { const c = K.countryOf(p); if (c && c.indexOf('geo:') !== 0) (byCountry[c] = byCountry[c] || []).push(p); });
+  Object.keys(byCountry).sort((a, b) => byCountry[b].length - byCountry[a].length)
+    .forEach(c => regions.push({ key: 'c-' + c, de: c, en: c, list: byCountry[c] }));
+
+  let activeRegion = deep ? null : 'all';
+  let routesOn = true;
+
+  function renderChips() {
+    $('regions').innerHTML = regions.map(r =>
+      `<button class="rchip${r.key === activeRegion ? ' active' : ''}" data-r="${r.key}">${K.escapeHtml(T(r.de, r.en))} <em>${r.list.length}</em></button>`
+    ).join('') + `<button class="rchip toggle${routesOn ? ' on' : ''}" id="routeToggle"><span class="dot"></span>${T('Routen', 'Routes')}</button>`;
+    $('regions').querySelectorAll('[data-r]').forEach(b => b.addEventListener('click', () => goRegion(b.dataset.r)));
+    $('routeToggle').addEventListener('click', () => {
+      routesOn = !routesOn;
+      if (map.getLayer('routes')) map.setLayoutProperty('routes', 'visibility', routesOn ? 'visible' : 'none');
+      renderChips();
+    });
   }
 
-  const bounds = [];
-  let deepMarker = null;
+  function goRegion(key, instant) {
+    const r = regions.find(x => x.key === key); if (!r) return;
+    activeRegion = key; renderChips(); closeSheet();
+    const b = boundsOf(r.list);
+    const pad = { top: 90, bottom: 110, left: 40, right: 60 };
+    if (r.list.length === 1) map.flyTo({ center: [r.list[0].lng, r.list[0].lat], zoom: 13, speed: 1.6, essential: true });
+    else map.fitBounds(b, { padding: pad, maxZoom: 13, duration: instant ? 0 : 1400, essential: true });
+    setInfo(T(r.de, r.en), r.list.length);
+  }
 
-  posts.forEach(p => {
-    const thumb = p.images&&p.images[0] ? p.images[0].thumb : '';
-    const full  = p.images&&p.images[0] ? p.images[0].full : '';
-    const loc   = p.locationText ? escapeHtml(K.prettyLoc(p.locationText)) : 'Unbekannter Ort';
-    const km    = K.distKm(p.lat, p.lng);
-    const date  = new Date(p.createdAt).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
+  function setInfo(title, n) {
+    $('viewInfo').hidden = false;
+    $('viLabel').textContent = T('Du siehst', 'Showing');
+    $('viTitle').innerHTML = K.escapeHtml(title) + ' · <b>' + n + '</b> ' + T(n === 1 ? 'Fund' : 'Funde', n === 1 ? 'find' : 'finds');
+  }
 
-    const icon = L.divIcon({
-      html: `<div class="photo-marker" style="background-image:url('${K.cdn(full||thumb,120)}')"></div>`,
-      className: '', iconSize: [48,48], iconAnchor: [24,24]
-    });
-
-    const marker = L.marker([p.lat, p.lng], { icon });
-
-    const popup = L.popup({ maxWidth: 200, minWidth: 200, closeButton: true, offset: [0, -10] })
-      .setContent(`
-        <div class="map-popup">
-          ${thumb ? `<img class="map-popup-img" src="${K.cdn(full||thumb,400)}" onerror="this.onerror=null;this.src='${thumb}'" alt="${loc}">` : ''}
-          <div class="map-popup-body">
-            <div class="map-popup-loc">${loc}</div>
-            ${km!=null?`<div class="map-popup-km">${K.fmtKm(km)} ${K.lang()==='en'?'from Zollstock':'ab Zollstock'}</div>`:''}
-            <div class="map-popup-date">${date}</div>
-            <a class="map-popup-link" href="/fund.html?id=${p.id}">${K.lang()==='en'?'View find':'Fund ansehen'} →</a>
-          </div>
-        </div>`);
-
-    marker.bindPopup(popup);
-    cluster.addLayer(marker);
-    bounds.push([p.lat, p.lng]);
-
-    if(hasDeep && Math.abs(p.lat-dLat)<0.001 && Math.abs(p.lng-dLng)<0.001) deepMarker=marker;
+  // Beim freien Verschieben: zählen, was im Ausschnitt liegt
+  map.on('moveend', e => {
+    if (!e.originalEvent) return; // programmatische Bewegungen haben ihre eigene Beschriftung
+    activeRegion = null; renderChips();
+    const b = map.getBounds();
+    const n = posts.filter(p => b.contains([p.lng, p.lat])).length;
+    $('viLabel').textContent = T('In diesem Ausschnitt', 'In this view');
+    $('viTitle').innerHTML = '<b>' + n + '</b> ' + T(n === 1 ? 'Fund' : 'Funde', n === 1 ? 'find' : 'finds');
+    $('viewInfo').hidden = false;
   });
 
-  map.addLayer(cluster);
+  map.on('load', () => {
+    $('mapLoading').remove();
 
-  const pill = document.createElement('div');
-  pill.className = 'map-pill';
-  const en = K.lang() === 'en';
-  pill.innerHTML = '<b>' + posts.length + '</b> ' + (en ? 'finds' : 'Funde') + ' · <b>' + K.countCountries(posts) + '</b> ' + (en ? 'countries' : 'Länder');
-  document.body.appendChild(pill);
-
-  // Heatmap erstellen
-  if (bounds.length > 0 && L.heatLayer) {
-    const heatData = posts.map(p => [p.lat, p.lng, 1]);
-    heatLayer = L.heatLayer(heatData, {
-      radius: 35, blur: 25, maxZoom: 13,
-      gradient: { 0.3: '#ffffff', 0.6: '#f28b8f', 1.0: '#e1141c' }
+    // Routen ab Zollstock (gebündelt pro Region ~1°, damit es nicht zu viele werden)
+    const seen = {}, lines = [];
+    posts.forEach(p => {
+      if (K.distKm(p.lat, p.lng) < 60) return;
+      const k = Math.round(p.lat) + ',' + Math.round(p.lng);
+      if (seen[k]) return; seen[k] = 1;
+      lines.push({ type: 'Feature', geometry: { type: 'LineString', coordinates: MapKit.arc([K.HOME.lng, K.HOME.lat], [p.lng, p.lat]) } });
     });
-  }
+    map.addSource('routes', { type: 'geojson', data: { type: 'FeatureCollection', features: lines } });
+    map.addLayer({ id: 'routes', type: 'line', source: 'routes', layout: { 'line-cap': 'round' },
+      paint: { 'line-color': '#e1141c', 'line-width': ['interpolate', ['linear'], ['zoom'], 2, 1.6, 8, 2.4], 'line-opacity': ['interpolate', ['linear'], ['zoom'], 3, 0.7, 9, 0.25], 'line-dasharray': [2, 1.5] } });
 
-  if(hasDeep && deepMarker) {
-    cluster.zoomToShowLayer(deepMarker, () => deepMarker.openPopup());
-  } else if(bounds.length>0) {
-    map.fitBounds(bounds, { padding:[60,60], maxZoom:14 });
-  }
-}
+    // Funde als Cluster
+    map.addSource('finds', {
+      type: 'geojson', cluster: true, clusterRadius: 56, clusterMaxZoom: 15,
+      data: { type: 'FeatureCollection', features: posts.map(p => ({ type: 'Feature', properties: { id: p.id }, geometry: { type: 'Point', coordinates: [p.lng, p.lat] } })) }
+    });
+    map.addLayer({ id: 'cluster-halo', type: 'circle', source: 'finds', filter: ['has', 'point_count'],
+      paint: { 'circle-color': '#e1141c', 'circle-opacity': 0.18, 'circle-radius': ['step', ['get', 'point_count'], 26, 5, 32, 15, 40] } });
+    map.addLayer({ id: 'clusters', type: 'circle', source: 'finds', filter: ['has', 'point_count'],
+      paint: { 'circle-color': '#e1141c', 'circle-stroke-color': '#fff', 'circle-stroke-width': 3, 'circle-radius': ['step', ['get', 'point_count'], 17, 5, 21, 15, 26] } });
+    map.addLayer({ id: 'cluster-count', type: 'symbol', source: 'finds', filter: ['has', 'point_count'],
+      layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': ['Noto Sans Bold'], 'text-size': 14, 'text-allow-overlap': true },
+      paint: { 'text-color': '#fff' } });
+    map.addLayer({ id: 'points-hit', type: 'circle', source: 'finds', filter: ['!', ['has', 'point_count']], paint: { 'circle-radius': 1, 'circle-opacity': 0 } });
 
-initMap();
+    map.on('click', 'clusters', async e => {
+      const f = map.queryRenderedFeatures(e.point, { layers: ['clusters'] })[0];
+      const zoom = await map.getSource('finds').getClusterExpansionZoom(f.properties.cluster_id);
+      map.easeTo({ center: f.geometry.coordinates, zoom: Math.min(zoom + 0.5, 16), duration: 700 });
+    });
+    map.on('mouseenter', 'clusters', () => map.getCanvas().style.cursor = 'pointer');
+    map.on('mouseleave', 'clusters', () => map.getCanvas().style.cursor = '');
+
+    const home = MapKit.homeMarker().addTo(map);
+    const homeVis = () => { home.getElement().style.display = map.getZoom() >= 6.5 ? '' : 'none'; };
+    map.on('zoom', homeVis); homeVis();
+
+    // Foto-Marker für einzelne Funde (HTML, nur für sichtbare, nicht geclusterte Punkte)
+    const markers = {};
+    function syncMarkers() {
+      const feats = map.querySourceFeatures('finds', { filter: ['!', ['has', 'point_count']] });
+      const keep = {};
+      feats.forEach(f => {
+        const id = f.properties.id; if (keep[id]) return; keep[id] = 1;
+        if (markers[id]) return;
+        const p = byId[id]; if (!p) return;
+        const el = document.createElement('div');
+        el.className = 'photo-marker';
+        el.style.backgroundImage = `url('${K.cdn(p.images[0].full, 160)}')`;
+        el.addEventListener('click', ev => { ev.stopPropagation(); openSheet(p); });
+        markers[id] = new maplibregl.Marker({ element: el }).setLngLat([p.lng, p.lat]).addTo(map);
+      });
+      Object.keys(markers).forEach(id => { if (!keep[id]) { markers[id].remove(); delete markers[id]; } });
+    }
+    map.on('data', e => { if (e.sourceId === 'finds' && e.isSourceLoaded) syncMarkers(); });
+    map.on('moveend', syncMarkers);
+
+    renderChips();
+    if (deep) {
+      const near = posts.find(p => Math.abs(p.lat - dLat) < 0.001 && Math.abs(p.lng - dLng) < 0.001);
+      if (near) openSheet(near, true);
+      setInfo(K.prettyLoc(near && near.locationText) || T('Fundort', 'Find location'), 1);
+    } else goRegion('all', true);
+  });
+
+  // ── Bottom-Sheet ──
+  let sheetList = [], sheetIdx = 0;
+  function openSheet(p, noFly) {
+    document.querySelectorAll('.photo-marker.sel').forEach(m => m.classList.remove('sel'));
+    const loc = K.prettyLoc(p.locationText) || T('Unbekannter Ort', 'Unknown place');
+    const km = K.distKm(p.lat, p.lng);
+    $('fsImg').src = K.cdn(p.images[0].full, 300);
+    $('fsImg').onerror = () => { $('fsImg').onerror = null; $('fsImg').src = p.images[0].thumb; };
+    $('fsKm').textContent = km != null ? K.fmtKm(km) + ' ' + T('ab Zollstock', 'from Zollstock') : '';
+    $('fsLoc').textContent = loc;
+    $('fsMeta').textContent = K.fmtDate(p.createdAt) + (p.displayName ? ' · ' + p.displayName : '');
+    $('fsLink').textContent = T('Fund ansehen', 'View find') + ' →';
+    $('fsLink').href = '/fund.html?id=' + p.id;
+    // mehrere Funde am gleichen Ort durchblättern
+    sheetList = posts.filter(q => Math.abs(q.lat - p.lat) < 0.0006 && Math.abs(q.lng - p.lng) < 0.0006);
+    sheetIdx = sheetList.indexOf(p);
+    $('fsNav').innerHTML = sheetList.length > 1 ? `<button id="fsPrev">‹</button><button id="fsNext">› ${sheetIdx + 1}/${sheetList.length}</button>` : '';
+    if (sheetList.length > 1) {
+      $('fsPrev').onclick = () => openSheet(sheetList[(sheetIdx - 1 + sheetList.length) % sheetList.length], true);
+      $('fsNext').onclick = () => openSheet(sheetList[(sheetIdx + 1) % sheetList.length], true);
+    }
+    $('sheet').classList.add('open');
+    $('viewInfo').classList.add('hide');
+    if (!noFly) map.easeTo({ center: [p.lng, p.lat], zoom: Math.max(map.getZoom(), 13), duration: 800, offset: [0, -60] });
+  }
+  function closeSheet() { $('sheet').classList.remove('open'); $('viewInfo').classList.remove('hide'); }
+  $('fsClose').addEventListener('click', closeSheet);
+  map.on('click', e => { if (!map.queryRenderedFeatures(e.point, { layers: ['clusters'] }).length) closeSheet(); });
+
+  document.addEventListener('langchange', () => { renderChips(); if (activeRegion) goRegion(activeRegion, true); });
+})();
 </script>
 </body>
 </html>

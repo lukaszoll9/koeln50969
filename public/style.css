@@ -562,7 +562,7 @@ input::placeholder, textarea::placeholder { color: #a39d96; }
 .fund-facts span { display: block; font-family: var(--mono); font-size: 0.64rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .fund-facts strong { font-stretch: 75%; font-weight: 850; font-size: 1.3rem; font-variant-numeric: tabular-nums; }
 .fund-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
-#minimap { height: 220px; border-radius: 12px; margin-top: 18px; border: 1px solid var(--line); z-index: 0; }
+#minimap { cursor: pointer; overflow: hidden; height: 220px; border-radius: 12px; margin-top: 18px; border: 1px solid var(--line); z-index: 0; }
 .map-link { display: inline-block; margin-top: 10px; font-weight: 650; font-size: 0.9rem; }
 
 .lightbox {
