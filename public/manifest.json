@@ -9,9 +9,14 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/sticker-hero.jpg",
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
@@ -21,7 +26,12 @@
       "short_name": "Melden",
       "description": "Neuen Sticker-Fund hochladen",
       "url": "/hochladen.html",
-      "icons": [{ "src": "/sticker-hero.jpg", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }

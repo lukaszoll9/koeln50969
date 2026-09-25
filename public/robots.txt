@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /.netlify/functions/
+Disallow: /api/
+
+Sitemap: https://koeln50969.de/sitemap.xml
