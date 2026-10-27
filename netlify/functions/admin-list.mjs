@@ -1,11 +1,12 @@
 import { getDatabase } from "@netlify/database";
-import { json, checkAdminAuth } from "./_shared.mjs";
+import { json, requireAdmin } from "./_shared.mjs";
 
 // Status-Namen vereinheitlichen (Frontend nutzte frueher "ablehnen"/"murks")
 const STATUS = { pending: "pending", approved: "approved", rejected: "rejected", murks: "rejected", ablehnen: "rejected" };
 
 export default async (req) => {
-  if (!checkAdminAuth(req)) return json(401, { error: "unauthorized" });
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
 
   const url = new URL(req.url);
   const status = STATUS[url.searchParams.get("status") || "pending"];

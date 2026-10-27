@@ -22,9 +22,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#ffffff">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="preload" href="/fonts/archivo-wdth.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -47,17 +45,29 @@
     <h2>GPS-Daten</h2>
     <p>Falls dein Foto Standortdaten enthält, liest dein Browser diese vor dem Hochladen aus und rundet sie auf ca. 10 Meter. Die Originaldatei mit exakten Metadaten verlässt dein Gerät nicht — das Bild wird vor dem Versand neu kodiert, wodurch alle anderen Metadaten (Gerät, genaue Uhrzeit) entfernt werden.</p>
 
-    <h2>Speicherort</h2>
-    <p>Bilder und Daten werden bei Netlify (Hosting-Anbieter) gespeichert. Es gilt zusätzlich die Datenschutzerklärung von Netlify, Inc.</p>
+    <h2>Hosting und Server-Logs</h2>
+    <p>Die Website, Bilder und Daten liegen bei Netlify, Inc. (Hosting-Anbieter). Beim Aufruf jeder Seite verarbeitet Netlify technisch notwendige Daten wie IP-Adresse, Zeitpunkt und aufgerufene Adresse, um die Seite auszuliefern und vor Angriffen zu schützen (Art. 6 Abs. 1 lit. f DSGVO). Es gilt zusätzlich die Datenschutzerklärung von Netlify.</p>
 
-    <h2>Moderation</h2>
-    <p>Jeder Upload wird vor der Veröffentlichung manuell geprüft und ist bis dahin nicht öffentlich sichtbar.</p>
+    <h2>Spamschutz</h2>
+    <p>Um Missbrauch zu verhindern, speichern wir beim Hochladen und bei Anmeldeversuchen im Admin-Bereich einen gekürzten, nicht umkehrbaren Hash deiner IP-Adresse. Er dient nur dazu, zu viele Uploads oder Anmeldeversuche zu begrenzen.</p>
 
-    <h2>Löschung</h2>
-    <p>Du kannst die Löschung deines Fundes jederzeit per E-Mail an lukasfra437@gmail.com verlangen.</p>
+    <h2>Moderation und Benachrichtigung</h2>
+    <p>Jeder Upload wird vor der Veröffentlichung manuell geprüft und ist bis dahin nicht öffentlich sichtbar. Über neue Uploads wird der Betreiber per E-Mail informiert (Versand über Mailjet); die E-Mail enthält nur Fundort und den angegebenen Namen, nicht das Foto.</p>
 
-    <h2>Externe Dienste</h2>
-    <p>Zur Adresssuche nutzen wir OpenStreetMap Nominatim; dabei wird deine Sucheingabe an openstreetmap.org übertragen.</p>
+    <h2>Standort</h2>
+    <p>Enthält dein Foto keine GPS-Daten, fragt die Seite deinen aktuellen Standort ab – nur, wenn du das im Browser erlaubst. Du kannst den Ort stattdessen auch selbst eintippen.</p>
+
+    <h2>Karten und Ortssuche</h2>
+    <p>Die Karten werden von OpenFreeMap (tiles.openfreemap.org) geladen; dabei wird deine IP-Adresse an diesen Dienst übertragen. Zur Umwandlung von Koordinaten in Ortsnamen und für die Ortssuche nutzen wir OpenStreetMap Nominatim; dabei werden die Koordinaten bzw. deine Sucheingabe an openstreetmap.org übertragen.</p>
+
+    <h2>Schriften und Bibliotheken</h2>
+    <p>Alle Schriften und Programmbibliotheken liegen auf unserem eigenen Server. Es werden keine Google Fonts oder externe Content-Delivery-Netzwerke geladen.</p>
+
+    <h2>Cookies und lokaler Speicher</h2>
+    <p>Wir setzen keine Cookies und kein Tracking oder Analyse-Tools ein. Im lokalen Speicher deines Browsers werden nur deine Spracheinstellung und ob du den Begrüßungshinweis schon gesehen hast gespeichert. Diese Daten verlassen dein Gerät nicht.</p>
+
+    <h2>Deine Rechte</h2>
+    <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung sowie auf Beschwerde bei einer Datenschutz-Aufsichtsbehörde. Die Löschung deines Fundes kannst du jederzeit per E-Mail an lukasfra437@gmail.com verlangen.</p>
   </div>
 </main>
 <footer>
