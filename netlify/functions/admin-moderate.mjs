@@ -1,8 +1,8 @@
 import { getDatabase } from "@netlify/database";
 import { getStore } from "@netlify/blobs";
-import { json, checkAdminAuth } from "./_shared.mjs";
+import { json, requireAdmin } from "./_shared.mjs";
 
-const ACTIONS = ["approve", "reject", "murks", "ablehnen", "feature", "delete", "update"];
+const ACTIONS = ["approve", "reject", "murks", "ablehnen", "feature", "delete", "update", "replace-image"];
 
 function cleanText(v, max) {
   if (v === undefined) return undefined;
@@ -12,7 +12,8 @@ function cleanText(v, max) {
 }
 
 export default async (req) => {
-  if (!checkAdminAuth(req)) return json(401, { error: "unauthorized" });
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
   if (req.method !== "POST") return json(405, { error: "method not allowed" });
 
   const body = await req.json().catch(() => null);
@@ -52,6 +53,26 @@ export default async (req) => {
         lat = ${lat}, lng = ${lng}
       WHERE id = ${id}
     `;
+  } else if (body.action === "replace-image") {
+    // Bild ersetzen (z. B. im Admin gedreht): neue Keys, damit der CDN-Cache nicht das alte Bild liefert
+    const idx = parseInt(body.index, 10);
+    const [row] = await db.sql`SELECT image_keys FROM posts WHERE id = ${id}`;
+    if (!row || !Number.isFinite(idx) || idx < 0 || idx >= row.image_keys.length) return json(400, { error: "invalid image" });
+    const decode = (b64) => (typeof b64 === "string" && b64.length < 6_000_000 ? Buffer.from(b64, "base64") : null);
+    const full = decode(body.full), thumb = decode(body.thumb);
+    const isJpeg = (b) => b && b.length > 100 && b[0] === 0xff && b[1] === 0xd8;
+    if (!isJpeg(full) || !isJpeg(thumb)) return json(400, { error: "invalid image data" });
+    const store = getStore("post-images");
+    const uid = crypto.randomUUID();
+    const fullKey = `full/${uid}.jpg`, thumbKey = `thumb/${uid}.jpg`;
+    await store.set(fullKey, new Blob([full], { type: "image/jpeg" }), { metadata: { contentType: "image/jpeg" } });
+    await store.set(thumbKey, new Blob([thumb], { type: "image/jpeg" }), { metadata: { contentType: "image/jpeg" } });
+    const keys = row.image_keys.slice();
+    const [oldFull, oldThumb] = keys[idx].split("|");
+    keys[idx] = `${fullKey}|${thumbKey}`;
+    await db.sql`UPDATE posts SET image_keys = ${keys} WHERE id = ${id}`;
+    await store.delete(oldFull).catch(() => {});
+    await store.delete(oldThumb).catch(() => {});
   } else if (body.action === "delete") {
     const [row] = await db.sql`SELECT image_keys FROM posts WHERE id = ${id}`;
     if (row) {

@@ -1,3 +1,9 @@
+/* Schriften lokal gehostet (keine Verbindung zu Google, DSGVO) */
+@font-face { font-family: 'Archivo'; font-style: normal; font-display: swap; font-weight: 100 900; font-stretch: 62% 125%; src: url('/fonts/archivo-wdth.woff2') format('woff2'); }
+@font-face { font-family: 'Archivo'; font-style: italic; font-display: swap; font-weight: 100 900; font-stretch: 62% 125%; src: url('/fonts/archivo-wdth-italic.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-display: swap; font-weight: 500; src: url('/fonts/jetbrains-mono-500.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-display: swap; font-weight: 700; src: url('/fonts/jetbrains-mono-700.woff2') format('woff2'); }
+
 /* ─────────────────────────────────────────────────────────────
    Köln 50969 — Designsystem „Rut & Wiess“
    Weiß · Köln-Rot (#E1141C) · Fast-Schwarz
